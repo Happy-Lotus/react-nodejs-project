@@ -1,6 +1,7 @@
 //swagger 설정
 const swaggerJsdoc = require("swagger-jsdoc");
 const swaggerUi = require("swagger-ui-express");
+require("dotenv").config();
 
 const options = {
   swaggerDefinition: {
@@ -12,7 +13,7 @@ const options = {
     },
     servers: [
       {
-        url: "http://localhost:4000",
+        url: `http://localhost:${process.env.PORT}`,
       },
     ],
   },

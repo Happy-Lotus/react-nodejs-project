@@ -5,7 +5,7 @@ const path = require("path");
 const cors = require("cors");
 //swagger 설정
 const { swaggerUi, specs } = require("./config/swagger");
-const PORT = 4000;
+const PORT = process.env.PORT;
 //env
 const dotenv = require("dotenv");
 //express 사용
