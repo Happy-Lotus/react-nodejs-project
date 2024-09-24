@@ -1,26 +1,30 @@
 //express
 const express = require("express");
-const path = require('path');
+const path = require("path");
 //cors
-const cors = require('cors');
-//swagger 설정 
-const {swaggerUi, specs} = require('./config/swagger')
+const cors = require("cors");
+//swagger 설정
+const { swaggerUi, specs } = require("./config/swagger");
 const PORT = 4000;
 //env
-const dotenv = require('dotenv');
-//express 사용 
+const dotenv = require("dotenv");
+//express 사용
 const app = express();
-const user = require('./routes/user/users')
+const user = require("./routes/user/users");
+const common = require("./routes/common/common");
 
-const maria = require('./config/database')
-maria.connect()
+const maria = require("./config/database");
+maria.connect();
 dotenv.config();
 
-app.use(cors())
+app.use(cors());
 app.use(express.json());
 
-app.use('/api-docs',swaggerUi.serve,swaggerUi.setup(specs,{explorer:true}))
-
+app.use(
+  "/api-docs",
+  swaggerUi.serve,
+  swaggerUi.setup(specs, { explorer: true })
+);
 
 /**
  * @swagger
@@ -28,7 +32,7 @@ app.use('/api-docs',swaggerUi.serve,swaggerUi.setup(specs,{explorer:true}))
  *   name: User
  *   description: 유저 추가 수정 삭제 조회
  */
-app.use("/user",user)
+app.use("/user", user);
 
 // /**
 //  * @swagger
@@ -38,12 +42,15 @@ app.use("/user",user)
 //  */
 // router.use("/board",board)
 
+/**
+ * @swagger
+ * tags:
+ *   name: Common
+ *   description: 로그인 회원가입
+ */
+app.use("/", common);
 
-app.get("/",(req,res)=> {
-    console.log("로그인 화면");
-})
-
-// db user 데이터 전체 읽기 
+// db user 데이터 전체 읽기
 //  app.get('/test-db', async (req, res) => {
 //     maria.query('select * from user',function(err,rows,fields){
 //       if(!err){
@@ -79,6 +86,6 @@ app.get("/",(req,res)=> {
 //     }
 //   });
 
- app.listen(PORT,() => {
-    console.log(`${PORT}번에서 실행이 되었습니다.`)
-}); 
+app.listen(PORT, () => {
+  console.log(`${PORT}번에서 실행이 되었습니다.`);
+});

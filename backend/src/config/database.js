@@ -1,4 +1,4 @@
-//db 설정 
+//db 설정
 const maria = require('mysql');
 require('dotenv').config();
 
