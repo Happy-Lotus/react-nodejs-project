@@ -4,10 +4,10 @@ require("dotenv").config();
 
 const pool = maria.createConnection({
   host: "localhost",
-  port: process.env.DB_PORT,
-  user: process.env.DB_USER,
-  password: process.env.DB_PASSWORD,
-  database: process.env.DB_NAME,
+  port: 3307,
+  user: "root",
+  password: "1234",
+  database: "testdb",
 });
 
 module.exports = pool;

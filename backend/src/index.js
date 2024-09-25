@@ -5,13 +5,15 @@ const path = require("path");
 const cors = require("cors");
 //swagger 설정
 const { swaggerUi, specs } = require("./config/swagger");
-const PORT = process.env.PORT;
 //env
 const dotenv = require("dotenv");
+
+const PORT = 4000;
 //express 사용
 const app = express();
 const user = require("./routes/user/users");
 const common = require("./routes/common/common");
+const board = require("./routes/board/posts")
 
 const maria = require("./config/database");
 maria.connect();
@@ -34,13 +36,13 @@ app.use(
  */
 app.use("/user", user);
 
-// /**
-//  * @swagger
-//  * tags:
-//  *   name: Board
-//  *   description: 게시판 글 조회, 추가, 수정, 삭제
-//  */
-// router.use("/board",board)
+/**
+ * @swagger
+ * tags:
+ *   name: board
+ *   description: 게시판 글 조회, 추가, 수정, 삭제
+ */
+app.use("/board",board)
 
 /**
  * @swagger

@@ -13,7 +13,7 @@ const options = {
     },
     servers: [
       {
-        url: `http://localhost:${process.env.PORT}`,
+        url: `http://localhost:4000`,
       },
     ],
   },
@@ -21,6 +21,7 @@ const options = {
     "./src/*.js",
     "./src/routes/user/*.js",
     "./src/routes/common/*.js",
+    "./src/routes/board/*.js",
     "./src/models/*.js",
   ], //Swagger 파일 연동
 };

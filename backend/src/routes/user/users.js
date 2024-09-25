@@ -26,14 +26,14 @@ const maria = require("../../config/database");
  *                      type: string
  */
 router.get("/users", async (req, res, next) => {
-  // maria.query('SELECT * FROM user WHERE userid=1',function(err,rows,fields){
-  //     if(!err){
-  //         res.send(rows);
-  //     }else{
-  //         console.log("err : "+ err);
-  //         res.send(err);
-  //     }
-  // });
+  maria.query('SELECT * FROM user WHERE userid=2',function(err,rows,fields){
+      if(!err){
+          res.send(rows);
+      }else{
+          console.log("err : "+ err);
+          res.send(err);
+      }
+  });
 });
 
 module.exports = router;
