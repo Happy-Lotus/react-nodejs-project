@@ -1,6 +1,7 @@
 //로직 작성
 const router = require("express").Router();
 const maria = require("../../config/database");
+const authMiddleware = require("../../middlewares/auth");
 
 /**
  * @swagger
@@ -25,14 +26,14 @@ const maria = require("../../config/database");
  *                  msg:
  *                      type: string
  */
-router.get("/posts", async (req, res, next) => {
-  maria.query('SELECT * FROM board',function(err,rows,fields){
-      if(!err){
-          res.send(rows);
-      }else{
-          console.log("err : "+ err);
-          res.send(err);
-      }
+router.get("/posts", authMiddleware, async (req, res, next) => {
+  maria.query("SELECT * FROM board", function (err, rows, fields) {
+    if (!err) {
+      res.send(rows);
+    } else {
+      console.log("err : " + err);
+      res.send(err);
+    }
   });
 });
 
@@ -66,22 +67,21 @@ router.get("/posts", async (req, res, next) => {
  *                  msg:
  *                      type: string
  */
-router.get("/posts/:title", async (req, res, next) => {
+router.get("/posts/:title", authMiddleware, async (req, res, next) => {
   const title = req.query.title;
-  console.log(title)
+  console.log(title);
 
-  maria.query('SELECT * FROM board WHERE title='+'\''+title+'\'',function(err,rows,fields){
-      if(!err){
-          res.send(rows);
-      }else{
-          console.log("err : "+ err);
-          res.send(err);
+  maria.query(
+    "SELECT * FROM board WHERE title=" + "'" + title + "'",
+    function (err, rows, fields) {
+      if (!err) {
+        res.send(rows);
+      } else {
+        console.log("err : " + err);
+        res.send(err);
       }
-  });
+    }
+  );
 });
-
-
-
-
 
 module.exports = router;
