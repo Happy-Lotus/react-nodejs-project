@@ -16,21 +16,15 @@ dotenv.config();
 app.use(cors());
 app.use(express.json());
 const cookieParser = require("cookie-parser");
+const authMiddleware = require("./middleware/authMiddleware");
 app.use(cookieParser());
+
 //swagger
 app.use(
   "/api-docs",
   swaggerUi.serve,
   swaggerUi.setup(specs, { explorer: true })
 );
-
-/**
- * @swagger
- * tags:
- *   name: User
- *   description: 유저 추가 수정 삭제 조회
- */
-// app.use("/user", user);
 
 //게시물 작성
 /**
@@ -85,7 +79,7 @@ app.use(
  *             schema:
  *              msg: string
  */
-app.post("/posts/edit", (req, res) => {
+app.post("/posts/edit", authMiddleware, (req, res) => {
   Post.create(req, res);
 });
 
@@ -347,12 +341,12 @@ app.post("/login", (req, res) => {
   User.login(req, res);
 });
 
+//사용자 로그아웃
 app.post("/logout", (req, res) => {
   User.logout(req, res);
 });
 
 //사용자 회원가입
-
 /**
  * @swagger
  * paths:
@@ -405,9 +399,13 @@ app.post("/register", (req, res) => {
   User.register(req, res);
 });
 
+//사용자 이메일 인증
 app.post("/verify-email", (req, res) => {
   User.verifyEmail(req, res);
 });
+
+app.get("/");
+
 /**
  * @swagger
  * tags:

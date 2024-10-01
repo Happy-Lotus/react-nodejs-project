@@ -1,15 +1,9 @@
-const maria = require("mysql");
 const conn = require("../config/database");
-const File = require("./File");
 const Token = require("./Token");
 const JWT = require("../config/jwt");
-const moment = require("moment");
-const multer = require("multer");
-const fs = require("fs");
 const bcrypt = require("bcryptjs");
 const dotenv = require("dotenv");
 const transporter = require("../config/email");
-const crypto = require("crypto");
 dotenv.config();
 const { JWT_SECRET } = process.env;
 
@@ -112,7 +106,7 @@ exports.login = async function (req, res) {
         const isCorrectPassword = await checkPassword(results[0].pwd, pwd);
         if (isCorrectPassword) {
           const accessToken = JWT.sign(results[0]);
-          const refreshToken = JWT.refresh();
+          const refreshToken = JWT.refresh(results[0]);
           await Token.create(refreshToken, results[0].userid);
 
           return res
@@ -144,11 +138,19 @@ exports.login = async function (req, res) {
 
 //사용자 로그아웃
 exports.logout = async function (req, res) {
-  const { email, token } = req.body;
+  const { userid } = req.body;
 
   try {
-    res.clearCookie("RefreshToken", { path: "/" });
-  } catch (error) {}
+    await Token.delete(userid);
+    return res
+      .status(201)
+      .clearCookie("RefreshToken", { path: "/" })
+      .clearCookie("AccessToken", { path: "/" })
+      .json({ msg: "로그아웃" });
+  } catch (error) {
+    console.error("Error: ", error);
+    return res.status(500).json({ result: "Server error:" });
+  }
 };
 
 exports.verifyEmail = async function (req, res) {
@@ -197,4 +199,45 @@ exports.update = async function (columns, changes, email) {
 };
 
 //사용자 삭제
-exports.delete = async function (req, res) {};
+exports.delete = async function (req, res) {
+  const sql = "DELETE FROM user WHERE userid = ?";
+  const userid = req.params.userid;
+
+  try {
+    conn.query(sql, userid, (error, results) => {
+      if (error) {
+        console.error("Database error: ", error);
+        return res.status(500).json({ result: "Database error:" + userid });
+      } else {
+        res
+          .status(201)
+          .clearCookie("RefreshToken", { path: "/" })
+          .clearCookie("AccessToken", { path: "/" })
+          .json({ result: "User deleted" });
+      }
+    });
+  } catch (error) {
+    console.error("Error: ", error);
+    return res.status(500).json({ result: "Server error:" });
+  }
+};
+
+//사용자 조회
+exports.read = async function (key, value) {
+  const sql = `SELECT userid FROM user WHERE ${key} = ?`;
+
+  try {
+    return new Promise((resolve, reject) => {
+      conn.query(sql, value, (error, results) => {
+        if (error) {
+          console.error("Database error: ", error);
+          reject(error);
+        } else {
+          resolve(results);
+        }
+      });
+    });
+  } catch (error) {
+    console.error("Error: ", error);
+  }
+};

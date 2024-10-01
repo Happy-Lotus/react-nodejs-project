@@ -9,28 +9,27 @@ module.exports = {
     // access token 발급
     const payload = {
       // access token에 들어갈 payload
-      userid: user.userid,
       email: user.email,
       pwd: user.pwd,
-      nickname: user.nickname,
+      userid: user.userid,
     };
 
     return jwt.sign(payload, secret, {
       // secret으로 sign하여 발급하고 return
       algorithm: "HS256", // 암호화 알고리즘
-      expiresIn: "10m", // 유효기간
+      expiresIn: "1h", // 유효기간
     });
   },
 
-  verify: (token) => {
+  verify: async (token) => {
     // access token 검증
     try {
-      const decoded = jwt.verify(token, secret, (error, decoded) => {});
+      const decoded = jwt.verify(token, secret);
       return {
         ok: true,
         email: decoded.email,
         pwd: decoded.pwd,
-        nickname: decoded.nickname,
+        userid: user.userid,
       };
     } catch (err) {
       return {
@@ -40,14 +39,15 @@ module.exports = {
     }
   },
 
-  refresh: () => {
+  refresh: (user) => {
     // refresh token 발급
-    return jwt.sign({}, secret, {
+    return jwt.sign({ email: user.email, pwd: user.pwd }, secret, {
       // refresh token은 payload 없이 발급
       algorithm: "HS256",
       expiresIn: "14d",
     });
   },
+
   refreshVerify: async (token, storedToken) => {
     // refresh token 검증
 
