@@ -1,14 +1,15 @@
 const { promisify } = require("util");
 const jwt = require("jsonwebtoken");
-const dotenv = require('dotenv')
+const dotenv = require("dotenv");
 dotenv.config();
-const secret = 'Kkb5I86s3B';
+const secret = "Kkb5I86s3B";
 
 module.exports = {
   sign: (user) => {
     // access token 발급
     const payload = {
       // access token에 들어갈 payload
+      userid: user.userid,
       email: user.email,
       pwd: user.pwd,
       nickname: user.nickname,
@@ -24,9 +25,7 @@ module.exports = {
   verify: (token) => {
     // access token 검증
     try {
-      const decoded = jwt.verify(token, secret,(error,decoded) => {
-        
-      });
+      const decoded = jwt.verify(token, secret, (error, decoded) => {});
       return {
         ok: true,
         email: decoded.email,
