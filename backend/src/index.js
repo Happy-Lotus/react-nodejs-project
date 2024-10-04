@@ -11,11 +11,14 @@ const PORT = 4000;
 const app = express();
 const User = require("./models/User");
 const Post = require("./models/Post");
+const File = require("./models/File");
+const { upload } = require("./config/storage");
 dotenv.config();
 app.use(cors());
 app.use(express.json());
 const cookieParser = require("cookie-parser");
 const authMiddleware = require("./middleware/authMiddleware");
+
 app.use(cookieParser());
 
 //swagger
@@ -78,10 +81,14 @@ app.use(
  *             schema:
  *              msg: string
  */
-app.post("/posts/edit", authMiddleware, (req, res) => {
+app.post("/posts/edit", authMiddleware, upload.array("files"), (req, res) => {
   Post.create(req, res);
 });
 
+//toast-ui-editor 이미지 업로드
+app.post("/posts/upload", upload.single("image"), (req, res) => {
+  Post.imageUpload(req, res);
+});
 //게시물 삭제
 /**
  * @swagger
@@ -404,6 +411,42 @@ app.post("/verify-email", (req, res) => {
 });
 
 app.get("/");
+
+/**
+ * @swagger
+ * paths:
+ *  /posts/{postid}/{filename}:
+ *    get:
+ *      summary: "파일 다운로드"
+ *      description: "파일 다운로드"
+ *      tags: [File]
+ *      parameters:
+ *      - in: path
+ *        name: postid
+ *        required: true
+ *        description: 게시물 아이디
+ *        schema:
+ *          type: integer
+ *      - in: path
+ *        name: filename
+ *        required: true
+ *        description: 파일 이름
+ *        schema:
+ *          type: string
+ *      responses:
+ *        200:
+ *          description: 파일 다운로드
+ *          content:
+ *            application/json:
+ *              schema:
+ *                type: object
+ *                properties:
+ *                  url:
+ *                    type: string
+ */
+app.get("/posts/:postid/:filename", (req, res) => {
+  File.downloadFiles(req, res);
+});
 
 app.listen(PORT, () => {
   console.log(`${PORT}번에서 실행이 되었습니다.`);

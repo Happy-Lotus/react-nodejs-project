@@ -1,42 +1,48 @@
 const conn = require("../config/database");
 const File = require("./File");
-const User = require("./User");
 const moment = require("moment");
 
 //게시물 생성
 exports.create = async function (req, res) {
-  const { title, content, writer, email } = req.body.board[0];
+  const { title, content, writer } = JSON.parse(req.body.board);
+  const { email, userid } = req.user;
+  const files = req.files;
 
   try {
-    const sql1 =
+    const sql =
       "INSERT INTO board (title, content, writer, regdate, userid) VALUES (?, ?, ?, ?, ?)";
-    const userid = await User.read("email", email);
     const now = moment(Date.now()).format("YYYY-MM-DD HH:mm:ss");
-    const var_array1 = [title, content, writer, now, userid[0].userid];
+    const var_array = [title, content, writer, now, userid];
 
-    conn.query(sql1, var_array1, (error, results) => {
+    const fileInfos = files.map((file) => ({
+      filename: file.filename,
+      originalname: file.originalname,
+      size: file.size,
+      url: `/uploads/${file.filename}`,
+    }));
+    console.log(fileInfos);
+
+    conn.query(sql, var_array, (error, results) => {
       if (error) {
         console.error("Database error: ", error);
         return res.status(500).json({ result: "Database error:" + email });
       } else {
         if (results.affectedRows > 0) {
-          console.log(req.body.file.length);
-          if (req.body.file.length > 0) {
-            const file = req.body.file[0];
+          if (fileInfos.length > 0) {
             try {
               const boardId = results.insertId;
-              File.create(boardId, file);
+              File.create(boardId, fileInfos);
               return res
                 .status(201)
                 .json({ result: "File and Post upload OK" });
             } catch (error) {
               console.error("File upload error: ", error);
-              return res.status(500).json({ result: "File upload error" });
+              return res.status(400).json({ result: "File upload error" });
             }
           } else {
             return res
               .status(201)
-              .json({ result: "Post created successfully" });
+              .json({ result: "Only Post created successfully" });
           }
         } else {
           return res.status(400).json({ result: "Error" });
