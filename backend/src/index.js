@@ -9,7 +9,6 @@ const dotenv = require("dotenv");
 const PORT = 4000;
 //express 사용
 const app = express();
-// const user = require("./routes/user/users");
 const User = require("./models/User");
 const Post = require("./models/Post");
 dotenv.config();
@@ -342,7 +341,7 @@ app.post("/login", (req, res) => {
 });
 
 //사용자 로그아웃
-app.post("/logout", (req, res) => {
+app.post("/logout", authMiddleware, (req, res) => {
   User.logout(req, res);
 });
 
@@ -405,14 +404,6 @@ app.post("/verify-email", (req, res) => {
 });
 
 app.get("/");
-
-/**
- * @swagger
- * tags:
- *   name: Common
- *   description: 로그인 회원가입
- */
-// app.use("/", common);
 
 app.listen(PORT, () => {
   console.log(`${PORT}번에서 실행이 되었습니다.`);

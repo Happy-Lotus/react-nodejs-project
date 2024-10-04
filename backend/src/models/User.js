@@ -1,9 +1,10 @@
 const conn = require("../config/database");
 const Token = require("./Token");
-const JWT = require("../config/jwt");
 const bcrypt = require("bcryptjs");
 const dotenv = require("dotenv");
 const transporter = require("../config/email");
+const jwt = require("jsonwebtoken");
+const secret = "Kkb5I86s3B";
 dotenv.config();
 const { JWT_SECRET } = process.env;
 
@@ -105,8 +106,21 @@ exports.login = async function (req, res) {
       } else {
         const isCorrectPassword = await checkPassword(results[0].pwd, pwd);
         if (isCorrectPassword) {
-          const accessToken = JWT.sign(results[0]);
-          const refreshToken = JWT.refresh(results[0]);
+          // const accessToken = JWT.sign(results[0]);
+          const payload = {
+            email: results[0].email,
+            userid: results[0].userid,
+            pwd: results[0].pwd,
+          };
+          const accessToken = jwt.sign(payload, secret, {
+            algorithm: "HS256",
+            expiresIn: "1h",
+          });
+          const refreshToken = jwt.sign(payload, secret, {
+            algorithm: "HS256",
+            expiresIn: "14d",
+          });
+
           await Token.create(refreshToken, results[0].userid);
 
           return res
@@ -124,7 +138,6 @@ exports.login = async function (req, res) {
             .json({
               email: email,
               nickname: results[0].nickname,
-              accessToken: accessToken,
             });
         } else {
           return res.status(400).json({ result: "Password mismatch " });
@@ -138,7 +151,7 @@ exports.login = async function (req, res) {
 
 //사용자 로그아웃
 exports.logout = async function (req, res) {
-  const { userid } = req.body;
+  const { userid } = req.user;
 
   try {
     await Token.delete(userid);
@@ -146,7 +159,7 @@ exports.logout = async function (req, res) {
       .status(201)
       .clearCookie("RefreshToken", { path: "/" })
       .clearCookie("AccessToken", { path: "/" })
-      .json({ msg: "로그아웃" });
+      .json({ msg: "로그아웃 완료" });
   } catch (error) {
     console.error("Error: ", error);
     return res.status(500).json({ result: "Server error:" });

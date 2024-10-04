@@ -3,7 +3,6 @@ const dotenv = require("dotenv");
 dotenv.config();
 const secret = "Kkb5I86s3B";
 const Token = require("../models/Token");
-const JWT = require("../config/jwt");
 
 const authMiddleware = async (req, res, next) => {
   const accesstoken = req.cookies.AccessToken;
@@ -22,7 +21,7 @@ const authMiddleware = async (req, res, next) => {
         //access token 만료
         const refreshtoken = req.headers.RefreshToken;
         if (!refreshtoken) {
-          //refresh 토큰이 없을 경우
+          //access token 만료 & refresh 토큰이 없을 경우
           return res.status(401).json({
             code: 401,
             msg: "Access token expired and no refresh token provided.",
@@ -30,6 +29,7 @@ const authMiddleware = async (req, res, next) => {
         } else {
           const payload = jwt.verify(refreshtoken, secret);
           if (!payload) {
+            //access token 만료 & refresh token 만료
             return res.status(402).json({
               code: 402,
               msg: "Refresh token expired.",
@@ -39,6 +39,7 @@ const authMiddleware = async (req, res, next) => {
 
         const storedRefreshToken = await Token.read(decoded.userid);
         if (storedRefreshToken !== refreshtoken) {
+          //저장된 refreshtoken과 일치하지 않음
           return res.status(402).json({
             code: 402,
             msg: "Refresh token expired or invalid.",
@@ -53,6 +54,8 @@ const authMiddleware = async (req, res, next) => {
           .status(201)
           .cookie("Accesstoken", newAccessToken, { httpOnly: true });
       } else {
+        //access token이 만료되지 않음
+        //인증오류
         req.user = decoded;
         next();
       }
@@ -61,6 +64,7 @@ const authMiddleware = async (req, res, next) => {
         msg: "Failed to authenticate token.",
       });
     }
+    //인증 성공
     req.user = decoded;
     next();
   });
