@@ -81,13 +81,19 @@ app.use(
  *             schema:
  *              msg: string
  */
-app.post("/posts/edit", authMiddleware, upload.array("files"), (req, res) => {
-  Post.create(req, res);
-});
+app.post(
+  "/posts/edit",
+  authMiddleware,
+  upload.fields([{ name: "files" }, { name: "thumbnail" }]),
+  (req, res) => {
+    console.log("create");
+    Post.create(req, res);
+  }
+);
 
 //toast-ui-editor 이미지 업로드
 app.post("/posts/upload", upload.single("image"), (req, res) => {
-  Post.imageUpload(req, res);
+  File.imageUpload(req, res);
 });
 //게시물 삭제
 /**
@@ -447,6 +453,7 @@ app.get("/");
 app.get("/posts/:postid/:filename", (req, res) => {
   File.downloadFiles(req, res);
 });
+app.delete("");
 
 app.listen(PORT, () => {
   console.log(`${PORT}번에서 실행이 되었습니다.`);

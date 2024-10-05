@@ -4,22 +4,30 @@ const moment = require("moment");
 
 //게시물 생성
 exports.create = async function (req, res) {
-  const { title, content, writer } = JSON.parse(req.body.board);
-  const { email, userid } = req.user;
-  const files = req.files;
-
   try {
-    const sql =
-      "INSERT INTO board (title, content, writer, regdate, userid) VALUES (?, ?, ?, ?, ?)";
-    const now = moment(Date.now()).format("YYYY-MM-DD HH:mm:ss");
-    const var_array = [title, content, writer, now, userid];
+    const { title, content, writer } = JSON.parse(req.body.board);
+    const { email, userid } = req.user;
+    const files = req.files.files;
+    const thumbnail = req.files.thumbnail
+      ? `${req.files.thumbnail[0].destination}${req.files.thumbnail[0].filename}`
+      : "";
 
-    const fileInfos = files.map((file) => ({
-      filename: file.filename,
-      originalname: file.originalname,
-      size: file.size,
-      url: `/uploads/${file.filename}`,
-    }));
+    const sql =
+      "INSERT INTO board (title, content, writer, regdate, userid,thumbnail) VALUES (?, ?, ?, ?, ?, ?)";
+    const now = moment(Date.now()).format("YYYY-MM-DD HH:mm:ss");
+    const var_array = [title, content, writer, now, userid, thumbnail];
+    let fileInfos;
+    console.log(fileInfos);
+
+    if (files) {
+      fileInfos = files.map((file) => ({
+        filename: file.filename,
+        originalname: file.originalname,
+        size: file.size,
+        url: `/uploads/${file.filename}`,
+      }));
+    }
+
     console.log(fileInfos);
 
     conn.query(sql, var_array, (error, results) => {
@@ -28,10 +36,10 @@ exports.create = async function (req, res) {
         return res.status(500).json({ result: "Database error:" + email });
       } else {
         if (results.affectedRows > 0) {
-          if (fileInfos.length > 0) {
+          if (fileInfos) {
             try {
               const boardId = results.insertId;
-              File.create(boardId, fileInfos);
+              if (files) File.create(boardId, fileInfos);
               return res
                 .status(201)
                 .json({ result: "File and Post upload OK" });
@@ -59,16 +67,21 @@ exports.create = async function (req, res) {
 exports.readAll = async function (req, res) {
   try {
     const sql =
-      "SELECT boardid, title, content, writer, regdate, isfile FROM board";
+      "SELECT boardid, title, content, writer, regdate, thumbnail FROM board";
 
-    conn.query(sql, (error, results) => {
+    conn.query(sql, async (error, results) => {
       if (error) {
         console.error("Database error: ", error);
         return res.status(500).json({ result: "Database error" });
       } else {
-        //이미지 썸네일 전달 필요
         if (results) {
-          return res.status(201).json(results);
+          const list = [];
+          for (const post of results) {
+            const files = await File.readOption(post.boardid);
+            list.push({ post: post, files: files });
+          }
+
+          return res.status(201).json(list);
         } else {
           return res.status(400).json({ result: "Error" });
         }
@@ -114,10 +127,9 @@ exports.readOption = async function (req, res) {
 //게시물 단일 조회
 exports.read = async function (req, res) {
   const boardid = req.params.postid;
-
   try {
     const sql =
-      "SELECT title, content, writer, regdate, isfile FROM board WHERE boardid = ?";
+      "SELECT title, content, writer, regdate, thumbnail FROM board WHERE boardid = ?";
 
     conn.query(sql, boardid, async (error, results) => {
       if (error) {
@@ -131,6 +143,24 @@ exports.read = async function (req, res) {
   } catch (error) {
     console.error("Error: ", error);
     return res.status(500).json({ result: "Server error:" });
+  }
+};
+
+exports.readByBoardId = async function (boardid) {
+  try {
+    const sql = "SELECT title, content, thumbnail FROM board WHERE boardid = ?";
+    return new Promise((resolve, reject) => {
+      conn.query(sql, boardid, (error, results) => {
+        if (error) {
+          console.error("Database error: ", error);
+          reject(error);
+        } else {
+          resolve(results[0]);
+        }
+      });
+    });
+  } catch (error) {
+    console.error("Error: ", error);
   }
 };
 
@@ -182,21 +212,58 @@ exports.update = async function (req, res) {
 //게시물 삭제
 exports.delete = async function (req, res) {
   const boardid = parseInt(req.params.postid);
+  const sql = "DELETE FROM board WHERE boardid = ?";
+  const var_array = [boardid];
 
   try {
-    const sql = "DELETE FROM board WHERE boardid = ?";
-    const var_array = [boardid];
+    const post = await this.readByBoardId(boardid);
+    console.log(post);
+    if (!post) {
+      return res.status(404).json({ result: "Post not found." });
+    }
 
-    conn.query(sql, var_array, (error, results) => {
-      if (error) {
-        console.error("Database error: ", error);
-        return res.status(500).json({ result: "Database error:" + userid });
-      } else {
-        res.status(201).json({ result: "File and Post deleted" });
-      }
+    const content = post.content;
+    const thumbnail = post.thumbnail;
+    const imageUrls = extractImageUrls(content);
+    const deletePromises = [];
+    if (imageUrls.length > 0 && imageUrls) {
+      deletePromises.push(File.deleteFiles(imageUrls));
+    }
+    if (thumbnail && thumbnail.trim() !== "") {
+      deletePromises.push(File.deleteThumbnail(thumbnail));
+    }
+    File.readOption(boardid).then((files) =>
+      deletePromises.push(File.deleteAttachedFiles(files))
+    );
+
+    // 모든 작업이 완료될 때까지 대기
+    await Promise.all(deletePromises);
+    await new Promise((resolve, reject) => {
+      conn.query(sql, var_array, (error, results) => {
+        if (error) {
+          console.error("Database error: ", error);
+          return reject(new Error("Database error: " + error.message));
+        }
+        resolve(results);
+      });
     });
+
+    res
+      .status(200)
+      .json({ result: "Post and associated files deleted successfully." });
   } catch (error) {
     console.error("Error: ", error);
     return res.status(500).json({ result: "Server error:" });
   }
+};
+
+const extractImageUrls = (content) => {
+  const regex = /<img[^>]+src="([^">]+)"/g; // <img> 태그에서 src 속성 추출
+  const urls = [];
+  let match;
+
+  while ((match = regex.exec(content)) !== null) {
+    urls.push(match[1]); // URL 추가
+  }
+  return urls;
 };
