@@ -32,6 +32,7 @@ const authMiddleware = async (req, res, next) => {
          * 결과: RefreshToken 확인 진행
          */
         const refreshtoken = req.cookies.RefreshToken;
+        let refreshPayload;
         if (!refreshtoken) {
           /**
            * AccessToken 만료, 클라이언트가 RefreshToken 제공하지 않은 경우
@@ -46,8 +47,8 @@ const authMiddleware = async (req, res, next) => {
            * AccessToken 만료, RefreshToken 제공된 경우
            * 결과: RefreshToken 유효성 검사 진행
            */
-          const payload = jwt.verify(refreshtoken, secret);
-          if (!payload) {
+          refreshPayload = jwt.verify(refreshtoken, secret);
+          if (!refreshPayload) {
             /**
              * RefreshToken이 만료되거나 유효하지 않은 경우
              * 결과: 402코드. 다음 미들웨어로 넘어가지 않음
@@ -67,7 +68,8 @@ const authMiddleware = async (req, res, next) => {
          * AccessToken 만료, RefreshToken 유효한 경우
          * 결과: 저장된 RefreshToken과 일치하는지 확인
          */
-        const storedRefreshToken = await Token.read(decoded.userid);
+
+        const storedRefreshToken = await Token.read(refreshPayload.userid);
         if (storedRefreshToken !== refreshtoken) {
           //결과: 402코드. 다음 미들웨어로 넘어가지 않음
           return res
@@ -80,12 +82,16 @@ const authMiddleware = async (req, res, next) => {
             });
         }
 
+        // console.log(refreshPayload);
         // 새로운 access token 발급
-        const newAccessToken = jwt.sign(decoded, secret, {
+        const newAccessToken = jwt.sign(refreshPayload, secret, {
           algorithm: "HS256",
-          expiresIn: "1h",
         });
+        res.clearCookie("AccessToken", { path: "/" });
         res.cookie("AccessToken", newAccessToken, { httpOnly: true });
+        console.log("access token update 완료");
+        req.user = decoded;
+        next();
       } else {
         /**
          * AccessToken이 유효하고 만료되지 않은 경우
@@ -98,6 +104,7 @@ const authMiddleware = async (req, res, next) => {
           });
 
           await Token.update(payload.userid, newRefreshToken);
+          console.log("token update 완료");
           res.cookie("RefreshToken", newRefreshToken, { httpOnly: true });
         }
         req.user = decoded;

@@ -49,6 +49,26 @@ exports.readOption = async function (boardId) {
   }
 };
 
+exports.delete = async function (file) {
+  const sql = "DELETE FROM file WHERE filename = ?";
+  const filename = file.filename;
+
+  try {
+    await new Promise((resolve, reject) => {
+      conn.query(sql, filename, (error, results) => {
+        if (error) {
+          console.error("Database error: ", error);
+          return reject(new Error("Database error: " + error.message));
+        }
+        resolve();
+      });
+    });
+  } catch (error) {
+    console.error(filename + " delete Error: ", error);
+    return res.status(500).json({ result: "Server error:" });
+  }
+};
+
 exports.imageUpload = async function (req, res) {
   if (!req.file) {
     return res.status(400).json({ error: "No file uploaded." });

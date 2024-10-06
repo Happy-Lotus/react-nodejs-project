@@ -92,9 +92,14 @@ app.post(
 );
 
 //toast-ui-editor 이미지 업로드
-app.post("/posts/upload", upload.single("image"), (req, res) => {
-  File.imageUpload(req, res);
-});
+app.post(
+  "/posts/upload",
+  authMiddleware,
+  upload.single("image"),
+  (req, res) => {
+    File.imageUpload(req, res);
+  }
+);
 //게시물 삭제
 /**
  * @swagger
@@ -131,7 +136,7 @@ app.post("/posts/upload", upload.single("image"), (req, res) => {
  *             schema:
  *              result: string
  */
-app.delete("/posts/:postid", (req, res) => {
+app.delete("/posts/:postid", authMiddleware, (req, res) => {
   Post.delete(req, res);
 });
 
@@ -172,7 +177,7 @@ app.delete("/posts/:postid", (req, res) => {
  *             schema:
  *              msg: string
  */
-app.get("/posts/detail/:postid", (req, res) => {
+app.get("/posts/detail/:postid", authMiddleware, (req, res) => {
   Post.read(req, res);
 });
 
@@ -219,7 +224,7 @@ app.get("/posts/detail/:postid", (req, res) => {
  *             schema:
  *              msg: string
  */
-app.get("/posts/:option", (req, res) => {
+app.get("/posts/:option", authMiddleware, (req, res) => {
   Post.readOption(req, res);
 });
 
@@ -243,7 +248,7 @@ app.get("/posts/:option", (req, res) => {
  *                  results:
  *                    type: object
  */
-app.get("/posts", (req, res) => {
+app.get("/posts", authMiddleware, (req, res) => {
   Post.readAll(req, res);
 });
 
@@ -297,9 +302,14 @@ app.get("/posts", (req, res) => {
  *             schema:
  *              msg: string
  */
-app.patch("/posts/detail/:postid", (req, res) => {
-  Post.update(req, res);
-});
+app.post(
+  "/posts/detail/:postid",
+  authMiddleware,
+  upload.fields([{ name: "files" }, { name: "thumbnail" }]),
+  (req, res) => {
+    Post.update(req, res);
+  }
+);
 
 //사용자 로그인
 /**
@@ -450,7 +460,7 @@ app.get("/");
  *                  url:
  *                    type: string
  */
-app.get("/posts/:postid/:filename", (req, res) => {
+app.get("/posts/:postid/:filename", authMiddleware, (req, res) => {
   File.downloadFiles(req, res);
 });
 app.delete("");

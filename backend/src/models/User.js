@@ -121,7 +121,13 @@ exports.login = async function (req, res) {
             expiresIn: "14d",
           });
 
-          await Token.create(refreshToken, results[0].userid);
+          const existRefreshToken = await Token.read(results[0].userid);
+
+          if (!existRefreshToken) {
+            await Token.create(refreshToken, results[0].userid);
+          } else {
+            await Token.update(refreshToken, results[0].userid);
+          }
 
           return res
             .status(201)

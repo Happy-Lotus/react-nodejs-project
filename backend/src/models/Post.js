@@ -1,6 +1,8 @@
+const { NULL } = require("mysql/lib/protocol/constants/types");
 const conn = require("../config/database");
 const File = require("./File");
 const moment = require("moment");
+const { update } = require("./Token");
 
 //게시물 생성
 exports.create = async function (req, res) {
@@ -17,7 +19,6 @@ exports.create = async function (req, res) {
     const now = moment(Date.now()).format("YYYY-MM-DD HH:mm:ss");
     const var_array = [title, content, writer, now, userid, thumbnail];
     let fileInfos;
-    console.log(fileInfos);
 
     if (files) {
       fileInfos = files.map((file) => ({
@@ -164,13 +165,34 @@ exports.readByBoardId = async function (boardid) {
   }
 };
 
-//게시물 수정(patch)
+//게시물 수정(post)
 exports.update = async function (req, res) {
-  const { boardid, title, content } = req.body.board[0];
+  const boardid = req.params.postid;
+  const { title, content, thumbnail } = JSON.parse(req.body.board);
+
+  const existThumbnail = await this.readByBoardId(boardid).then(
+    (result) => result.thumbnail
+  );
+
+  let changeThumbnail =
+    typeof req.files.thumbnail !== "undefined"
+      ? `${req.files.thumbnail[0].destination}${req.files.thumbnail[0].filename}`
+      : "";
+
+  console.log(changeThumbnail + "change함수전");
+
+  changeThumbnail = await changeThumbnailImg(
+    existThumbnail,
+    changeThumbnail,
+    thumbnail
+  );
+
+  const add = req.files.files;
 
   try {
-    const sql1 = "UPDATE board SET title = ?, content = ? WHERE boardid = ?";
-    const var_array = [title, content, boardid];
+    const sql1 =
+      "UPDATE board SET title = ?, content = ?, thumbnail = ? WHERE boardid = ?";
+    const var_array = [title, content, changeThumbnail, boardid];
 
     conn.query(sql1, var_array, (error, results) => {
       if (error) {
@@ -178,19 +200,37 @@ exports.update = async function (req, res) {
         return res.status(500).json({ result: "Database error:" + userid });
       } else {
         if (results.affectedRows > 0) {
-          const file = req.body.file[0];
+          const updateFiles =
+            typeof req.body.updateFiles !== "undefined"
+              ? JSON.parse(JSON.parse(req.body.updateFiles).updateFiles)
+              : [];
 
           try {
-            if (file.add.length > 0) {
-              for (const newFile of file.add) {
-                File.create(boardid, newFile);
+            if (add && add.length > 0) {
+              let fileInfos;
+
+              if (add) {
+                fileInfos = add.map((file) => ({
+                  filename: file.filename,
+                  originalname: file.originalname,
+                  size: file.size,
+                  url: `/uploads/${file.filename}`,
+                }));
               }
+              File.create(boardid, fileInfos);
             }
 
-            if (file.delete.length > 0) {
-              for (const oldFile of file.delete) {
+            if (updateFiles.length > 0) {
+              let fileInfos;
+              fileInfos = updateFiles.map((file) => ({
+                filename: file,
+              }));
+              console.log(fileInfos);
+
+              for (const oldFile of fileInfos) {
                 File.delete(oldFile);
               }
+              File.deleteAttachedFiles(fileInfos);
             }
 
             return res.status(201).json({ result: "File update OK" });
@@ -199,7 +239,7 @@ exports.update = async function (req, res) {
             return res.status(500).json({ result: "File upload error" });
           }
         } else {
-          return res.status(400).json({ result: "Error" });
+          return res.status(400).json({ result: error });
         }
       }
     });
@@ -266,4 +306,32 @@ const extractImageUrls = (content) => {
     urls.push(match[1]); // URL 추가
   }
   return urls;
+};
+
+const changeThumbnailImg = async (
+  existThumbnail,
+  changeThumbnail,
+  thumbnail
+) => {
+  if (existThumbnail && existThumbnail.trim() !== "") {
+    // 기존 썸네일이 존재하는 경우
+    if (thumbnail === existThumbnail) {
+      // 1. 이미 썸네일이 있고 다른 이미지로 변경하지 않는 경우
+      return existThumbnail;
+    } else if (changeThumbnail.trim() !== "") {
+      // 2. 이미 썸네일이 있는데 다른 이미지로 변경하는 경우
+      await File.deleteThumbnail(existThumbnail);
+      console.log("Deleted existing thumbnail:", existThumbnail);
+      return thumbnail;
+    } else {
+      // 3. 이미 썸네일이 있는데 삭제하는 경우
+      await File.deleteThumbnail(existThumbnail);
+      console.log("Deleted existing thumbnail:", existThumbnail);
+      return "";
+    }
+  } else if (changeThumbnail.trim() !== "") {
+    // 4. 썸네일 없는데 새로 추가하려는 경우
+    console.log("Adding new thumbnail:", changeThumbnail);
+    return changeThumbnail;
+  }
 };
