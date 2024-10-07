@@ -179,8 +179,6 @@ exports.update = async function (req, res) {
       ? `${req.files.thumbnail[0].destination}${req.files.thumbnail[0].filename}`
       : "";
 
-  console.log(changeThumbnail + "change함수전");
-
   changeThumbnail = await changeThumbnailImg(
     existThumbnail,
     changeThumbnail,
@@ -200,6 +198,7 @@ exports.update = async function (req, res) {
         return res.status(500).json({ result: "Database error:" + userid });
       } else {
         if (results.affectedRows > 0) {
+          console.log(req.body.updateFiles);
           const updateFiles =
             typeof req.body.updateFiles !== "undefined"
               ? JSON.parse(JSON.parse(req.body.updateFiles).updateFiles)
@@ -322,7 +321,7 @@ const changeThumbnailImg = async (
       // 2. 이미 썸네일이 있는데 다른 이미지로 변경하는 경우
       await File.deleteThumbnail(existThumbnail);
       console.log("Deleted existing thumbnail:", existThumbnail);
-      return thumbnail;
+      return changeThumbnail;
     } else {
       // 3. 이미 썸네일이 있는데 삭제하는 경우
       await File.deleteThumbnail(existThumbnail);

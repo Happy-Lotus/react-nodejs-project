@@ -106,7 +106,6 @@ exports.login = async function (req, res) {
       } else {
         const isCorrectPassword = await checkPassword(results[0].pwd, pwd);
         if (isCorrectPassword) {
-          // const accessToken = JWT.sign(results[0]);
           const payload = {
             email: results[0].email,
             userid: results[0].userid,
