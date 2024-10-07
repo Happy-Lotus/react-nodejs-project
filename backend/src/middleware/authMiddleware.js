@@ -14,8 +14,8 @@ const authMiddleware = async (req, res, next) => {
    * 결과 : 400코드. 다음 미들웨어로 넘어가지 않음.
    */
   if (!accesstoken) {
-    return res.status(400).json({
-      code: 400,
+    return res.status(401).json({
+      code: 401,
       msg: "No token provided. Access denied.",
     });
   }
@@ -51,14 +51,15 @@ const authMiddleware = async (req, res, next) => {
           if (!refreshPayload) {
             /**
              * RefreshToken이 만료되거나 유효하지 않은 경우
-             * 결과: 402코드. 다음 미들웨어로 넘어가지 않음
+             * 결과: 401코드. 다음 미들웨어로 넘어가지 않음
+             * 재로그인 요청
              */
             return res
-              .status(402)
+              .status(401)
               .clearCookie("RefreshToken", { path: "/" })
               .clearCookie("AccessToken", { path: "/" })
               .json({
-                code: 402,
+                code: 401,
                 msg: "Refresh token expired.",
               });
           }
@@ -71,18 +72,17 @@ const authMiddleware = async (req, res, next) => {
 
         const storedRefreshToken = await Token.read(refreshPayload.userid);
         if (storedRefreshToken !== refreshtoken) {
-          //결과: 402코드. 다음 미들웨어로 넘어가지 않음
+          //결과: 401코드. 다음 미들웨어로 넘어가지 않음
           return res
-            .status(402)
+            .status(401)
             .clearCookie("RefreshToken", { path: "/" })
             .clearCookie("AccessToken", { path: "/" })
             .json({
-              code: 402,
+              code: 401,
               msg: "Refresh token expired or invalid.",
             });
         }
 
-        // console.log(refreshPayload);
         // 새로운 access token 발급
         const newAccessToken = jwt.sign(refreshPayload, secret, {
           algorithm: "HS256",
@@ -94,29 +94,43 @@ const authMiddleware = async (req, res, next) => {
         next();
       } else {
         /**
-         * AccessToken이 유효하고 만료되지 않은 경우
+         * AccessToken이 만료되지 않은 경우. 근데 그외 err 발생
          */
-        const payload = jwt.verify(accesstoken, secret);
-        if (!payload) {
-          const newRefreshToken = jwt.sign({ userid: payload.userid }, secret, {
-            algorithm: "HS256",
-            expiresIn: "14d",
-          });
+        // const refreshtoken = req.cookies.RefreshToken;
+        // const payload = jwt.verify(refresh, secret);
+        // if (!payload) {
+        //   const newRefreshToken = jwt.sign({ userid: payload.userid }, secret, {
+        //     algorithm: "HS256",
+        //     expiresIn: "14d",
+        //   });
 
-          await Token.update(payload.userid, newRefreshToken);
-          console.log("token update 완료");
-          res.cookie("RefreshToken", newRefreshToken, { httpOnly: true });
-        }
-        req.user = decoded;
-        next();
+        //   await Token.update(payload.userid, newRefreshToken);
+        //   console.log("token update 완료");
+        //   res.cookie("RefreshToken", newRefreshToken, { httpOnly: true });
+        // }
+        // req.user = decoded;
+        // next();
+
+        return res
+          .status(401)
+          .clearCookie("RefreshToken", { path: "/" })
+          .clearCookie("AccessToken", { path: "/" })
+          .json({
+            code: 401,
+            msg: "AccessToken Error: " + err,
+          });
       }
-      return res.status(401).json({
-        code: 401,
-        msg: "Failed to authenticate token.",
-      });
+      return res
+        .status(401)
+        .clearCookie("RefreshToken", { path: "/" })
+        .clearCookie("AccessToken", { path: "/" })
+        .json({
+          code: 401,
+          msg: "Failed to authenticate token.",
+        });
     }
     /**
-     * AccessToken이 만료되었고, 클라이언트가 유효한 RefreshToken을 제공한 경우
+     * AccessToken 유효
      */
     req.user = decoded;
     next();

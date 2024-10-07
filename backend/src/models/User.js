@@ -23,6 +23,7 @@ const checkPassword = async function (dbpwd, pwd) {
   }
 };
 
+//사용자 이메일 이용한 사용자 확인
 exports.readByEmail = async function (email) {
   try {
     const sql = "SELECT * FROM user WHERE email = ?";
@@ -49,7 +50,6 @@ exports.register = async function (req, res) {
 
   console.log(email + " " + pwd + " " + nickname + " " + name);
   try {
-    console.log(email);
     const existingUser = await this.readByEmail(email);
 
     if (!existingUser) {
@@ -59,6 +59,7 @@ exports.register = async function (req, res) {
     const sql =
       "INSERT INTO user (name, email, pwd, regdate, nickname, is_verified) VALUES (?, ?, ?, ?, ?, ?)";
     const currentDate = new Date().toISOString().split("T")[0];
+    console.log("현재시각날짜: " + new Date().toISOString());
     const hashedPassword = await bcrypt.hash(pwd, 10);
     const var_array = [name, email, hashedPassword, currentDate, nickname, 0];
 
@@ -82,7 +83,7 @@ exports.register = async function (req, res) {
       } else {
         console.log(response);
         await this.update(["is_verified"], [number], email);
-        res.status(201).json({
+        res.status(200).json({
           message: "회원가입 성공. 이메일을 확인하여 인증을 완료해주세요.",
         });
       }
@@ -121,7 +122,8 @@ exports.login = async function (req, res) {
           });
 
           const existRefreshToken = await Token.read(results[0].userid);
-
+          //existRefreshToken이 없을 경우 -> 새로 create
+          //있다면 token update
           if (!existRefreshToken) {
             await Token.create(refreshToken, results[0].userid);
           } else {
@@ -145,7 +147,7 @@ exports.login = async function (req, res) {
               nickname: results[0].nickname,
             });
         } else {
-          return res.status(400).json({ result: "Password mismatch " });
+          return res.status(400).json({ result: "Password mismatch" });
         }
       }
     });
@@ -161,7 +163,7 @@ exports.logout = async function (req, res) {
   try {
     await Token.delete(userid);
     return res
-      .status(201)
+      .status(204)
       .clearCookie("RefreshToken", { path: "/" })
       .clearCookie("AccessToken", { path: "/" })
       .json({ msg: "로그아웃 완료" });
@@ -171,6 +173,7 @@ exports.logout = async function (req, res) {
   }
 };
 
+//사용자 이메일 인증
 exports.verifyEmail = async function (req, res) {
   const { verifyNumber, email } = req.body;
 
@@ -181,11 +184,12 @@ exports.verifyEmail = async function (req, res) {
         console.error("Database error: ", error);
         return res.status(500).json({ result: "Database error:" + email });
       } else {
+        console.log(results[0]);
         if (verifyNumber === results[0].is_verified) {
           await this.update(["is_verified"], [1], email);
           return res.status(201).json({ result: "인증 완료" });
         } else {
-          return res.status(400).json({ result: "인증 코드 맞지 않음" });
+          return res.status(400).json({ result: "인증 오류" });
         }
       }
     });
@@ -213,7 +217,9 @@ exports.update = async function (columns, changes, email) {
       i++;
     }
     i = 0;
-  } catch (error) {}
+  } catch (error) {
+    return res.status(500).json({ result: "Server error:" });
+  }
 };
 
 //사용자 삭제

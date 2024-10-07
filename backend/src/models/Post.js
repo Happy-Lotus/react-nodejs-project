@@ -169,10 +169,11 @@ exports.readByBoardId = async function (boardid) {
 exports.update = async function (req, res) {
   const boardid = req.params.postid;
   const { title, content, thumbnail } = JSON.parse(req.body.board);
+  console.log(req.body.updateFiles);
 
-  const existThumbnail = await this.readByBoardId(boardid).then(
-    (result) => result.thumbnail
-  );
+  const existThumbnail = await this.readByBoardId(boardid).then((result) => {
+    result.thumbnail;
+  });
 
   let changeThumbnail =
     typeof req.files.thumbnail !== "undefined"
@@ -188,16 +189,17 @@ exports.update = async function (req, res) {
   const add = req.files.files;
 
   try {
-    const sql1 =
+    const sql =
       "UPDATE board SET title = ?, content = ?, thumbnail = ? WHERE boardid = ?";
     const var_array = [title, content, changeThumbnail, boardid];
 
-    conn.query(sql1, var_array, (error, results) => {
+    conn.query(sql, var_array, (error, results) => {
       if (error) {
         console.error("Database error: ", error);
         return res.status(500).json({ result: "Database error:" + userid });
       } else {
         if (results.affectedRows > 0) {
+          console.log("updateFiles");
           console.log(req.body.updateFiles);
           const updateFiles =
             typeof req.body.updateFiles !== "undefined"
@@ -221,15 +223,19 @@ exports.update = async function (req, res) {
 
             if (updateFiles.length > 0) {
               let fileInfos;
-              fileInfos = updateFiles.map((file) => ({
-                filename: file,
+              fileInfos = updateFiles.map((filename) => ({
+                file: { filename: filename },
               }));
-              console.log(fileInfos);
 
-              for (const oldFile of fileInfos) {
-                File.delete(oldFile);
-              }
-              File.deleteAttachedFiles(fileInfos);
+              // for (const oldFile of fileInfos) {
+              //   File.delete(oldFile[0]);
+              // }
+              fileInfos.forEach((fileInfo) => {
+                File.delete(fileInfo.file);
+              });
+              File.deleteAttachedFiles(
+                fileInfos.map((fileInfo) => fileInfo.file)
+              );
             }
 
             return res.status(201).json({ result: "File update OK" });

@@ -51,6 +51,7 @@ exports.readOption = async function (boardId) {
 
 exports.delete = async function (file) {
   const sql = "DELETE FROM file WHERE filename = ?";
+  console.log(file.filename);
   const filename = file.filename;
 
   try {

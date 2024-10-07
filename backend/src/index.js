@@ -307,6 +307,7 @@ app.post(
   authMiddleware,
   upload.fields([{ name: "files" }, { name: "thumbnail" }]),
   (req, res) => {
+    console.log("/posts/detail/:postid post update 호출");
     Post.update(req, res);
   }
 );
