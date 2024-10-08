@@ -33,7 +33,7 @@ exports.readByEmail = async function (email) {
           console.error("Database error: ", error);
           reject(error);
         } else if (results.length > 0) {
-          reject(false);
+          resolve(false);
         } else {
           resolve(true);
         }
@@ -58,12 +58,15 @@ exports.register = async function (req, res) {
 
     const sql =
       "INSERT INTO user (name, email, pwd, regdate, nickname, is_verified) VALUES (?, ?, ?, ?, ?, ?)";
-    const currentDate = new Date().toISOString().split("T")[0];
-    console.log("현재시각날짜: " + new Date().toISOString());
+    const currentDate = new Date().toISOString().slice(0, 23).replace("T", " ");
     const hashedPassword = await bcrypt.hash(pwd, 10);
     const var_array = [name, email, hashedPassword, currentDate, nickname, 0];
 
-    await conn.query(sql, var_array);
+    await conn.query(sql, var_array, (error, results) => {
+      if (error.name == "ER_DUP_ENTRY") {
+        return res.status(400).json({ msg: error.sqlMessage });
+      }
+    });
     console.log("user insert");
     const generateRandomNumber = function (min, max) {
       const randNum = Math.floor(Math.random() * (max - min + 1)) + min;

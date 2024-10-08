@@ -8,6 +8,8 @@ const pool = maria.createConnection({
   user: "root",
   password: "1234",
   database: "testdb",
+  timezone: "Asia/Seoul",
+  dateStrings: true,
 });
 
 module.exports = pool;
