@@ -2,6 +2,15 @@ import { useForm } from 'react-hook-form'
 import styles from './RegisterPage.module.scss';
 
 const RegisterPage = () => {
+
+  const onSubmit = (data) => {
+    data.preventDefault();
+    const form = data.target;
+    const formData = new FormData(form);
+    fetch('/register',{method:"POST",body:formData})
+
+  }
+  
   const {
     register, //input 값을 입력할 때 해당 값을 저장할 변수 이름 정해주는 함수
     handleSubmit, // submit 버튼을 눌렀을 때 form의 전체적인 데이터 처리를 해주는 함수 
@@ -18,13 +27,7 @@ const RegisterPage = () => {
    * errors : 입력값에 맞는 오류 내용
    */
 
-  const onSubmit = (data) => {
-    data.preventDefault();
-    const form = data.target;
-    const formData = new FormData(form);
-    fetch('/register',{method:"POST",body:formData})
 
-  }
 
   return (
     <div className={styles.background__color__container}>

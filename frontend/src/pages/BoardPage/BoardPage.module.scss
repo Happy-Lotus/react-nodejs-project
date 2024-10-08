@@ -1,0 +1,139 @@
+$HEADER-HEIGHT: 56px;
+
+.page {
+  display: flex;
+  flex-direction: column;
+
+  width: 100%;
+  height: 100vh;
+
+  &__contents {
+    display: flex;
+    flex-direction: column;
+    // align-items: center;
+
+    &__introBox {
+      display: flex;
+      align-items: flex-start;
+      justify-content: center;
+    }
+  }
+}
+
+.wrapper {
+  display: flex;
+  flex-direction: column;
+
+  &__title {
+    font-size: 2rem;
+    font-weight: 400;
+  }
+}
+
+.table__container {
+  width: 100%;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 20px 0px 20px 0px;
+  box-sizing: border-box;
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-bottom: 20px;
+
+  th,
+  td {
+    padding: 10px;
+    text-align: left;
+    border-bottom: 1px solid #ddd;
+  }
+
+  th {
+    background-color: #f4f4f4;
+  }
+
+  tbody tr:hover {
+    background-color: #f9f9f9;
+  }
+
+  .title-cell {
+    display: flex;
+    align-items: center;
+
+    .thumbnail {
+      width: 60px;
+      height: 60px;
+      margin-right: 10px;
+      border-radius: 4px;
+      object-fit: cover;
+    }
+  }
+}
+
+.footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 20px;
+
+  .pagination {
+    display: flex;
+    justify-content: center;
+    flex-grow: 1;
+
+    .prev__page,
+    .next__page {
+      padding: 10px 15px;
+      margin: 0 5px;
+      border: none;
+      color: #000000;
+      cursor: pointer;
+      border-radius: 50%;
+      width: 35px;
+      height: 35px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+
+      &:hover {
+        background-color: #0056b3;
+      }
+    }
+  }
+
+  .submit__container {
+    flex-shrink: 0;
+
+    .submit__btn {
+      padding: 10px 20px;
+      border: none;
+      background-color: #28a745;
+      color: #fff;
+      cursor: pointer;
+
+      &:hover {
+        background-color: #218838;
+      }
+    }
+  }
+}
+
+.input__box__text {
+  width: 150px;
+  z-index: auto;
+}
+.input__box__img {
+  padding: 0;
+  width: 40px;
+}
+
+.input__box__img__style {
+  width: 30px;
+}
+
+.searchbar {
+  display: flex;
+  justify-content: flex-end;
+}
