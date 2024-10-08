@@ -1,5 +1,7 @@
+import { useState } from "react";
 import CommonHeader from "../../components/header/header";
 import styles from "./BoardPage.module.scss";
+import { FaSearch } from "react-icons/fa";
 
 function BoardPage() {
   const data = [
@@ -46,6 +48,8 @@ function BoardPage() {
 
     // Add more rows as needed
   ];
+
+  const [searchOption, setSearchOption] = useState("title"); // 추가된 부분
   return (
     <div className={styles.page}>
       {/**공통 네비게이션 UI 부분 */}
@@ -59,13 +63,21 @@ function BoardPage() {
         <div className={styles.searchbar}>
           <div className={styles.right__search}>
             <div className={styles.input__group}>
+              <select
+                className={styles.toggle__box}
+                value={searchOption}
+                onChange={(e) => setSearchOption(e.target.value)}
+              >
+                <option value="title">제목</option>
+                <option value="author">작성자</option>
+              </select>
               <input
                 className={styles.input__box__text}
                 type="text"
                 placeholder="검색"
               />
               <span className={styles.input__box__img}>
-                <img src="" className={styles.input__box__img__style} />
+                <FaSearch />
               </span>
             </div>
           </div>
@@ -86,7 +98,7 @@ function BoardPage() {
                   <td>{row.no}</td>
                   <td className={styles.title__cell}>
                     <img
-                      src="frontend/src/assets/알고리즘.jpg"
+                      src={require("../../assets/testimage4.jpg").default}
                       alt={`Thumbnail ${row.no}`}
                       className={styles.thumbnail}
                     />

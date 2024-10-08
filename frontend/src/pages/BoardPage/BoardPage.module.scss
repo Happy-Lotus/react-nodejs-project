@@ -1,4 +1,4 @@
-$HEADER-HEIGHT: 56px;
+$HEADER-HEIGHT: 100px;
 
 .page {
   display: flex;
@@ -14,8 +14,9 @@ $HEADER-HEIGHT: 56px;
 
     &__introBox {
       display: flex;
-      align-items: flex-start;
-      justify-content: center;
+      align-items: center;
+      justify-content: flex-start;
+      height: 100px;
     }
   }
 }
@@ -32,7 +33,7 @@ $HEADER-HEIGHT: 56px;
 
 .table__container {
   width: 100%;
-  max-width: 1200px;
+  max-width: 1280px;
   margin: 0 auto;
   padding: 20px 0px 20px 0px;
   box-sizing: border-box;
@@ -58,7 +59,7 @@ $HEADER-HEIGHT: 56px;
     background-color: #f9f9f9;
   }
 
-  .title-cell {
+  .title__cell {
     display: flex;
     align-items: center;
 
@@ -123,10 +124,29 @@ $HEADER-HEIGHT: 56px;
 .input__box__text {
   width: 150px;
   z-index: auto;
+  padding: 8px;
+  box-shadow: 1px 1px 3px 0px rgba(228, 231, 236, 0.7);
 }
 .input__box__img {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
   padding: 0;
-  width: 40px;
+  width: 60px;
+  text-align: center;
+
+  background-color: #eee;
+
+  border-top-right-radius: 8px;
+  border-bottom-right-radius: 8px;
+
+  cursor: poiner;
+  transition: background-color 0.1s ease;
+}
+
+.input__box__img:active {
+  background-color: #e0e0e0;
 }
 
 .input__box__img__style {
@@ -136,4 +156,16 @@ $HEADER-HEIGHT: 56px;
 .searchbar {
   display: flex;
   justify-content: flex-end;
+}
+
+.input__group {
+  display: flex;
+  border-radius: 8px;
+  box-shadow: 0px 2px 8px 0px rgba(228, 231, 236, 0.7);
+  border-top-left-radius: 8px;
+  border-bottom-left-radius: 8px;
+}
+
+.toggle__box {
+  font-size: small;
 }

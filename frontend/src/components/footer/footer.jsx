@@ -6,13 +6,13 @@
 // // import { imageData } from '@/store/selectors/imageSelectors'
 
 // function CommonFooter() {
-//     // const imgSelector = useRecoilValueLoadable(imageData)
-//     // const search = useRecoilValue(searchState)
-//     // const [page, setPage] = useRecoilState(pageState)
-//     // const [step, setStep] = useState(0)
+//     const imgSelector = useRecoilValueLoadable(imageData)
+//     const search = useRecoilValue(searchState)
+//     const [page, setPage] = useRecoilState(pageState)
+//     const [step, setStep] = useState(0)
 
 //     useEffect(() => {
-//         setStep(0) //search 값이 바뀌면 setStep이 0으로 할당되도록. 
+//         setStep(0) //search 값이 바뀌면 setStep이 0으로 할당되도록.
 //     }, [search])
 
 //     // 페이지 리스트 UI 생성
@@ -20,7 +20,7 @@
 //     for (let i = 1; i <= imgSelector.contents.total_pages; i++) {
 //         newArr.push(i)
 //     }
-//     const length = newArr.length
+//     // const length = newArr.length
 //     const divide = Math.floor(length / 10) + (Math.floor(length % 10) > 0 ? 1 : 0)
 //     const res = []
 
