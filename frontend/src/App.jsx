@@ -8,7 +8,7 @@ import Navbar from "./layout/Navbar/Navbar";
 import Footer from "./components/footer/footer";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/ReactToastify.css";
-
+import { RecoilRoot } from "recoil"; // Import RecoilRoot
 function Layout() {
   return (
     <div className="flex flex-col h-screen justify-between">
@@ -30,17 +30,19 @@ function Layout() {
 
 function App() {
   return (
-    <Routes>
-      <Route path="/" element={<RegisterPage />} />
-      <Route path="/verify-email" element={<Verify_Email />} />
-      <Route path="/login" element={<LoginPage />} />
-      <Route path="/posts" element={<Layout />}>
-        <Route index element={<BoardPage />} />
-        {/*로그인 여부와 상관없이 갈 수 있는 경로*/}
-        {/* <Route index element={<RegisterPage />} /> */}
-        {/* <Route index element={<PostEditor />} /> */}
-      </Route>
-    </Routes>
+    <RecoilRoot>
+      <Routes>
+        <Route path="/" element={<RegisterPage />} />
+        <Route path="/verify-email" element={<Verify_Email />} />
+        <Route path="/login" element={<LoginPage />} />
+        <Route path="/posts" element={<Layout />}>
+          <Route index element={<BoardPage />} />
+          {/*로그인 여부와 상관없이 갈 수 있는 경로*/}
+          {/* <Route index element={<RegisterPage />} /> */}
+          {/* <Route index element={<PostEditor />} /> */}
+        </Route>
+      </Routes>
+    </RecoilRoot>
   );
 }
 

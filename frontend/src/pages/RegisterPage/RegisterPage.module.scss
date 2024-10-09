@@ -35,7 +35,7 @@ $gray-hover: gray;
 }
 
 .form__group {
-  margin-bottom: 1rem; /* 4 */
+  margin-top: 1rem; /* 4 */
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -45,7 +45,7 @@ $gray-hover: gray;
   display: flex;
   justify-content: flex-end;
   align-items: center;
-
+  position: relative; // 에러 메시지 위치 조정을 위해 상대 위치 설정
   &__noBtn {
     margin-right: 96px;
   }
@@ -81,6 +81,8 @@ $gray-hover: gray;
   display: flex;
   justify-content: space-between;
   align-items: center;
+
+  margin-top: 2rem;
 }
 
 .btn {
@@ -159,4 +161,10 @@ $gray-hover: gray;
 .error_msg {
   --tw-text-opacity: 1;
   color: rgb(239 68 68 / var(--tw-text-opacity));
+  font-size: 0.875rem; // 에러 메시지 크기
+  margin-top: 0.25rem; // input과 에러 메시지 사이의 간격
+
+  display: flex; // 블록 요소로 설정하여 줄바꿈
+  margin-left: 84px;
+  justify-content: flex-start;
 }

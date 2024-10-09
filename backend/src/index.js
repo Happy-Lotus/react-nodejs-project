@@ -14,7 +14,7 @@ const Post = require("./models/Post");
 const File = require("./models/File");
 const { upload } = require("./config/storage");
 dotenv.config();
-app.use(cors());
+app.use(cors({ Credential: true, origin: "http://localhost:3000" }));
 app.use(express.json());
 const cookieParser = require("cookie-parser");
 const authMiddleware = require("./middleware/authMiddleware");

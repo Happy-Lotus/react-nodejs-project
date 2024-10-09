@@ -6,7 +6,8 @@
   "scripts": {
     "dev": "nodemon src/index.js",
     "test": "echo \"Error: no test specified\" && exit 1",
-    "api-docs": "swagger-cli bundle ./src/swagger/openapi.yaml --"
+    "api-docs": "swagger-cli bundle ./src/swagger/openapi.yaml --",
+    "start": "react-scripts --max-http-header-size=1024 start"
   },
   "author": "",
   "license": "ISC",
