@@ -69,7 +69,7 @@ exports.read = async function (userid) {
           console.error("Database error: ", error);
           reject(error);
         } else {
-          resolve(results[0].token);
+          resolve(results[0]);
         }
       });
     });

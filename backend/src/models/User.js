@@ -7,6 +7,7 @@ const jwt = require("jsonwebtoken");
 const secret = "Kkb5I86s3B";
 dotenv.config();
 const { JWT_SECRET } = process.env;
+let timeoutId;
 
 //사용자 비밀번호 확인
 const checkPassword = async function (dbpwd, pwd) {
@@ -56,18 +57,24 @@ exports.register = async function (req, res) {
       return res.status(400).json({ msg: "이미 존재하는 이메일입니다." });
     }
 
+    if (req.session[email]) {
+      return res
+        .status(401)
+        .json({ msg: "아직 인증이 완료되지 않은 이메일입니다." });
+    }
+
     const sql =
-      "INSERT INTO user (name, email, pwd, regdate, nickname, is_verified) VALUES (?, ?, ?, ?, ?, ?)";
+      "INSERT INTO user (name, email, pwd, regdate, nickname) VALUES (?, ?, ?, ?, ?)";
     const currentDate = new Date().toISOString().slice(0, 23).replace("T", " ");
     const hashedPassword = await bcrypt.hash(pwd, 10);
-    const var_array = [name, email, hashedPassword, currentDate, nickname, 0];
+    const var_array = [name, email, hashedPassword, currentDate, nickname];
 
     await conn.query(sql, var_array, (error, results) => {
-      if (error.name == "ER_DUP_ENTRY") {
+      if (error) {
         return res.status(400).json({ msg: error.sqlMessage });
       }
     });
-    console.log("user insert");
+
     const generateRandomNumber = function (min, max) {
       const randNum = Math.floor(Math.random() * (max - min + 1)) + min;
       return randNum;
@@ -85,7 +92,20 @@ exports.register = async function (req, res) {
         res.status(400).json({ message: "이메일 전송에 실패하였습니다." });
       } else {
         console.log(response);
-        await this.update(["is_verified"], [number], email);
+        req.session[email] = number;
+        console.log("number:" + number);
+        timeoutId = setTimeout(async () => {
+          const storedCode = req.session[email];
+          console.log("session:" + req.session[email]);
+          if (!storedCode) {
+            console.log("session delete OK");
+          } else {
+            delete req.session[email];
+            console.log(
+              `Session for ${email} has expired and the verification code has been deleted.`
+            );
+          }
+        }, 600000);
         res.status(200).json({
           message: "회원가입 성공. 이메일을 확인하여 인증을 완료해주세요.",
         });
@@ -123,7 +143,6 @@ exports.login = async function (req, res) {
             algorithm: "HS256",
             expiresIn: "14d",
           });
-
           const existRefreshToken = await Token.read(results[0].userid);
           //existRefreshToken이 없을 경우 -> 새로 create
           //있다면 token update
@@ -178,24 +197,30 @@ exports.logout = async function (req, res) {
 
 //사용자 이메일 인증
 exports.verifyEmail = async function (req, res) {
-  const { verifyNumber, email } = req.body;
+  const { email, verifyNumber } = req.body;
 
   try {
-    const sql = "SELECT is_verified FROM user WHERE email = ?";
-    conn.query(sql, email, async (error, results) => {
-      if (error) {
-        console.error("Database error: ", error);
-        return res.status(500).json({ result: "Database error:" + email });
-      } else {
-        console.log(results[0]);
-        if (verifyNumber === results[0].is_verified) {
-          await this.update(["is_verified"], [1], email);
-          return res.status(201).json({ result: "인증 완료" });
-        } else {
-          return res.status(400).json({ result: "인증 오류" });
-        }
-      }
-    });
+    const storedCode = req.session[email];
+
+    if (!storedCode) {
+      return res
+        .status(400)
+        .json({ message: "인증번호가 세션에 저장되어 있지 않습니다." });
+    }
+
+    if (verifyNumber === storedCode) {
+      // 인증 성공
+      console.log("인증성공" + storedCode);
+      delete req.session[email];
+      clearTimeout(timeoutId); // 타이머 취소
+      console.log("세션번호 삭제:" + req.session[email]);
+      return res.status(200).json({ message: "인증 성공!" });
+    } else {
+      // 인증 실패
+      return res
+        .status(400)
+        .json({ message: "인증번호가 일치하지 않습니다. 다시 입력하세요." });
+    }
   } catch (error) {
     console.error("Error: ", error);
     return res.status(500).json({ result: "Server error:" });
@@ -266,5 +291,15 @@ exports.read = async function (key, value) {
     });
   } catch (error) {
     console.error("Error: ", error);
+  }
+};
+
+exports.sessionDelete = async function (email) {
+  if (req.session[email]) {
+    delete req.session[email];
+    res.status(201).json({ msg: "재인증하세요" });
+  } else {
+    console.log("이미 인증된 이메일입니다." + email);
+    res.status(400).json({ msg: "이미 인증된 이메일입니다." });
   }
 };

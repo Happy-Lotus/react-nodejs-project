@@ -18,8 +18,20 @@ app.use(cors({ Credential: true, origin: "http://localhost:3000" }));
 app.use(express.json());
 const cookieParser = require("cookie-parser");
 const authMiddleware = require("./middleware/authMiddleware");
+const session = require("express-session");
+const FileStore = require("session-file-store")(session);
 
 app.use(cookieParser());
+app.use(
+  session({
+    store: new FileStore(),
+    secret: "Kkb5I86s3B",
+    resave: false,
+    saveUninitalized: true,
+    cookie: { secure: false },
+  })
+);
+app.use(express.urlencoded({ extended: true }));
 
 //swagger
 app.use(
@@ -27,6 +39,8 @@ app.use(
   swaggerUi.serve,
   swaggerUi.setup(specs, { explorer: true })
 );
+
+let timerId;
 
 //게시물 작성
 /**
@@ -419,11 +433,13 @@ app.post("/logout", authMiddleware, (req, res) => {
  *              msg: string
  */
 app.post("/register", (req, res) => {
+  console.log(req.body);
   User.register(req, res);
 });
 
 //사용자 이메일 인증
 app.post("/verify-email", (req, res) => {
+  console.log(req.session["annie04056@gmail.com"]);
   User.verifyEmail(req, res);
 });
 

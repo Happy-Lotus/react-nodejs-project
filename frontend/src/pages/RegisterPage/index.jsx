@@ -15,6 +15,7 @@ const RegisterPage = () => {
   const onSubmit = async (data) => {
     try {
       await signup(data);
+
       reset();
       // navigate("/login");
     } catch (error) {
