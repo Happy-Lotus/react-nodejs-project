@@ -8,3 +8,12 @@ export const signupState = atom({
     success: false,
   },
 });
+
+export const signinState = atom({
+  key: "signinState", // 고유한 ID
+  default: {
+    isLoading: false,
+    error: null,
+    success: false,
+  },
+});
