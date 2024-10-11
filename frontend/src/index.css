@@ -1,3 +1,17 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+body,
+html {
+  height: 100%; /* 전체 높이를 100%로 설정 */
+  margin: 0; /* 기본 마진 제거 */
+  font-family: "Outfit", "Pretendard", AppleGothic, sans-serif;
+}
+
+@media (max-width: 1500px) {
+  main {
+    padding-left: 30px;
+    padding-right: 30px;
+  }
+}

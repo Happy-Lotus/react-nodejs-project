@@ -191,7 +191,7 @@ app.delete("/posts/:postid", authMiddleware, (req, res) => {
  *             schema:
  *              msg: string
  */
-app.get("/posts/detail/:postid", authMiddleware, (req, res) => {
+app.get("/posts/detail/:postid", (req, res) => {
   Post.read(req, res);
 });
 
@@ -262,7 +262,7 @@ app.get("/posts/:option", authMiddleware, (req, res) => {
  *                  results:
  *                    type: object
  */
-app.get("/posts", authMiddleware, (req, res) => {
+app.get("/posts", (req, res) => {
   Post.readAll(req, res);
 });
 
@@ -480,7 +480,6 @@ app.get("/");
 app.get("/posts/:postid/:filename", authMiddleware, (req, res) => {
   File.downloadFiles(req, res);
 });
-app.delete("");
 
 app.listen(PORT, () => {
   console.log(`${PORT}번에서 실행이 되었습니다.`);

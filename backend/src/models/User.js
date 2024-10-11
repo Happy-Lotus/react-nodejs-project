@@ -54,13 +54,13 @@ exports.register = async function (req, res) {
     const existingUser = await this.readByEmail(email);
 
     if (!existingUser) {
-      return res.status(400).json({ msg: "이미 존재하는 이메일입니다." });
+      return res.status(409).json({ message: "이미 존재하는 이메일입니다." });
     }
 
     if (req.session[email]) {
       return res
-        .status(401)
-        .json({ msg: "아직 인증이 완료되지 않은 이메일입니다." });
+        .status(403)
+        .json({ message: "아직 인증이 완료되지 않은 이메일입니다." });
     }
 
     const sql =
@@ -71,7 +71,7 @@ exports.register = async function (req, res) {
 
     await conn.query(sql, var_array, (error, results) => {
       if (error) {
-        return res.status(400).json({ msg: error.sqlMessage });
+        return res.status(400).json({ message: error.sqlMessage });
       }
     });
 
@@ -89,7 +89,7 @@ exports.register = async function (req, res) {
 
     transporter.sendMail(mailOptions, async (err, response) => {
       if (err) {
-        res.status(400).json({ message: "이메일 전송에 실패하였습니다." });
+        res.status(500).json({ message: "이메일 전송에 실패하였습니다." });
       } else {
         console.log(response);
         req.session[email] = number;
@@ -106,7 +106,7 @@ exports.register = async function (req, res) {
             );
           }
         }, 600000);
-        res.status(200).json({
+        res.status(201).json({
           message: "회원가입 성공. 이메일을 확인하여 인증을 완료해주세요.",
         });
       }
@@ -169,7 +169,7 @@ exports.login = async function (req, res) {
               nickname: results[0].nickname,
             });
         } else {
-          return res.status(400).json({ result: "Password mismatch" });
+          return res.status(401).json({ result: "Password mismatch" });
         }
       }
     });
@@ -259,18 +259,18 @@ exports.delete = async function (req, res) {
     conn.query(sql, userid, (error, results) => {
       if (error) {
         console.error("Database error: ", error);
-        return res.status(500).json({ result: "Database error:" + userid });
+        return res.status(500).json({ message: "Database error:" + userid });
       } else {
         res
-          .status(201)
+          .status(200)
           .clearCookie("RefreshToken", { path: "/" })
           .clearCookie("AccessToken", { path: "/" })
-          .json({ result: "User deleted" });
+          .json({ message: "User deleted" });
       }
     });
   } catch (error) {
     console.error("Error: ", error);
-    return res.status(500).json({ result: "Server error:" });
+    return res.status(500).json({ message: "Server error:" });
   }
 };
 
@@ -291,15 +291,16 @@ exports.read = async function (key, value) {
     });
   } catch (error) {
     console.error("Error: ", error);
+    throw new Error("서버 오류");
   }
 };
 
 exports.sessionDelete = async function (email) {
   if (req.session[email]) {
     delete req.session[email];
-    res.status(201).json({ msg: "재인증하세요" });
+    res.status(200).json({ msg: "재인증하세요" });
   } else {
     console.log("이미 인증된 이메일입니다." + email);
-    res.status(400).json({ msg: "이미 인증된 이메일입니다." });
+    res.status(409).json({ message: "이미 인증이 완료된 이메일입니다." });
   }
 };

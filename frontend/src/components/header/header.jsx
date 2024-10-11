@@ -1,16 +1,22 @@
-import styles from './header.module.scss'
-
+import styles from "./header.module.scss";
 
 function CommonHeader() {
-
-    return <header className={styles.header}>
-        <div className={styles.header__logoBox} >
-            <span className={styles.header__logoBox__title}>목록</span>
+  return (
+    <div className={styles.header__container}>
+      {" "}
+      {/**container */}
+      <div className={styles.header}>
+        {" "}
+        {/**wrap */}
+        <div className={styles.header__logoBox}>
+          <span>Main</span>
         </div>
         <div className={styles.header__profileBox}>
-            <button className={styles.header__profileBox__button}>로그아웃</button>
+          <button className={styles.header__profileBox__button}>LOGOUT</button>
         </div>
-    </header>
+      </div>
+    </div>
+  );
 }
 
-export default CommonHeader
+export default CommonHeader;

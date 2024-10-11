@@ -1,6 +1,6 @@
-import styles from "./Footer.module.scss";
+import styles from "./navigation.module.scss";
 
-function CommonFooter() {
+function CommonNav() {
   return (
     <footer className={styles.footer}>
       <div className={styles.pagination}>
@@ -14,4 +14,4 @@ function CommonFooter() {
   );
 }
 
-export default CommonFooter;
+export default CommonNav;

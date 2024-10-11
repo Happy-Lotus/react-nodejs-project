@@ -16,7 +16,7 @@ export const useSignup = () => {
       },
       data: {
         name: "김희연",
-        nickname: "test33",
+        nickname: "test35",
         email: "annie04056@gmail.com",
         pwd: "test2test@",
       },
@@ -60,9 +60,7 @@ export const useLogin = () => {
       const response = await axios(config);
       console.log("요청완료");
       setSigninState({ isLoading: false, error: null, success: true });
-      if (response.status === 201) {
-        console.log("로그인 완료");
-      }
+      return response.status;
     } catch (error) {
       console.log("요청실패");
       console.log(error);
@@ -75,4 +73,56 @@ export const useLogin = () => {
     }
   };
   return { signin };
+};
+
+export const fetchPosts = async () => {
+  try {
+    const config = {
+      method: "get",
+      url: "http://localhost:4000/posts",
+      headers: {
+        "Content-Type": "application/json",
+      },
+    };
+    console.log("posts api 요청중");
+    const response = await axios.get("http://localhost:4000/posts"); // API 호출
+
+    const transformedPosts = response.data.map((item) => ({
+      id: item.post.boardid, // 게시물 ID
+      title: item.post.title, // 제목
+      writer: item.post.writer, // 작성자
+      regdate: item.post.regdate.split(" ")[0], // 작성일
+      thumbnail: item.post.thumbnail, // 썸네일
+      files: item.files, // 파일
+    }));
+    console.log("요청 완료");
+    return transformedPosts; // 데이터 반환
+  } catch (error) {
+    console.error("Error fetching posts:", error);
+    throw error; // 에러 발생 시 에러 던짐
+  }
+};
+
+// 게시물 상세 데이터 가져오기
+export const fetchPostDetail = async (postId) => {
+  try {
+    const response = await axios.get(
+      `http://localhost:4000/posts/detail/${postId}`
+    ); // API 호출
+    console.log(response.data.filelist)
+    console.log(response.data)
+
+    const transformedPost = response.data.board.map((item,index) => ({
+      title: item.title, // 제목
+      content: item.content, //내용
+      writer: item.writer, // 작성자
+      regdate: item.regdate.split(" ")[0], // 작성일
+      thumbnail: item.thumbnail, // 썸네일
+    }));
+    transformedPost.filelist = response.data.filelist;
+    return transformedPost; // 데이터 반환
+  } catch (error) {
+    console.error("Error fetching post detail:", error);
+    throw error;
+  }
 };
