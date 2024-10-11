@@ -4,26 +4,44 @@ import RegisterPage from "./pages/RegisterPage";
 import Verify_Email from "./pages/VerifyEmailPage";
 import LoginPage from "./pages/LoginPage";
 import BoardPage from "./pages/BoardPage";
-import Navbar from "./layout/Navbar/Navbar";
-import Footer from "./components/footer/footer";
+import BoardDetailPage from "./pages/BoardDetailPage/BoardDetailPage";
+import CommonHeader from "./components/header/header";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/ReactToastify.css";
 import { RecoilRoot } from "recoil"; // Import RecoilRoot
 function Layout() {
   return (
-    <div className="flex flex-col h-screen justify-between">
+    <div style={{ width: "100%", height: "100vh" }}>
       <ToastContainer
         position="bottom-right"
         theme="light"
         pauseOnHover
         autoClose={1500}
       />
-
+      <header
+        style={{
+          height: "100px",
+          backgroundColor: "#6248FF",
+          color: "white",
+          boxShadow: "0 4px 8px rgba(0, 0, 0, 0.2)",
+          position: "relative",
+        }}
+      >
+        <div
+          style={{
+            width: "100%",
+            position: "fixed",
+            backgroundColor: "#6248FF",
+            boxShadow: "0 4px 8px rgba(0, 0, 0, 0.2)",
+          }}
+        >
+          <CommonHeader />
+        </div>
+      </header>
       {/* <Navbar /> */}
-      <main className="mb-auto w-10/12 max-w-7xl mx-auto">
+      <main className="max-w-7xl mx-auto my-20">
         <Outlet />
       </main>
-      {/* <Footer /> */}
     </div>
   );
 }
@@ -37,6 +55,7 @@ function App() {
         <Route path="/login" element={<LoginPage />} />
         <Route path="/posts" element={<Layout />}>
           <Route index element={<BoardPage />} />
+          <Route path="/posts/detail/:postId" element={<BoardDetailPage />} />
           {/*로그인 여부와 상관없이 갈 수 있는 경로*/}
           {/* <Route index element={<RegisterPage />} /> */}
           {/* <Route index element={<PostEditor />} /> */}
