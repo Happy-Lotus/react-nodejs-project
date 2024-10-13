@@ -15,7 +15,7 @@ const Post = require("./models/Post");
 const File = require("./models/File");
 const { upload } = require("./config/storage");
 dotenv.config();
-app.use(cors({ Credential: true, origin: "*" }));
+app.use(cors({ Credentials: true, origin: "http://localhost:3000" }));
 app.use(express.json());
 const cookieParser = require("cookie-parser");
 const authMiddleware = require("./middleware/authMiddleware");
@@ -42,7 +42,10 @@ app.use(
 );
 
 app.use("/uploads", express.static(path.join(__dirname, "/uploads")));
-app.get("/uploads/:url", (res, req) => {});
+app.get("/uploads/:imageUrl", (req, res) => {
+  const imageUrl = req.params.imageUrl;
+  File.read(imageUrl, res);
+});
 
 let timerId;
 
@@ -110,7 +113,6 @@ app.post(
 );
 
 app.post("/posts/upload", upload.single("image"), (req, res) => {
-  console.log(req.files);
   File.imageUpload(req, res);
 });
 //게시물 삭제

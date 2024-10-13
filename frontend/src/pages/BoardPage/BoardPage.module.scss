@@ -42,30 +42,43 @@ $HEADER-HEIGHT: 100px;
 .table {
   width: 100%;
   border-collapse: collapse;
-  margin-bottom: 20px;
 
   th,
   td {
     padding: 10px;
-    text-align: left;
-    border-bottom: 1px solid #ddd;
+    text-align: center;
   }
 
   th {
     background-color: #f4f4f4;
+    text-align: center;
+  }
+
+  .index__cell {
+    border-bottom: 1px solid #ddd;
+  }
+  .thumbnail__th {
+    width: 300px;
   }
 
   tbody tr:hover {
     background-color: #f9f9f9;
   }
-
+  .tr__content {
+    border-bottom: 1px solid #ddd;
+    height: 100%;
+  }
+  .content__cell {
+    width: 400px;
+  }
   .title__cell {
     display: flex;
-    align-items: center;
+    // align-items: center;
+    justify-content: center;
 
     .thumbnail {
-      width: 60px;
-      height: 60px;
+      width: 240px;
+      height: 160px;
       margin-right: 10px;
       border-radius: 4px;
       object-fit: cover;
@@ -120,4 +133,10 @@ $HEADER-HEIGHT: 100px;
 
 .toggle__box {
   font-size: small;
+}
+
+.thumbnail {
+  width: 50px;
+  height: 50px;
+  margin-right: 10px;
 }

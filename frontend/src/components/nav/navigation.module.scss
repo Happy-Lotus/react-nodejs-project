@@ -1,13 +1,8 @@
 .footer {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-top: 20px;
-
   .pagination {
     display: flex;
-    justify-content: center;
-    flex-grow: 1;
+    justify-content: center; // 중앙 정렬
+    flex-grow: 1; // 남은 공간을 차지
 
     .prev__page,
     .next__page {
@@ -24,24 +19,27 @@
       align-items: center;
 
       &:hover {
-        background-color: #0056b3;
+        font-weight: bolder;
       }
     }
   }
 
   .submit__container {
-    flex-shrink: 0;
+    text-align: right;
 
     .submit__btn {
       padding: 10px 20px;
       border: none;
-      background-color: #28a745;
-      color: #fff;
+      color: black;
       cursor: pointer;
 
       &:hover {
-        background-color: #218838;
+        font-weight: bolder;
       }
     }
   }
+}
+
+.wrapper {
+  display: block;
 }

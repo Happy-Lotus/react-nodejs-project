@@ -71,16 +71,29 @@ exports.delete = async function (file) {
 };
 
 exports.imageUpload = async function (req, res) {
-  console.log("file함수");
   console.log(req.file);
   if (!req.file) {
-    console.log("서버실행됨");
     return res.status(400).json({ error: "No file uploaded." });
   }
 
   // 파일 URL 생성
   const fileUrl = `http://localhost:4000/uploads/${req.file.filename}`;
   console.log(req.file);
+  return res.json({ url: fileUrl });
+};
+
+exports.read = async function (url, res) {
+  if (!url) {
+    return res.status(400).json({ error: "No file uploaded." });
+  }
+
+  const fileUrl = `http://localhost:4000/uploads/${url}`;
+  res.setHeader("Access-Control-Allow-Origin", "http://localhost:3000");
+  res.setHeader("Access-Control-Allow-Methods", "GET,POST,DELETE,PUT");
+  res.setHeader("Access-Control-Allow-Headers", "Content-Type");
+  res.setHeader("X-Content-Type-Options", "nosniff");
+  res.setHeader("Content-Type", "text/css");
+
   return res.json({ url: fileUrl });
 };
 

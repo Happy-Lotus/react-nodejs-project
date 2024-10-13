@@ -109,10 +109,10 @@ export const fetchPostDetail = async (postId) => {
     const response = await axios.get(
       `http://localhost:4000/posts/detail/${postId}`
     ); // API 호출
-    console.log(response.data.filelist)
-    console.log(response.data)
+    console.log(response.data.filelist);
+    console.log(response.data);
 
-    const transformedPost = response.data.board.map((item,index) => ({
+    const transformedPost = response.data.board.map((item, index) => ({
       title: item.title, // 제목
       content: item.content, //내용
       writer: item.writer, // 작성자

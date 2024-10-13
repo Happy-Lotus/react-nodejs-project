@@ -67,8 +67,9 @@ function BoardPage() {
         <div className={styles.table__container}>
           <table className={styles.table}>
             <thead>
-              <tr>
+              <tr className={styles.index__cell}>
                 <th>No.</th>
+                <th className={styles.thumbnail__th}></th>
                 <th>제목</th>
                 <th>작성자</th>
                 <th>작성시간</th>
@@ -76,7 +77,7 @@ function BoardPage() {
             </thead>
             <tbody>
               {posts.map((post, index) => (
-                <tr key={index}>
+                <tr key={index} className={styles.tr__content}>
                   <td>{index}</td>
                   <td className={styles.title__cell}>
                     <img
@@ -84,6 +85,9 @@ function BoardPage() {
                       alt={`Thumbnail ${post.thumbnail}`}
                       className={styles.thumbnail}
                     />
+                  </td>
+                  <td className={styles.content__cell}>
+                    {" "}
                     <Link to={`/posts/detail/${post.id}`}>{post.title}</Link>
                   </td>
                   <td>{post.writer}</td>
