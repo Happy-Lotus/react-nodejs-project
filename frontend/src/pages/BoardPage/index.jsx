@@ -6,54 +6,10 @@ import { fetchPosts } from "../../utils/api";
 import { Link } from "react-router-dom";
 
 function BoardPage() {
-  // const data = [
-  //   {
-  //     no: 20,
-  //     thumbnail: "frontend/src/assets/알고리즘.jpg",
-  //     title:
-  //       "Contrary to popular belief, Lorem Ipsum is not simply random text.",
-  //     author: "annie",
-  //     date: "2024-09-03",
-  //   },
-  //   {
-  //     no: 19,
-  //     thumbnail: "frontend/src/assets/알고리즘.jpg",
-  //     title:
-  //       "Contrary to popular belief, Lorem Ipsum is not simply random text.",
-  //     author: "annie",
-  //     date: "2024-09-03",
-  //   },
-  //   {
-  //     no: 18,
-  //     thumbnail: "frontend/src/assets/알고리즘.jpg",
-  //     title:
-  //       "Contrary to popular belief, Lorem Ipsum is not simply random text.",
-  //     author: "annie",
-  //     date: "2024-09-03",
-  //   },
-  //   {
-  //     no: 17,
-  //     thumbnail: "frontend/src/assets/알고리즘.jpg",
-  //     title:
-  //       "Contrary to popular belief, Lorem Ipsum is not simply random text.",
-  //     author: "annie",
-  //     date: "2024-09-03",
-  //   },
-  //   {
-  //     no: 16,
-  //     thumbnail: "frontend/src/assets/알고리즘.jpg",
-  //     title:
-  //       "Contrary to popular belief, Lorem Ipsum is not simply random text.",
-  //     author: "annie",
-  //     date: "2024-09-03",
-  //   },
-
-  //   // Add more rows as needed
-  // ];
-
   const [posts, setPosts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [searchOption, setSearchOption] = useState("title"); // 추가된 부분
+  const [image, setImage] = useState([]);
 
   useEffect(() => {
     const getPosts = async () => {
@@ -61,6 +17,9 @@ function BoardPage() {
         const data = await fetchPosts();
         console.log(data);
         setPosts(data);
+
+        const imageList = data.map((post) => post.thumbnail);
+        setImage(imageList);
       } catch (error) {
         console.error("Error fetching posts:", error);
       } finally {
@@ -121,8 +80,8 @@ function BoardPage() {
                   <td>{index}</td>
                   <td className={styles.title__cell}>
                     <img
-                      src={`${post.thumbnail}`}
-                      alt={`Thumbnail ${post.id}`}
+                      src={`http://localhost:4000/${image[0]}`}
+                      alt={`Thumbnail ${post.thumbnail}`}
                       className={styles.thumbnail}
                     />
                     <Link to={`/posts/detail/${post.id}`}>{post.title}</Link>

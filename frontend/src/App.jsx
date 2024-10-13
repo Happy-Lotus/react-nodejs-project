@@ -5,6 +5,7 @@ import Verify_Email from "./pages/VerifyEmailPage";
 import LoginPage from "./pages/LoginPage";
 import BoardPage from "./pages/BoardPage";
 import BoardDetailPage from "./pages/BoardDetailPage/BoardDetailPage";
+import BoardEditPage from "./pages/BoardEditPage";
 import CommonHeader from "./components/header/header";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/ReactToastify.css";
@@ -20,6 +21,7 @@ function Layout() {
       />
       <header
         style={{
+          zIndex: "2",
           height: "100px",
           backgroundColor: "#6248FF",
           color: "white",
@@ -56,6 +58,7 @@ function App() {
         <Route path="/posts" element={<Layout />}>
           <Route index element={<BoardPage />} />
           <Route path="/posts/detail/:postId" element={<BoardDetailPage />} />
+          <Route path="/posts/edit" element={<BoardEditPage />} />
           {/*로그인 여부와 상관없이 갈 수 있는 경로*/}
           {/* <Route index element={<RegisterPage />} /> */}
           {/* <Route index element={<PostEditor />} /> */}

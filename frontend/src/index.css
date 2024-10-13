@@ -15,3 +15,8 @@ html {
     padding-right: 30px;
   }
 }
+.ck-editor__editable {
+  min-height: 32rem;
+  max-height: 32rem;
+  overflow-y: auto;
+}

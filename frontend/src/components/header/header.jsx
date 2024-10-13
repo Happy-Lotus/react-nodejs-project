@@ -1,3 +1,4 @@
+import { Link } from "react-router-dom";
 import styles from "./header.module.scss";
 
 function CommonHeader() {
@@ -9,7 +10,9 @@ function CommonHeader() {
         {" "}
         {/**wrap */}
         <div className={styles.header__logoBox}>
-          <span>Main</span>
+          <Link to={`/posts`}>
+            <span>Main</span>
+          </Link>
         </div>
         <div className={styles.header__profileBox}>
           <button className={styles.header__profileBox__button}>LOGOUT</button>

@@ -138,7 +138,10 @@ exports.read = async function (req, res) {
         return res.status(500).json({ result: "Database error:" + boardid });
       } else {
         const file = await File.readOption(boardid);
-        return res.status(201).json({ board: results, filelist: file });
+        return res
+          .header(" X-Content-Type-Options: nosniff ")
+          .status(201)
+          .json({ board: results, filelist: file });
       }
     });
   } catch (error) {

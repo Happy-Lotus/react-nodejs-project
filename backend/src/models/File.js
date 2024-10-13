@@ -71,7 +71,10 @@ exports.delete = async function (file) {
 };
 
 exports.imageUpload = async function (req, res) {
+  console.log("file함수");
+  console.log(req.file);
   if (!req.file) {
+    console.log("서버실행됨");
     return res.status(400).json({ error: "No file uploaded." });
   }
 
