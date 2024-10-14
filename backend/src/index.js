@@ -47,8 +47,6 @@ app.get("/uploads/:imageUrl", (req, res) => {
   File.read(imageUrl, res);
 });
 
-let timerId;
-
 //게시물 작성
 /**
  * @swagger
@@ -112,9 +110,14 @@ app.post(
   }
 );
 
-app.post("/posts/upload", upload.single("image"), (req, res) => {
-  File.imageUpload(req, res);
-});
+app.post(
+  "/posts/upload",
+  authMiddleware,
+  upload.single("image"),
+  (req, res) => {
+    File.imageUpload(req, res);
+  }
+);
 //게시물 삭제
 /**
  * @swagger
@@ -192,7 +195,7 @@ app.delete("/posts/:postid", authMiddleware, (req, res) => {
  *             schema:
  *              msg: string
  */
-app.get("/posts/detail/:postid", (req, res) => {
+app.get("/posts/detail/:postid", authMiddleware, (req, res) => {
   Post.read(req, res);
 });
 

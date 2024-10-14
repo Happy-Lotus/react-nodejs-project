@@ -25,17 +25,6 @@ const LoginPage = () => {
   const onSubmit = async (data) => {
     try {
       const response = await signin(data);
-      // const { AccessToken, RefreshToken } = response.headers[
-      //   "set-cookie"
-      // ].reduce((acc, cookie) => {
-      //   const [name, value] = cookie.split(";")[0].split("=");
-      //   acc[name] = value;
-      //   return acc;
-      // }, {});
-
-      // setCookie("AccessToken", AccessToken, { path: "/" }); // 쿠키 저장
-      // setCookie("RefreshToken", RefreshToken, { path: "/" }); // 쿠키 저장
-      // reset();
       navigate("/posts");
     } catch (error) {
       console.error(error);

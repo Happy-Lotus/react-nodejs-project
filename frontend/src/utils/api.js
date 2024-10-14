@@ -107,8 +107,6 @@ export const fetchPosts = async () => {
   }
 };
 
-export const fetchPost = async (postId) => {};
-
 // 게시물 상세 데이터 가져오기
 export const fetchPostDetail = async (postId) => {
   try {
@@ -151,5 +149,43 @@ export const checkNickname = async (nickname) => {
     console.log(response.data.length > 0);
 
     return response.data.length > 0;
+  } catch (error) {}
+};
+
+export const updatePost = async (data) => {
+  try {
+    const config = {
+      method: "post",
+      url: "http://localhost:4000/",
+      headers: {
+        "Content-Type": "multipart/form-data",
+        withCredentials: true,
+      },
+      data: {
+        title: data.title,
+        content: data.content,
+        files: data.files,
+      },
+    };
+
+    const response = await axios(config);
+    return response;
+  } catch (error) {}
+};
+
+export const userLogout = async () => {
+  try {
+    const config = {
+      url: "http://localhost:4000/logout",
+      method: "post",
+      headers: {
+        "Content-Type": "application/json",
+        withCredentials: true,
+      },
+      data: {},
+    };
+
+    const response = await axios(config);
+    return response;
   } catch (error) {}
 };

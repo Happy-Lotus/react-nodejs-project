@@ -1,7 +1,18 @@
-import { Link } from "react-router-dom";
+import { Link, Navigate, useNavigate } from "react-router-dom";
 import styles from "./header.module.scss";
+import { userLogout } from "../../utils/api";
 
 function CommonHeader() {
+  const navigate = useNavigate();
+  const logout = async () => {
+    try {
+      await userLogout();
+      navigate("/login");
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
   return (
     <div className={styles.header__container}>
       {" "}
@@ -15,7 +26,12 @@ function CommonHeader() {
           </Link>
         </div>
         <div className={styles.header__profileBox}>
-          <button className={styles.header__profileBox__button}>LOGOUT</button>
+          <button
+            className={styles.header__profileBox__button}
+            onClick={logout}
+          >
+            LOGOUT
+          </button>
         </div>
       </div>
     </div>
