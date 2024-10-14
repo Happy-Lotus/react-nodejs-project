@@ -82,7 +82,11 @@ exports.readAll = async function (req, res) {
             list.push({ post: post, files: files });
           }
 
-          return res.status(201).json(list);
+          return res
+            .setHeader("Access-Control-Allow-Credentials", "true")
+            .setHeader("Access-Control-Allow-Origin", "http://localhost:3000")
+            .status(201)
+            .json(list);
         } else {
           return res.status(400).json({ result: "Error" });
         }

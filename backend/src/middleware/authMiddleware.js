@@ -6,8 +6,6 @@ const Token = require("../models/Token");
 
 const authMiddleware = async (req, res, next) => {
   const accesstoken = req.cookies.AccessToken;
-  console.log(req.cookies);
-  console.log(req.headers);
 
   /**
    * 클라이언트 요청의 쿠기에 AccessToken이 존재하지 않는 경우

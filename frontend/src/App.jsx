@@ -5,6 +5,7 @@ import Verify_Email from "./pages/VerifyEmailPage";
 import LoginPage from "./pages/LoginPage";
 import BoardPage from "./pages/BoardPage";
 import BoardDetailPage from "./pages/BoardDetailPage/BoardDetailPage";
+import BoardRewritePage from "./pages/BoardRewritePage";
 import BoardEditPage from "./pages/BoardEditPage";
 import CommonHeader from "./components/header/header";
 import { ToastContainer } from "react-toastify";
@@ -59,6 +60,10 @@ function App() {
           <Route index element={<BoardPage />} />
           <Route path="/posts/detail/:postId" element={<BoardDetailPage />} />
           <Route path="/posts/edit" element={<BoardEditPage />} />
+          <Route
+            path="/posts/detail/:postId/edit"
+            element={<BoardRewritePage />}
+          />
           {/*로그인 여부와 상관없이 갈 수 있는 경로*/}
           {/* <Route index element={<RegisterPage />} /> */}
           {/* <Route index element={<PostEditor />} /> */}

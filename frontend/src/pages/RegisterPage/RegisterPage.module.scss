@@ -99,7 +99,7 @@ $gray-hover: gray;
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
     height: 42px;
     width: 80px;
-    font-size: 1rem;
+    font-size: 0.8rem;
     color: white;
     border-radius: 0.375rem; /* md */
     transition: background-color 0.2s;
@@ -167,4 +167,30 @@ $gray-hover: gray;
   display: flex; // 블록 요소로 설정하여 줄바꿈
   margin-left: 84px;
   justify-content: flex-start;
+}
+
+.available_msg {
+  font-size: 0.875rem; // 에러 메시지 크기
+  margin-top: 0.25rem; // input과 에러 메시지 사이의 간격
+
+  display: flex; // 블록 요소로 설정하여 줄바꿈
+  margin-left: 84px;
+  justify-content: flex-start;
+  color: blue; // 사용 가능한 닉네임 색상
+}
+
+.check_icon {
+  display:flex;
+  justify-content:flex-end;
+  margin-right: 100px; // 아이콘과 입력 필드 간격
+  color: green; // 아이콘 색상
+}
+
+.timer {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 0.25rem;
+  font-size: 0.875rem;
+  color: blue;
+  margin-right: 96px;
 }

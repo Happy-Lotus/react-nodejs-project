@@ -15,7 +15,7 @@ const Post = require("./models/Post");
 const File = require("./models/File");
 const { upload } = require("./config/storage");
 dotenv.config();
-app.use(cors({ Credentials: true, origin: "http://localhost:3000" }));
+app.use(cors({ credentials: true, origin: "http://localhost:3000" }));
 app.use(express.json());
 const cookieParser = require("cookie-parser");
 const authMiddleware = require("./middleware/authMiddleware");
@@ -263,7 +263,7 @@ app.get("/posts/:option", authMiddleware, (req, res) => {
  *                  results:
  *                    type: object
  */
-app.get("/posts", (req, res) => {
+app.get("/posts", authMiddleware, (req, res) => {
   Post.readAll(req, res);
 });
 
@@ -377,6 +377,7 @@ app.post(
  */
 app.post("/login", (req, res) => {
   User.login(req, res);
+  console.log(res);
 });
 
 //사용자 로그아웃
@@ -480,6 +481,18 @@ app.get("/");
  */
 app.get("/posts/:postid/:filename", authMiddleware, (req, res) => {
   File.downloadFiles(req, res);
+});
+
+app.post("/checkNickname", async (req, res) => {
+  const { nickname } = req.body;
+  try {
+    const results = await User.read("nickname", nickname); // 닉네임으로 조회
+    return res.status(200).json(results);
+  } catch (error) {
+    console.error("Error checking nickname:", error);
+    return res.status(500).json({ message: "서버 오류" });
+  }
+  User.read(req, res);
 });
 
 app.listen(PORT, () => {

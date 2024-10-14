@@ -1,18 +1,21 @@
 import React, { useEffect, useState } from "react";
-import { Link, useParams } from "react-router-dom";
+import { Link, useLocation, useParams } from "react-router-dom";
 import { CKEditor } from "@ckeditor/ckeditor5-react";
 import ClassicEditor from "@ckeditor/ckeditor5-build-classic";
 
-import styles from "./BoardEditPage.module.scss"; // SCSS 모듈 임포트
+import styles from "./BoardRewritePage.module.scss"; // SCSS 모듈 임포트
 import Editor from "./Editor";
 
-const BoardEditPage = () => {
+const BoardRewritePage = () => {
+  const location = useLocation();
+  const { post, files } = location.state || {};
+  console.log(files);
   const [mountainContent, setMountainContent] = useState({
     title: "",
     content: "",
   });
 
-  const [viewConent, setViewContent] = useState([]);
+  //   const [viewConent, setViewContent] = useState([]);
   const getValue = (e) => {
     const { name, value } = e.target;
     setMountainContent((prevContent) => ({
@@ -29,7 +32,11 @@ const BoardEditPage = () => {
       <div className={styles.content__container}>
         <div className={styles.content__titleBox}>
           <span className={styles.content__title}>제목</span>
-          <input name="title" className={styles.title__input}></input>
+          <input
+            name="title"
+            className={styles.title__input}
+            defaultValue={post.title}
+          ></input>
         </div>
         <div className={styles.content__contentBox}>
           <span className={styles.content__content}>내용</span>
@@ -51,11 +58,22 @@ const BoardEditPage = () => {
               }}
             /> */}
             <Editor
-              content={mountainContent.content}
+              content={post.content}
               setContent={(data) =>
                 setMountainContent({ ...mountainContent, content: data })
               }
             />
+          </div>
+        </div>
+        <div className={styles.attachments}>
+          <h2>3. 첨부파일</h2>
+          <div className={styles.file}>
+            {files.map((item, index) => {
+              console.log(item.originalname);
+              return <span key={index}>📄 {item.originalname}</span>;
+            })}
+            {/* <span>📄 Lorem Ipsum.pdf</span>
+            <span>🖼️ sample.jpg</span> */}
           </div>
         </div>
         <div className={styles.buttons}>
@@ -69,4 +87,4 @@ const BoardEditPage = () => {
   );
 };
 
-export default BoardEditPage;
+export default BoardRewritePage;

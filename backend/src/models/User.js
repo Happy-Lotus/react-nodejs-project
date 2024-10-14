@@ -152,8 +152,12 @@ exports.login = async function (req, res) {
             await Token.update(refreshToken, results[0].userid);
           }
 
-          return res
+          res
             .status(201)
+            .setHeader("Access-Control-Allow-Credentials", "true")
+            .setHeader("Access-Control-Allow-Headers", "Content-Type")
+            .setHeader("Access-Control-Allow-Methods", "POST,OPTIONS")
+            .setHeader("Access-Control-Allow-Origin", "http://localhost:3000")
             .cookie("AccessToken", accessToken, {
               httpOnly: true,
               path: "/",
@@ -168,6 +172,7 @@ exports.login = async function (req, res) {
               email: email,
               nickname: results[0].nickname,
             });
+          return res;
         } else {
           return res.status(401).json({ result: "Password mismatch" });
         }

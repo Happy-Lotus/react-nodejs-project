@@ -4,11 +4,14 @@ import { useLogin } from "../../utils/api"; // API 요청 로직 import
 import { useRecoilValue } from "recoil";
 import { signinState } from "../../state/authState";
 import { useNavigate } from "react-router-dom"; // useHistory import
+import { useCookies } from "react-cookie";
 
 const LoginPage = () => {
+  const [cookies, setCookie] = useCookies(["AccessToken", "RefreshToken"]);
   const { signin } = useLogin();
   const signinStatus = useRecoilValue(signinState);
   const navigate = useNavigate();
+
   const {
     register,
     handleSubmit,
@@ -21,8 +24,18 @@ const LoginPage = () => {
 
   const onSubmit = async (data) => {
     try {
-      await signin(data);
-      reset();
+      const response = await signin(data);
+      // const { AccessToken, RefreshToken } = response.headers[
+      //   "set-cookie"
+      // ].reduce((acc, cookie) => {
+      //   const [name, value] = cookie.split(";")[0].split("=");
+      //   acc[name] = value;
+      //   return acc;
+      // }, {});
+
+      // setCookie("AccessToken", AccessToken, { path: "/" }); // 쿠키 저장
+      // setCookie("RefreshToken", RefreshToken, { path: "/" }); // 쿠키 저장
+      // reset();
       navigate("/posts");
     } catch (error) {
       console.error(error);

@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { Link, useParams } from "react-router-dom";
+import { Link, useNavigate, useParams } from "react-router-dom";
 
 import styles from "./BoardDetailPage.module.scss"; // SCSS 모듈 임포트
 import { fetchPostDetail } from "../../utils/api";
@@ -7,15 +7,22 @@ import { fetchPostDetail } from "../../utils/api";
 const BoardDetailPage = () => {
   const { postId } = useParams(); // URL 파라미터에서 postId 가져오기
   const [post, setPost] = useState(null); // 게시물 데이터를 저장할 상태
-  const [files,setFile] = useState([])
+  const [files, setFile] = useState([]);
   const [loading, setLoading] = useState(true); // 로딩 상태
+  const navigate = useNavigate();
+
+  const handleEdit = () => {
+    navigate(`/posts/detail/${postId}/edit`, {
+      state: { post: post, files: files },
+    });
+  };
 
   useEffect(() => {
     const getPostDetail = async () => {
       try {
         const data = await fetchPostDetail(postId); // API 호출
         setPost(data[0]); // 받아온 데이터로 상태 업데이트
-        setFile(data.filelist)
+        setFile(data.filelist);
       } catch (error) {
         console.error("Error fetching post detail:", error);
       } finally {
@@ -53,15 +60,10 @@ const BoardDetailPage = () => {
         <div className={styles.attachments}>
           <h2>3. 첨부파일</h2>
           <div className={styles.file}>
-            {files.map((item,index) => {
+            {files.map((item, index) => {
               console.log(item.originalname);
-              return(
-                <span key={index}>
-                📄 {item.originalname}
-              </span>
-              );
-              
-            }) }
+              return <span key={index}>📄 {item.originalname}</span>;
+            })}
             {/* <span>📄 Lorem Ipsum.pdf</span>
             <span>🖼️ sample.jpg</span> */}
           </div>
@@ -71,7 +73,9 @@ const BoardDetailPage = () => {
           <Link to="/posts">
             <button className={styles.backButton}>목록</button>
           </Link>
-          <button className={styles.editButton}>수정</button>
+          <button className={styles.editButton} onClick={handleEdit}>
+            수정
+          </button>
         </div>
       </div>
     </div>
