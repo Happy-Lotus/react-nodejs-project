@@ -47,17 +47,11 @@ exports.readByEmail = async function (email) {
 
 //사용자 생성
 exports.register = async function (req, res) {
-  const { email, pwd, nickname, name } = req.body;
+  const { email, pwd, nickname, name, isVerified } = req.body;
 
   console.log(email + " " + pwd + " " + nickname + " " + name);
   try {
-    const existingUser = await this.readByEmail(email);
-
-    if (!existingUser) {
-      return res.status(409).json({ message: "이미 존재하는 이메일입니다." });
-    }
-
-    if (req.session[email]) {
+    if (!isVerified || isVerified !== 1) {
       return res
         .status(403)
         .json({ message: "아직 인증이 완료되지 않은 이메일입니다." });
@@ -74,6 +68,27 @@ exports.register = async function (req, res) {
         return res.status(400).json({ message: error.sqlMessage });
       }
     });
+    req.session.destroy(function () {
+      req.session;
+    });
+
+    res.status(201).json({
+      message: "회원가입 성공",
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "서버 오류" });
+  }
+};
+
+exports.generateCode = async function (req, res) {
+  const { email } = req.body;
+  try {
+    const existingUser = await this.readByEmail(email);
+
+    if (!existingUser) {
+      return res.status(409).json({ message: "이미 존재하는 이메일입니다." });
+    }
 
     const generateRandomNumber = function (min, max) {
       const randNum = Math.floor(Math.random() * (max - min + 1)) + min;
@@ -91,23 +106,13 @@ exports.register = async function (req, res) {
       if (err) {
         res.status(500).json({ message: "이메일 전송에 실패하였습니다." });
       } else {
-        console.log(response);
-        req.session[email] = number;
+        req.session.user = {
+          email: email,
+          code: number,
+        };
         console.log("number:" + number);
-        timeoutId = setTimeout(async () => {
-          const storedCode = req.session[email];
-          console.log("session:" + req.session[email]);
-          if (!storedCode) {
-            console.log("session delete OK");
-          } else {
-            delete req.session[email];
-            console.log(
-              `Session for ${email} has expired and the verification code has been deleted.`
-            );
-          }
-        }, 600000);
         res.status(201).json({
-          message: "회원가입 성공. 이메일을 확인하여 인증을 완료해주세요.",
+          message: "이메일을 확인하여 인증을 완료해주세요.",
         });
       }
     });
@@ -159,11 +164,13 @@ exports.login = async function (req, res) {
             .setHeader("Access-Control-Allow-Methods", "POST,OPTIONS")
             .setHeader("Access-Control-Allow-Origin", "http://localhost:3000")
             .cookie("AccessToken", accessToken, {
+              maxAge: 3600000,
               httpOnly: true,
               path: "/",
               sameSite: "lax",
             })
             .cookie("RefreshToken", refreshToken, {
+              maxAge: 3600000 * 24 * 14,
               httpOnly: true,
               path: "/",
               sameSite: "lax",
@@ -202,23 +209,21 @@ exports.logout = async function (req, res) {
 
 //사용자 이메일 인증
 exports.verifyEmail = async function (req, res) {
-  const { email, verifyNumber } = req.body;
+  const { email, code } = req.body;
 
   try {
-    const storedCode = req.session[email];
+    const user = req.session.user;
 
-    if (!storedCode) {
+    if (!user) {
       return res
         .status(400)
         .json({ message: "인증번호가 세션에 저장되어 있지 않습니다." });
     }
 
-    if (verifyNumber === storedCode) {
+    if (code === user.code) {
       // 인증 성공
-      console.log("인증성공" + storedCode);
-      delete req.session[email];
-      clearTimeout(timeoutId); // 타이머 취소
-      console.log("세션번호 삭제:" + req.session[email]);
+      console.log("인증성공" + user.code);
+      req.session.user = null;
       return res.status(200).json({ message: "인증 성공!" });
     } else {
       // 인증 실패

@@ -30,6 +30,7 @@ app.use(
     resave: false,
     saveUninitalized: true,
     cookie: { secure: false },
+    rolling: true,
   })
 );
 app.use(express.urlencoded({ extended: true }));
@@ -444,7 +445,6 @@ app.post("/register", (req, res) => {
 
 //사용자 이메일 인증
 app.post("/verify-email", (req, res) => {
-  console.log(req.session["annie04056@gmail.com"]);
   User.verifyEmail(req, res);
 });
 
@@ -495,7 +495,11 @@ app.post("/checkNickname", async (req, res) => {
     console.error("Error checking nickname:", error);
     return res.status(500).json({ message: "서버 오류" });
   }
-  User.read(req, res);
+});
+
+app.post("/generateCode", (req, res) => {
+  console.log("backend generateCode");
+  User.generateCode(req, res);
 });
 
 app.listen(PORT, () => {

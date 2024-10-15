@@ -189,3 +189,45 @@ export const userLogout = async () => {
     return response;
   } catch (error) {}
 };
+
+export const generateCode = async (email) => {
+  console.log("email", email);
+  try {
+    const config = {
+      url: "http://localhost:4000/generateCode",
+      method: "post",
+      headers: {
+        "Content-Type": "application/json",
+        withCredentials: true,
+      },
+      data: {
+        email: email,
+      },
+    };
+
+    const response = await axios(config);
+    console.log(response);
+    return response;
+  } catch (error) {}
+};
+
+export const verifyCode = async (email, code) => {
+  try {
+    const config = {
+      url: "http://localhost:4000/verify-email",
+      method: "post",
+      headers: {
+        "Content-Type": "application/json",
+        withCredentials: true,
+      },
+      data: {
+        email: email,
+        code: code,
+      },
+    };
+
+    const response = await axios(config);
+    console.log(response);
+    return response;
+  } catch (error) {}
+};

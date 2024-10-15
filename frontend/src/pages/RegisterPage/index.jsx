@@ -1,7 +1,12 @@
 import { useForm } from "react-hook-form";
 import styles from "./RegisterPage.module.scss";
 import { useState, useEffect } from "react";
-import { checkNickname, useSignup } from "../../utils/api"; // API 요청 로직 import
+import {
+  checkNickname,
+  useSignup,
+  generateCode,
+  verifyCode,
+} from "../../utils/api"; // API 요청 로직 import
 import { useRecoilValue } from "recoil";
 import { signupState } from "../../state/authState";
 import { useNavigate } from "react-router-dom"; // useHistory import
@@ -18,17 +23,17 @@ const RegisterPage = () => {
   const [timer, setTimer] = useState(0);
 
   const onSubmit = async (data) => {
-    if (!isVerified) {
-      setErrorMessage("인증이 되지 않았습니다.");
-      return;
-    }
-    try {
-      await signup(data);
-      reset();
-      navigate("/login");
-    } catch (error) {
-      console.error(error);
-    }
+    // if (!isVerified) {
+    //   setErrorMessage("인증이 되지 않았습니다.");
+    //   return;
+    // }
+    // try {
+    //   await signup(data);
+    //   reset();
+    //   navigate("/login");
+    // } catch (error) {
+    //   console.error(error);
+    // }
   };
 
   const {
@@ -60,17 +65,29 @@ const RegisterPage = () => {
   };
 
   //이메일 인증 버튼 클릭
-  const handleEmailVerification = () => {
-    setTimer(180);
+  const handleEmailVerification = async () => {
+    const email = getValues("email");
+    const response = await generateCode(email);
+    console.log("이메일 인증 진행 후");
+
+    // if (response.status === 201) {
+    //   setTimer(180);
+    // } else {
+    //   console.log("handleEmailVerification 오류:", response.status);
+    // }
   };
 
-  const handleCodeCheck = () => {
-    if (code === "") {
+  const handleCodeCheck = async () => {
+    const code = parseInt(getValues("code"));
+    const email = getValues("email");
+    if (!code) {
       setErrorMessage("인증 코드를 입력해주세요.");
     } else {
-      setErrorMessage("인증 성공");
-      setIsVerified(true);
-      setTimer(0);
+      const response = await verifyCode(email, code);
+      console.log(response);
+      // setErrorMessage("인증 성공");
+      // setIsVerified(true);
+      // setTimer(0);
     }
   };
 
@@ -123,9 +140,9 @@ const RegisterPage = () => {
                 />
               </div>
             </div>
-            {(!isTouched || errors.name) && isSubmitted && (
+            {/* {(!isTouched || errors.name) && isSubmitted && (
               <span className={styles.error_msg}>{errors.name.message}</span>
-            )}
+            )} */}
             <div className={styles.form__group}>
               <label htmlFor="nickname" className={styles.form__group__label}>
                 닉네임
@@ -176,7 +193,7 @@ const RegisterPage = () => {
             {duplicateMessage && !errors.nickname && (
               <span className={styles.timer}>{duplicateMessage}</span>
             )} */}
-            {isSubmitted && (errors.nickname || duplicateMessage) && (
+            {/* {isSubmitted && (errors.nickname || duplicateMessage) && (
               <span
                 className={
                   errors.nickname ? styles.error_msg : styles.available_msg
@@ -184,7 +201,7 @@ const RegisterPage = () => {
               >
                 {errors.nickname ? errors.nickname.message : duplicateMessage}
               </span>
-            )}
+            )} */}
             <div className={styles.form__group}>
               <label htmlFor="email" className={styles.form__group__label}>
                 이메일
@@ -222,16 +239,16 @@ const RegisterPage = () => {
                 </button>
               </div>
             </div>
-            {errors.email && (
+            {/* {errors.email && (
               <span className={styles.error_msg}>{errors.email.message}</span>
-            )}
+            )} */}
             <div className={styles.form__group}>
               <label htmlFor="code" className={styles.form__group__label}>
                 인증코드
               </label>
               <div className={styles.form__group__input}>
                 <input
-                  type="text"
+                  type="number"
                   id="code"
                   className={styles.form__group__input__box}
                   aria-invalid={
@@ -262,7 +279,7 @@ const RegisterPage = () => {
                 </button>
               </div>
             </div>
-            {timer > 0 && <span className={styles.timer}>{timer}초 남음</span>}
+            {/* {timer > 0 && <span className={styles.timer}>{timer}초 남음</span>}
             {isSubmitted && (errors.code || errorMessage) && (
               <span
                 className={
@@ -272,7 +289,7 @@ const RegisterPage = () => {
                 {errors.code ? errors.code.message : errorMessage}
               </span>
             )}
-            {isVerified && <span className={styles.check_icon}>✔️</span>}
+            {isVerified && <span className={styles.check_icon}>✔️</span>} */}
             <div className={styles.form__group}>
               {/**비밀번호 입력 */}
               <label htmlFor="pwd" className={styles.form__group__label}>
@@ -309,11 +326,11 @@ const RegisterPage = () => {
                 />
               </div>
             </div>
-            {errors.password && (
+            {/* {errors.password && (
               <span className={styles.error_msg}>
                 {errors.password.message}
               </span>
-            )}
+            )} */}
             <div className={styles.form__actions}>
               <button type="button" className={styles.btn__submit}>
                 취소
