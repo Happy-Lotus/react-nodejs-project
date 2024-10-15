@@ -25,12 +25,14 @@ const FileStore = require("session-file-store")(session);
 app.use(cookieParser());
 app.use(
   session({
-    store: new FileStore(),
+    store: new FileStore({
+      path: "./sessions", // 세션 파일을 저장할 경로
+      ttl: 600, // 세션 만료 시간 (초)
+    }),
     secret: "Kkb5I86s3B",
     resave: false,
     saveUninitalized: true,
     cookie: { secure: false },
-    rolling: true,
   })
 );
 app.use(express.urlencoded({ extended: true }));
@@ -488,6 +490,7 @@ app.get("/posts/:postid/:filename", authMiddleware, (req, res) => {
 
 app.post("/checkNickname", async (req, res) => {
   const { nickname } = req.body;
+  console.log("checkNickname");
   try {
     const results = await User.read("nickname", nickname); // 닉네임으로 조회
     return res.status(200).json(results);

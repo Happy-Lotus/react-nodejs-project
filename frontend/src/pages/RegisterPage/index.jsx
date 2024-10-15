@@ -34,6 +34,9 @@ const RegisterPage = () => {
     // } catch (error) {
     //   console.error(error);
     // }
+    await signup(data, 1);
+    reset();
+    navigate("/login");
   };
 
   const {

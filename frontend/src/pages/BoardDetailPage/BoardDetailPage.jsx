@@ -17,6 +17,10 @@ const BoardDetailPage = () => {
     });
   };
 
+  const transform = () => {
+    return { __html: post.content };
+  };
+
   useEffect(() => {
     const getPostDetail = async () => {
       try {
@@ -54,9 +58,10 @@ const BoardDetailPage = () => {
             <p>작성시간: {post.regdate}</p>
           </div>
         </div>
-        <div className={styles.description}>
-          <p>{post.content}</p>
-        </div>
+        <div
+          className={styles.description}
+          dangerouslySetInnerHTML={transform()}
+        ></div>
         <div className={styles.attachments}>
           <h2>3. 첨부파일</h2>
           <div className={styles.file}>

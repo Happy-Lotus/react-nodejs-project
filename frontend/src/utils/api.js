@@ -21,6 +21,7 @@ export const useSignup = () => {
         nickname: userData.nickname,
         email: userData.email,
         pwd: userData.pwd,
+        isVerified: 1,
       },
     };
     try {
@@ -146,8 +147,6 @@ export const checkNickname = async (nickname) => {
     };
 
     const response = await axios(config);
-    console.log(response.data.length > 0);
-
     return response.data.length > 0;
   } catch (error) {}
 };
