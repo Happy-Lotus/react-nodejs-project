@@ -1,240 +1,26 @@
 const conn = require("../config/database");
-const Token = require("./Token");
 const bcrypt = require("bcryptjs");
 const dotenv = require("dotenv");
-const transporter = require("../config/email");
-const jwt = require("jsonwebtoken");
-const secret = "Kkb5I86s3B";
 dotenv.config();
-const { JWT_SECRET } = process.env;
-let timeoutId;
-
-//사용자 비밀번호 확인
-const checkPassword = async function (dbpwd, pwd) {
-  try {
-    return new Promise((resolve, reject) => {
-      if (bcrypt.compare(dbpwd, pwd)) {
-        resolve(true);
-      } else {
-        reject(false);
-      }
-    });
-  } catch (error) {
-    console.error("Error:", error);
-  }
-};
-
-//사용자 이메일 이용한 사용자 확인
-exports.readByEmail = async function (email) {
-  try {
-    const sql = "SELECT * FROM user WHERE email = ?";
-    return new Promise((resolve, reject) => {
-      conn.query(sql, email, (error, results) => {
-        if (error) {
-          console.error("Database error: ", error);
-          reject(error);
-        } else if (results.length > 0) {
-          resolve(false);
-        } else {
-          resolve(true);
-        }
-      });
-    });
-  } catch (error) {
-    console.error("Error: ", error);
-  }
-};
 
 //사용자 생성
-exports.register = async function (req, res) {
-  const { email, pwd, nickname, name, isVerified } = req.body;
+exports.create = async function (data) {
+  const { email, pwd, nickname, name } = data;
+  const sql =
+    "INSERT INTO user (name, email, pwd, regdate, nickname) VALUES (?, ?, ?, ?, ?)";
+  const currentDate = new Date().toISOString().slice(0, 23).replace("T", " ");
+  const hashedPassword = await bcrypt.hash(pwd, 10);
+  const var_array = [name, email, hashedPassword, currentDate, nickname];
 
-  console.log(email + " " + pwd + " " + nickname + " " + name);
-  try {
-    if (!isVerified || isVerified !== 1) {
-      return res
-        .status(403)
-        .json({ message: "아직 인증이 완료되지 않은 이메일입니다." });
-    }
-
-    const sql =
-      "INSERT INTO user (name, email, pwd, regdate, nickname) VALUES (?, ?, ?, ?, ?)";
-    const currentDate = new Date().toISOString().slice(0, 23).replace("T", " ");
-    const hashedPassword = await bcrypt.hash(pwd, 10);
-    const var_array = [name, email, hashedPassword, currentDate, nickname];
-
-    await conn.query(sql, var_array, (error, results) => {
+  return new Promise((resolve, reject) => {
+    conn.query(sql, var_array, (error, results) => {
       if (error) {
-        return res.status(400).json({ message: error.sqlMessage });
-      }
-    });
-    req.session.destroy(function () {
-      req.session;
-    });
-
-    res.status(201).json({
-      message: "회원가입 성공",
-    });
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ message: "서버 오류" });
-  }
-};
-
-exports.generateCode = async function (req, res) {
-  const { email } = req.body;
-  try {
-    const existingUser = await this.readByEmail(email);
-
-    if (!existingUser) {
-      return res.status(409).json({ message: "이미 존재하는 이메일입니다." });
-    }
-
-    const generateRandomNumber = function (min, max) {
-      const randNum = Math.floor(Math.random() * (max - min + 1)) + min;
-      return randNum;
-    };
-    const number = generateRandomNumber(111111, 999999);
-    const mailOptions = {
-      from: "your-email@gmail.com",
-      to: email,
-      subject: " 이메일인증",
-      html: "<h1>인증번호를 입력해주세요 \n\n\n\n\n</h1>" + number,
-    };
-
-    transporter.sendMail(mailOptions, async (err, response) => {
-      if (err) {
-        res.status(500).json({ message: "이메일 전송에 실패하였습니다." });
+        return reject({ statusCode: 400, message: error.sqlMessage });
       } else {
-        req.session.user = {
-          email: email,
-          code: number,
-        };
-        console.log("number:" + number);
-        res.status(201).json({
-          message: "이메일을 확인하여 인증을 완료해주세요.",
-        });
+        resolve({ statusCode: 201 });
       }
     });
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ message: "서버 오류" });
-  }
-};
-
-//사용자 로그인
-exports.login = async function (req, res) {
-  const { email, pwd } = req.body;
-
-  try {
-    const sql = "SELECT userid, email, pwd, nickname FROM user WHERE email = ?";
-    conn.query(sql, email, async (error, results) => {
-      if (error) {
-        console.error("Database error: ", error);
-        return res.status(500).json({ result: "Database error:" + email });
-      } else {
-        const isCorrectPassword = await checkPassword(results[0].pwd, pwd);
-        if (isCorrectPassword) {
-          const payload = {
-            email: results[0].email,
-            userid: results[0].userid,
-            pwd: results[0].pwd,
-          };
-          const accessToken = jwt.sign(payload, secret, {
-            algorithm: "HS256",
-            expiresIn: "1h",
-          });
-          const refreshToken = jwt.sign(payload, secret, {
-            algorithm: "HS256",
-            expiresIn: "14d",
-          });
-          const existRefreshToken = await Token.read(results[0].userid);
-          //existRefreshToken이 없을 경우 -> 새로 create
-          //있다면 token update
-          if (!existRefreshToken) {
-            await Token.create(refreshToken, results[0].userid);
-          } else {
-            await Token.update(refreshToken, results[0].userid);
-          }
-
-          res
-            .status(201)
-            .setHeader("Access-Control-Allow-Credentials", "true")
-            .setHeader("Access-Control-Allow-Headers", "Content-Type")
-            .setHeader("Access-Control-Allow-Methods", "POST,OPTIONS")
-            .setHeader("Access-Control-Allow-Origin", "http://localhost:3000")
-            .cookie("AccessToken", accessToken, {
-              maxAge: 3600000,
-              httpOnly: true,
-              path: "/",
-              sameSite: "lax",
-            })
-            .cookie("RefreshToken", refreshToken, {
-              maxAge: 3600000 * 24 * 14,
-              httpOnly: true,
-              path: "/",
-              sameSite: "lax",
-            })
-            .json({
-              email: email,
-              nickname: results[0].nickname,
-            });
-          return res;
-        } else {
-          return res.status(401).json({ result: "Password mismatch" });
-        }
-      }
-    });
-  } catch (error) {
-    return res.status(500).json({ result: "Server Error" });
-  }
-};
-
-//사용자 로그아웃
-exports.logout = async function (req, res) {
-  const { userid } = req.user;
-
-  try {
-    await Token.delete(userid);
-    return res
-      .status(204)
-      .clearCookie("RefreshToken", { path: "/" })
-      .clearCookie("AccessToken", { path: "/" })
-      .json({ msg: "로그아웃 완료" });
-  } catch (error) {
-    console.error("Error: ", error);
-    return res.status(500).json({ result: "Server error:" });
-  }
-};
-
-//사용자 이메일 인증
-exports.verifyEmail = async function (req, res) {
-  const { email, code } = req.body;
-
-  try {
-    const user = req.session.user;
-
-    if (!user) {
-      return res
-        .status(400)
-        .json({ message: "인증번호가 세션에 저장되어 있지 않습니다." });
-    }
-
-    if (code === user.code) {
-      // 인증 성공
-      console.log("인증성공" + user.code);
-      req.session.user = null;
-      return res.status(200).json({ message: "인증 성공!" });
-    } else {
-      // 인증 실패
-      return res
-        .status(400)
-        .json({ message: "인증번호가 일치하지 않습니다. 다시 입력하세요." });
-    }
-  } catch (error) {
-    console.error("Error: ", error);
-    return res.status(500).json({ result: "Server error:" });
-  }
+  });
 };
 
 //사용자 업데이트
@@ -261,7 +47,7 @@ exports.update = async function (columns, changes, email) {
 };
 
 //사용자 삭제
-exports.delete = async function (req, res) {
+exports.delete = async (req, res) => {
   const sql = "DELETE FROM user WHERE userid = ?";
   const userid = req.params.userid;
 
@@ -284,7 +70,28 @@ exports.delete = async function (req, res) {
   }
 };
 
-//사용자 조회
+exports.readSpec = async (email) => {
+  const sql = "SELECT userid, email, pwd, nickname FROM user WHERE email = ?";
+  return new Promise((resolve, reject) => {
+    conn.query(sql, email, (error, results) => {
+      if (error) {
+        reject({ statusCode: 500, message: "database error" });
+      } else if (results.length === 0) {
+        reject({ statusCode: 404, message: "User not found" });
+      } else {
+        const user = {
+          userid: results[0].userid,
+          email: results[0].email,
+          pwd: results[0].pwd,
+          nickname: results[0].nickname,
+        };
+        resolve({ statusCode: 200, message: "Success", user });
+      }
+    });
+  });
+};
+
+//사용자 정보 읽기(key:value)
 exports.read = async function (key, value) {
   const sql = `SELECT userid FROM user WHERE ${key} = ?`;
 
@@ -302,15 +109,5 @@ exports.read = async function (key, value) {
   } catch (error) {
     console.error("Error: ", error);
     throw new Error("서버 오류");
-  }
-};
-
-exports.sessionDelete = async function (email) {
-  if (req.session[email]) {
-    delete req.session[email];
-    res.status(200).json({ msg: "재인증하세요" });
-  } else {
-    console.log("이미 인증된 이메일입니다." + email);
-    res.status(409).json({ message: "이미 인증이 완료된 이메일입니다." });
   }
 };

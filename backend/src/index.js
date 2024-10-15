@@ -13,6 +13,7 @@ const app = express();
 const User = require("./models/User");
 const Post = require("./models/Post");
 const File = require("./models/File");
+const adminRouter = require("./routes/User");
 const { upload } = require("./config/storage");
 dotenv.config();
 app.use(cors({ credentials: true, origin: "http://localhost:3000" }));
@@ -45,11 +46,13 @@ app.use(
 );
 
 app.use("/uploads", express.static(path.join(__dirname, "/uploads")));
+
+app.use("/", adminRouter);
+
 app.get("/uploads/:imageUrl", (req, res) => {
   const imageUrl = req.params.imageUrl;
   File.read(imageUrl, res);
 });
-
 //게시물 작성
 /**
  * @swagger
@@ -333,125 +336,6 @@ app.post(
   }
 );
 
-//사용자 로그인
-/**
- * @swagger
- * paths:
- *  /login:
- *    post:
- *      summary: "사용자 로그인"
- *      description: "email, pwd 이용해 사용자 로그인"
- *      tags: [User]
- *      requestBody:
- *          description: email, pwd
- *          required: true
- *          content:
- *           application/json:
- *             schema:
- *                type: object
- *                properties:
- *                   email:
- *                     type: string
- *                     description: "유저 이메일"
- *                   pwd:
- *                     type: string
- *                     description: "유저 비밀번호"
- *      responses:
- *        200:
- *          description: 로그인 성공
- *          content:
- *            application/json:
- *              schema:
- *                type: object
- *                properties:
- *                  email:
- *                    type: string
- *                  nickname:
- *                    type: string
- *        400:
- *          description: Password mismatch
- *          content:
- *            application/json:
- *              schema:
- *                result: string
- *        500:
- *          description: Server Error
- *          content:
- *            application/json:
- *              schema:
- *                result: string
- */
-app.post("/login", (req, res) => {
-  User.login(req, res);
-  console.log(res);
-});
-
-//사용자 로그아웃
-app.post("/logout", authMiddleware, (req, res) => {
-  User.logout(req, res);
-});
-
-//사용자 회원가입
-/**
- * @swagger
- * paths:
- *  /register:
- *    post:
- *      summary: "사용자 회원가입"
- *      description: "사용자 회원가입"
- *      tags: [User]
- *      requestBody:
- *        description: email, pwd, nickname, name 이용해 회원가입
- *        required: true
- *        content:
- *            application/json:
- *              schema:
- *                type: object
- *                properties:
- *                    email:
- *                      type: string
- *                      description: "유저 이메일"
- *                    pwd:
- *                      type: string
- *                      description: "유저 비밀번호"
- *                    nickname:
- *                      type: string
- *                      description: "유저 닉네임"
- *                    name:
- *                      type: string
- *                      description: "유저이름"
- *      responses:
- *        201:
- *          description: OK
- *          content:
- *            application/json:
- *              schema:
- *                  result: string
- *        400:
- *          description: Not Found
- *          content:
- *           application/json:
- *             schema:
- *              msg: string
- *        500:
- *          description: Server Error
- *          content:
- *           application/json:
- *             schema:
- *              msg: string
- */
-app.post("/register", (req, res) => {
-  console.log(req.body);
-  User.register(req, res);
-});
-
-//사용자 이메일 인증
-app.post("/verify-email", (req, res) => {
-  User.verifyEmail(req, res);
-});
-
-app.get("/");
-
 /**
  * @swagger
  * paths:
@@ -486,23 +370,6 @@ app.get("/");
  */
 app.get("/posts/:postid/:filename", authMiddleware, (req, res) => {
   File.downloadFiles(req, res);
-});
-
-app.post("/checkNickname", async (req, res) => {
-  const { nickname } = req.body;
-  console.log("checkNickname");
-  try {
-    const results = await User.read("nickname", nickname); // 닉네임으로 조회
-    return res.status(200).json(results);
-  } catch (error) {
-    console.error("Error checking nickname:", error);
-    return res.status(500).json({ message: "서버 오류" });
-  }
-});
-
-app.post("/generateCode", (req, res) => {
-  console.log("backend generateCode");
-  User.generateCode(req, res);
 });
 
 app.listen(PORT, () => {
