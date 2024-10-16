@@ -1,7 +1,6 @@
 import "./index.css";
 import { Route, Routes, Outlet } from "react-router-dom";
 import RegisterPage from "./pages/RegisterPage";
-import Verify_Email from "./pages/VerifyEmailPage";
 import LoginPage from "./pages/LoginPage";
 import BoardPage from "./pages/BoardPage";
 import BoardDetailPage from "./pages/BoardDetailPage/BoardDetailPage";
@@ -54,7 +53,6 @@ function App() {
     <RecoilRoot>
       <Routes>
         <Route path="/" element={<RegisterPage />} />
-        <Route path="/verify-email" element={<Verify_Email />} />
         <Route path="/login" element={<LoginPage />} />
         <Route path="/posts" element={<Layout />}>
           <Route index element={<BoardPage />} />
