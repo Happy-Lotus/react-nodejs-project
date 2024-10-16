@@ -6,6 +6,9 @@ dotenv.config();
 //사용자 생성
 exports.create = async function (data) {
   const { email, pwd, nickname, name } = data;
+  console.log(
+    data.email + " " + data.pwd + " " + data.nickname + " " + data.name
+  );
   const sql =
     "INSERT INTO user (name, email, pwd, regdate, nickname) VALUES (?, ?, ?, ?, ?)";
   const currentDate = new Date().toISOString().slice(0, 23).replace("T", " ");
@@ -17,7 +20,7 @@ exports.create = async function (data) {
       if (error) {
         return reject({ statusCode: 400, message: error.sqlMessage });
       } else {
-        resolve({ statusCode: 201 });
+        resolve({ statusCode: 201, message: "회원가입 성공" });
       }
     });
   });

@@ -34,22 +34,6 @@ const BoardEditPage = () => {
         <div className={styles.content__contentBox}>
           <span className={styles.content__content}>내용</span>
           <div className={styles.content__input}>
-            {/* <CKEditor
-              editor={ClassicEditor}
-              data="<p>Hello from CKEditor&nbsp;5!</p>"
-              onReady={(editor) => {
-                // You can store the "editor" and use when it is needed.
-                console.log("Editor is ready to use!", editor);
-              }}
-              onChange={(event, editor) => {
-                const data = editor.getData();
-                console.log({ event, editor, data });
-                setMountainContent({
-                  ...mountainContent,
-                  content: data,
-                });
-              }}
-            /> */}
             <Editor
               content={mountainContent.content}
               setContent={(data) =>

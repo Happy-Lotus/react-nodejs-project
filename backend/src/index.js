@@ -14,6 +14,7 @@ const User = require("./models/User");
 const Post = require("./models/Post");
 const File = require("./models/File");
 const adminRouter = require("./routes/User");
+const postRouter = require("./routes/Post");
 const { upload } = require("./config/storage");
 dotenv.config();
 app.use(cors({ credentials: true, origin: "http://localhost:3000" }));
@@ -48,6 +49,7 @@ app.use(
 app.use("/uploads", express.static(path.join(__dirname, "/uploads")));
 
 app.use("/", adminRouter);
+app.use("/posts", postRouter);
 
 app.get("/uploads/:imageUrl", (req, res) => {
   const imageUrl = req.params.imageUrl;
@@ -164,118 +166,6 @@ app.delete("/posts/:postid", authMiddleware, (req, res) => {
   Post.delete(req, res);
 });
 
-//게시물 상세 조회
-/**
- * @swagger
- * paths:
- *  /posts/detail/{postid}:
- *    get:
- *      summary: "게시물 상세 조회"
- *      description: "특정 게시물 조회 "
- *      tags: [Post]
- *      parameters:
- *      - in: path
- *        name: postid
- *        required: true
- *        description: 테이블 아이디
- *        schema:
- *          type: integer
- *      responses:
- *        201:
- *          description: OK
- *          content:
- *            application/json:
- *              schema:
- *                  list:
- *                   type: object
- *        400:
- *          description: Not Found
- *          content:
- *           application/json:
- *             schema:
- *              msg: string
- *        500:
- *          description: Server Error
- *          content:
- *           application/json:
- *             schema:
- *              msg: string
- */
-app.get("/posts/detail/:postid", authMiddleware, (req, res) => {
-  Post.read(req, res);
-});
-
-//특정 게시물 옵션 조회
-/**
- * @swagger
- * paths:
- *  /posts/{option}:
- *    get:
- *      summary: "특정 게시물 조회"
- *      description: "특정 게시물 조회 "
- *      tags: [Post]
- *      parameters:
- *      - in: path
- *        name: option
- *        required: true
- *        description: 검색 조건
- *        schema:
- *          type: string
- *      - in: query
- *        name: content
- *        required: true
- *        description: 검색 내용
- *        schema:
- *          type: string
- *      responses:
- *        201:
- *          description: OK
- *          content:
- *            application/json:
- *              schema:
- *                  list:
- *                   type: object
- *        400:
- *          description: Not Found
- *          content:
- *           application/json:
- *             schema:
- *              msg: string
- *        500:
- *          description: Server Error
- *          content:
- *           application/json:
- *             schema:
- *              msg: string
- */
-app.get("/posts/:option", authMiddleware, (req, res) => {
-  Post.readOption(req, res);
-});
-
-//게시물 전체 조회
-/**
- * @swagger
- * paths:
- *  /posts:
- *    get:
- *      summary: "게시물 전체 조회"
- *      description: "게시물 목록"
- *      tags: [Post]
- *      responses:
- *        200:
- *          description: 전체 게시물 정보
- *          content:
- *            application/json:
- *              schema:
- *                type: object
- *                properties:
- *                  results:
- *                    type: object
- */
-app.get("/posts", authMiddleware, (req, res) => {
-  Post.readAll(req, res);
-});
-
 //게시물 수정
 /**
  * @swagger
@@ -375,3 +265,115 @@ app.get("/posts/:postid/:filename", authMiddleware, (req, res) => {
 app.listen(PORT, () => {
   console.log(`${PORT}번에서 실행이 되었습니다.`);
 });
+
+//게시물 상세 조회
+/**
+ * @swagger
+ * paths:
+ *  /posts/detail/{postid}:
+ *    get:
+ *      summary: "게시물 상세 조회"
+ *      description: "특정 게시물 조회 "
+ *      tags: [Post]
+ *      parameters:
+ *      - in: path
+ *        name: postid
+ *        required: true
+ *        description: 테이블 아이디
+ *        schema:
+ *          type: integer
+ *      responses:
+ *        201:
+ *          description: OK
+ *          content:
+ *            application/json:
+ *              schema:
+ *                  list:
+ *                   type: object
+ *        400:
+ *          description: Not Found
+ *          content:
+ *           application/json:
+ *             schema:
+ *              msg: string
+ *        500:
+ *          description: Server Error
+ *          content:
+ *           application/json:
+ *             schema:
+ *              msg: string
+ */
+// app.get("/posts/detail/:postid", authMiddleware, (req, res) => {
+//   Post.read(req, res);
+// });
+
+//특정 게시물 옵션 조회
+/**
+ * @swagger
+ * paths:
+ *  /posts/{option}:
+ *    get:
+ *      summary: "특정 게시물 조회"
+ *      description: "특정 게시물 조회 "
+ *      tags: [Post]
+ *      parameters:
+ *      - in: path
+ *        name: option
+ *        required: true
+ *        description: 검색 조건
+ *        schema:
+ *          type: string
+ *      - in: query
+ *        name: content
+ *        required: true
+ *        description: 검색 내용
+ *        schema:
+ *          type: string
+ *      responses:
+ *        201:
+ *          description: OK
+ *          content:
+ *            application/json:
+ *              schema:
+ *                  list:
+ *                   type: object
+ *        400:
+ *          description: Not Found
+ *          content:
+ *           application/json:
+ *             schema:
+ *              msg: string
+ *        500:
+ *          description: Server Error
+ *          content:
+ *           application/json:
+ *             schema:
+ *              msg: string
+ */
+// app.get("/posts/:option", authMiddleware, (req, res) => {
+//   Post.readOption(req, res);
+// });
+
+//게시물 전체 조회
+/**
+ * @swagger
+ * paths:
+ *  /posts:
+ *    get:
+ *      summary: "게시물 전체 조회"
+ *      description: "게시물 목록"
+ *      tags: [Post]
+ *      responses:
+ *        200:
+ *          description: 전체 게시물 정보
+ *          content:
+ *            application/json:
+ *              schema:
+ *                type: object
+ *                properties:
+ *                  results:
+ *                    type: object
+ */
+// app.get("/posts", authMiddleware, (req, res) => {
+//   Post.readAll(req, res);
+// });

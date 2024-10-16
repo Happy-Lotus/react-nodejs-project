@@ -64,94 +64,100 @@ exports.create = async function (req, res) {
   }
 };
 
-//게시물 전체 조회(글 목록)
-exports.readAll = async function (req, res) {
+//게시물 전체 조회(글 목록) => 완료
+exports.readAll = async function () {
+  const sql =
+    "SELECT boardid, title, content, writer, regdate, thumbnail FROM board";
   try {
-    const sql =
-      "SELECT boardid, title, content, writer, regdate, thumbnail FROM board";
+    return new Promise((resolve, reject) => {
+      conn.query(sql, async (error, results) => {
+        if (error) {
+          return reject({ statusCode: 500, message: error.sqlMessage });
+        } else {
+          if (results) {
+            const list = await Promise.all(
+              results.map(async (item) => {
+                try {
+                  const files = await File.readOption(item.boardid);
+                  console.log("files");
+                  console.log(files);
+                  return {
+                    post: {
+                      boardid: item.boardid,
+                      title: item.title,
+                      content: item.content,
+                      writer: item.writer,
+                      regdate: item.regdate,
+                      thumbnail: item.thumbnail,
+                    },
+                    files: files,
+                  };
+                } catch (fileError) {
+                  return reject({
+                    statusCode: fileError.statusCode,
+                    message: fileError.message,
+                  });
+                }
+              })
+            );
 
-    conn.query(sql, async (error, results) => {
-      if (error) {
-        console.error("Database error: ", error);
-        return res.status(500).json({ result: "Database error" });
-      } else {
-        if (results) {
-          const list = [];
-          for (const post of results) {
-            const files = await File.readOption(post.boardid);
-            list.push({ post: post, files: files });
+            console.log(list);
+            resolve({
+              statusCode: 201,
+              message: "게시물 전체 조회 성공",
+              postData: list,
+            });
+          } else {
+            resolve({ statusCode: 400, message: "데이터 없음" });
           }
-
-          return res
-            .setHeader("Access-Control-Allow-Credentials", "true")
-            .setHeader("Access-Control-Allow-Origin", "http://localhost:3000")
-            .status(201)
-            .json(list);
-        } else {
-          return res.status(400).json({ result: "Error" });
         }
-      }
+      });
     });
   } catch (error) {
     console.error("Error: ", error);
-    return res.status(500).json({ result: "Server error:" });
+    throw new Error("서버 오류");
   }
 };
 
-//게시물 옵션 조회
-exports.readOption = async function (req, res) {
-  const option = req.params.option;
-  const content = req.query.content;
-  let sql;
+//게시물 단일 조회 => 완료
+exports.read = async function (boardid) {
+  const sql =
+    "SELECT title, content, writer, regdate, thumbnail FROM board WHERE boardid = ?";
 
-  try {
-    if (option === "title") {
-      sql = `SELECT * FROM board WHERE title LIKE '%${content}%'`;
-    } else {
-      sql = `SELECT * FROM board WHERE content LIKE '%${content}%'`;
-    }
-
-    conn.query(sql, (error, results) => {
-      if (error) {
-        console.error("Database error: ", error);
-        return res.status(500).json({ result: "Database error:" + userid });
-      } else {
-        if (results) {
-          return res.status(201).json(results);
-        } else {
-          return res.status(400).json({ result: "Error" });
-        }
-      }
-    });
-  } catch (error) {
-    console.error("Error: ", error);
-    return res.status(500).json({ result: "Server error:" });
-  }
-};
-
-//게시물 단일 조회
-exports.read = async function (req, res) {
-  const boardid = req.params.postid;
-  try {
-    const sql =
-      "SELECT title, content, writer, regdate, thumbnail FROM board WHERE boardid = ?";
-
+  return new Promise((resolve, reject) => {
     conn.query(sql, boardid, async (error, results) => {
       if (error) {
-        console.error("Database error: ", error);
-        return res.status(500).json({ result: "Database error:" + boardid });
+        return reject({ statusCode: 500, message: error.sqlMessage });
+      } else if (results.length === 0) {
+        return reject({ statusCode: 404, message: "게시물이 없습니다." });
       } else {
-        const file = await File.readOption(boardid);
-        return res
-          .header(" X-Content-Type-Options: nosniff ")
-          .status(201)
-          .json({ board: results, filelist: file });
+        const post = results[0];
+        try {
+          const files = await File.readOption(boardid);
+          resolve({
+            statusCode: 201,
+            message: "게시물 데이터 조회 성공",
+            postData: {
+              post: {
+                boardid: boardid,
+                title: post.title,
+                content: post.content,
+                writer: post.writer,
+                regdate: post.regdate,
+                thumbnail: post.thumbnail,
+              },
+              files: files,
+            },
+          });
+        } catch (fileError) {
+          reject({
+            statusCode: fileError.statusCode || 500,
+            message: fileError.message || "파일 조회 오류",
+          });
+        }
       }
     });
-  } catch (error) {
-    console.error("Error: ", error);
-    return res.status(500).json({ result: "Server error:" });
-  }
+  });
 };
 
 exports.readByBoardId = async function (boardid) {
@@ -347,3 +353,34 @@ const changeThumbnailImg = async (
     return changeThumbnail;
   }
 };
+
+// //게시물 옵션 조회
+// exports.readOption = async function (option, content) {
+//   const sql = `SELECT * FROM board WHERE ${option} LIKE '%${content}%'`;
+
+//   try {
+//     return new Promise((resolve, reject) => {
+//       conn.query(sql, (error, results) => {
+//         if (error) {
+//           return reject({ statusCode: 500, message: error.sqlMessage });
+//         } else if (results.length === 0) {
+//           return reject({ statusCode: 404, message: "게시물이 없습니다." });
+//         }
+//         resolve({
+//           statusCode: 201,
+//           message: `게시물 ${option} 조회 성공`,
+//           post: {
+//             boardid: boardid,
+//             title: results[0].title,
+//             content: results[0].content,
+//             writer: results[0].writer,
+//             regdate: results[0].regdate,
+//             thumbnail: results[0].thumbnail,
+//           },
+//         });
+//       });
+//     });
+//   } catch (error) {
+//     throw new Error("서버 오류");
+//   }
+// };

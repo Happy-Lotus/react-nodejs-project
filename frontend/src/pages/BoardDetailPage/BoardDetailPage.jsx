@@ -25,8 +25,8 @@ const BoardDetailPage = () => {
     const getPostDetail = async () => {
       try {
         const data = await fetchPostDetail(postId); // API 호출
-        setPost(data[0]); // 받아온 데이터로 상태 업데이트
-        setFile(data.filelist);
+        setPost(data.post); // 받아온 데이터로 상태 업데이트
+        setFile(data.files);
       } catch (error) {
         console.error("Error fetching post detail:", error);
       } finally {

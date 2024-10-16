@@ -9,6 +9,8 @@ function BoardPage() {
   const [posts, setPosts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [searchOption, setSearchOption] = useState("title"); // 추가된 부분
+  const [searchTerm, setSearchTerm] = useState("");
+  const [filteredPosts, setFilteredPosts] = useState([]); // 필터링된 게시물 상태
   const [image, setImage] = useState([]);
 
   useEffect(() => {
@@ -20,6 +22,7 @@ function BoardPage() {
 
         const imageList = data.map((post) => post.thumbnail);
         setImage(imageList);
+        setFilteredPosts(data);
       } catch (error) {
         console.error("Error fetching posts:", error);
       } finally {
@@ -28,6 +31,18 @@ function BoardPage() {
     };
     getPosts();
   }, []);
+
+  const handleSearch = () => {
+    // 검색 버튼 클릭 시 필터링
+    const results = posts.filter((post) => {
+      if (searchOption === "title") {
+        return post.title.toLowerCase().includes(searchTerm.toLowerCase());
+      } else if (searchOption === "author") {
+        return post.writer.toLowerCase().includes(searchTerm.toLowerCase());
+      }
+    });
+    setFilteredPosts(results); // 필터링된 결과를 상태에 저장
+  };
 
   if (loading) {
     return <div>Loading...</div>;
@@ -55,10 +70,13 @@ function BoardPage() {
               </select>
               <input
                 className={styles.input__box__text}
+                id="search"
                 type="text"
                 placeholder="검색"
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
               />
-              <span className={styles.input__box__img}>
+              <span className={styles.input__box__img} onClick={handleSearch}>
                 <FaSearch />
               </span>
             </div>
@@ -76,7 +94,7 @@ function BoardPage() {
               </tr>
             </thead>
             <tbody>
-              {posts.map((post, index) => (
+              {filteredPosts.map((post, index) => (
                 <tr key={index} className={styles.tr__content}>
                   <td>{index}</td>
                   <td className={styles.title__cell}>

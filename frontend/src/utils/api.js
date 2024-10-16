@@ -91,8 +91,8 @@ export const fetchPosts = async () => {
     };
     console.log("posts api 요청중");
     const response = await axios(config); // API 호출
-
-    const transformedPosts = response.data.map((item) => ({
+    console.log(response);
+    const transformedPosts = response.data.postData.map((item) => ({
       id: item.post.boardid, // 게시물 ID
       title: item.post.title, // 제목
       writer: item.post.writer, // 작성자
@@ -111,20 +111,14 @@ export const fetchPosts = async () => {
 // 게시물 상세 데이터 가져오기
 export const fetchPostDetail = async (postId) => {
   try {
+    console.log("fetchPostDetail");
     const response = await axios.get(
       `http://localhost:4000/posts/detail/${postId}`
     ); // API 호출
-    console.log(response.data.filelist);
-    console.log(response.data);
+    console.log("fetchPostDetail");
+    console.log(response);
 
-    const transformedPost = response.data.board.map((item, index) => ({
-      title: item.title, // 제목
-      content: item.content, //내용
-      writer: item.writer, // 작성자
-      regdate: item.regdate.split(" ")[0], // 작성일
-      thumbnail: item.thumbnail, // 썸네일
-    }));
-    transformedPost.filelist = response.data.filelist;
+    const transformedPost = response.data.postData;
     return transformedPost; // 데이터 반환
   } catch (error) {
     console.error("Error fetching post detail:", error);
@@ -147,6 +141,8 @@ export const checkNickname = async (nickname) => {
     };
 
     const response = await axios(config);
+    console.log("frontend response 결과");
+    console.log(response.data.length);
     return response.data.length > 0;
   } catch (error) {}
 };
