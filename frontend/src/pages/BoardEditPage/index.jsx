@@ -36,7 +36,7 @@ const BoardEditPage = () => {
   const onDrop = useCallback((acceptedFiles) => {
     // Do something with the files
   }, []);
-  const { getRootProps, getInputProps } = useDropzone({
+  const { getRootProps, getInputProps, acceptedFiles } = useDropzone({
     accept: {
       "image/*": [".jpeg", ".jpg", ".png"],
       "application/vnd.ms-excel": [],
@@ -47,6 +47,9 @@ const BoardEditPage = () => {
     },
     noKeyboard: true,
   });
+  const filelist = acceptedFiles.map((file) => (
+    <li key={file.path}>{file.path}</li>
+  ));
 
   const handleDrop = (event) => {
     event.preventDefault();
@@ -92,10 +95,17 @@ const BoardEditPage = () => {
             </label>
           </div>
           <section className={styles.file}>
-            <div {...getRootProps({ className: "dropzone" })}>
+            <div
+              {...getRootProps({
+                className: "dropzone",
+                onDrop: (event) => event.stopPropagation(),
+              })}
+            >
               <input {...getInputProps()} />
               <p>파일을 여기로 드래그하세요.</p>
             </div>
+            <h4>Files</h4>
+            <ul>{filelist}</ul>
           </section>
 
           {/* <div
