@@ -94,19 +94,29 @@
   padding-top: 16px;
 }
 
+// .file {
+//   border: 2px dashed #ccc;
+//   border-radius: 4px;
+//   padding-right: 20px;
+//   padding-left: 20px;
+//   text-align: center;
+//   position: relative;
+//   transition: background-color 0.2s ease;
+//   width: 60%;
+//   height: 140px;
+//   overflow-y: auto;
+//   // &:hover {
+//   //   background-color: #e6e6e6;
+//   // }
 .file {
   border: 2px dashed #ccc;
   border-radius: 4px;
-  padding: 20px;
+  padding: 20px; // 패딩을 통일하여 깜빡임 방지
   text-align: center;
   position: relative;
-  transition: background-color 0.3s;
   width: 60%;
   height: 140px;
   overflow-y: auto;
-  &:hover {
-    background-color: #e6e6e6;
-  }
 
   .dragMessage {
     position: absolute;
@@ -117,23 +127,37 @@
     font-size: 16px;
   }
 }
+.drapzone {
+  width:100%;
+  min-height:100%;
+  background-color: transparent; // 기본 배경색
+  text-align:center;
+  top:50%;
+  padding:4px;
+  border-radius: 4px;
+}
 
-.fileItem {
+
+.drapzoneActive {
+  background-color: #e6e6e6; // 드래그 중일 때 배경색
+  transition: background-color 0.3s ;
+  width:100%;
+  min-height:100%;
+  text-align:center;
+  top:50%;
+  padding:4px;
+  border-radius: 4px;
+}
+
+.file__item {
   display: flex;
   justify-content: flex-start;
   column-gap: 8px;
   align-items: center;
-  padding: 10px;
   border-bottom: 1px solid #eee;
 
   &:last-child {
     border-bottom: none;
-  }
-
-  .fileName {
-    white-space: nowrap; // 줄 바꿈 방지
-    overflow: hidden; // 넘치는 부분 숨기기
-    text-overflow: ellipsis; // 넘치는 부분에 ... 표시
   }
 
   button {
@@ -146,6 +170,13 @@
       color: #c82333;
     }
   }
+}
+
+.filename {
+
+  white-space: nowrap; // 줄 바꿈 방지
+  overflow: hidden; // 넘치는 부분 숨기기
+  text-overflow: ellipsis; // 넘치는 부분에 ... 표시
 }
 
 .title__uploadButton {
@@ -172,4 +203,15 @@
 .attachments__title {
   font-size: 1.3rem;
   font-weight: bolder;
+}
+.filelist__p {
+  margin: 0;
+  position: absolute; /* 가운데 정렬을 위해 절대 위치 설정 */
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%); /* 가운데 정렬 */
+}
+
+.file__list {
+  text-align: left; /* 파일 리스트 왼쪽 정렬 */
 }

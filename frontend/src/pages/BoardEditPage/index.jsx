@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useState } from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import { Link, useParams, useNavigate } from "react-router-dom";
 import { CKEditor } from "@ckeditor/ckeditor5-react";
 import ClassicEditor from "@ckeditor/ckeditor5-build-classic";
@@ -14,9 +14,11 @@ const BoardEditPage = () => {
     content: "",
   });
   const [files, setFiles] = useState([]); // 첨부파일 상태
+  const filesRef = useRef(files); // 현재 파일 리스트를 참조하기 위한 ref
   const navigate = useNavigate();
-
   const [viewConent, setViewContent] = useState([]);
+  const [isDragActive, setIsDragActive] = useState(false);
+
   const getValue = (e) => {
     const { name, value } = e.target;
     setMountainContent((prevContent) => ({
@@ -25,41 +27,77 @@ const BoardEditPage = () => {
     }));
   };
 
+  useEffect(() => {
+    filesRef.current = files; // files 상태가 변경될 때마다 ref 업데이트
+  }, [files]);
+
   const handleFileChange = (event) => {
     const selectedFiles = Array.from(event.target.files);
-    setFiles((prevFiles) => [...prevFiles, ...selectedFiles]);
+    const existingFileNames = new Set(
+      filesRef.current.map((file) => file.name)
+    );
+
+    const newFiles = selectedFiles.filter(
+      (file) => !existingFileNames.has(file.name)
+    );
+    setFiles((prevFiles) => [
+      ...prevFiles,
+      ...newFiles.map((file) => Object.assign(file, { preview: file.name })),
+    ]);
   };
 
   const handleDeleteFile = (fileToDelete) => {
     setFiles((prevFiles) => prevFiles.filter((file) => file !== fileToDelete));
   };
+
   const onDrop = useCallback((acceptedFiles) => {
-    // Do something with the files
+    const existingFileNames = new Set(
+      filesRef.current.map((file) => file.name)
+    );
+
+    const newFiles = acceptedFiles.filter(
+      (file) => !existingFileNames.has(file.name)
+    );
+
+    setFiles((prevFiles) => [
+      ...prevFiles,
+      ...newFiles.map((file) => Object.assign(file, { preview: file.name })),
+    ]);
+    setIsDragActive(false);
   }, []);
-  const { getRootProps, getInputProps, acceptedFiles } = useDropzone({
+
+  const { getRootProps, getInputProps } = useDropzone({
     accept: {
       "image/*": [".jpeg", ".jpg", ".png"],
-      "application/vnd.ms-excel": [],
-      "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet": [],
-      "application/msword": [],
       "application/pdf": [],
-      "application/zip": [],
+      "application/x-hwp": [], // HWP 파일 형식 추가
     },
-    noKeyboard: true,
+    onDrop,
+    onDragEnter: () => {
+      if (!isDragActive) setIsDragActive(true);
+    },
+    onDragLeave: () => {
+      if (isDragActive) setIsDragActive(false);
+    },
+    noClick: true,
   });
-  const filelist = acceptedFiles.map((file) => (
-    <li key={file.path}>{file.path}</li>
-  ));
-
-  const handleDrop = (event) => {
-    event.preventDefault();
-    const droppedFiles = Array.from(event.dataTransfer.files);
-    setFiles((prevFiles) => [...prevFiles, ...droppedFiles]);
-  };
-
-  const handleDragOver = (event) => {
-    event.preventDefault();
-  };
+  const filelist =
+    files.length > 0 ? (
+      <ul className={styles.file__list}>
+        {files.map((file) => (
+          <li key={file.name} style={{ paddingBottom: "8px" }}>
+            <div className={styles.file__item}>
+              <button onClick={() => handleDeleteFile(file)}>
+                <FaTrash />
+              </button>
+              <span className={styles.filename}>{file.name}</span>
+            </div>
+          </li>
+        ))}
+      </ul>
+    ) : (
+      <p className={styles.filelist__p}>파일을 여기로 드래그하세요.</p>
+    );
 
   const onSubmit = async () => {
     // await registerPost(mountainContent.title,mountainContent.content);
@@ -93,41 +131,6 @@ const BoardEditPage = () => {
             <label htmlFor="file-upload" className={styles.fileUploadButton}>
               <FaUpload /> 업로드
             </label>
-          </div>
-          <section className={styles.file}>
-            <div
-              {...getRootProps({
-                className: "dropzone",
-                onDrop: (event) => event.stopPropagation(),
-              })}
-            >
-              <input {...getInputProps()} />
-              <p>파일을 여기로 드래그하세요.</p>
-            </div>
-            <h4>Files</h4>
-            <ul>{filelist}</ul>
-          </section>
-
-          {/* <div
-            className={styles.file}
-          >
-            <Dropzone onDrop={(acceptedFiles) => console.log(acceptedFiles)}>
-              {({ getRootProps, getInputProps }) => {
-                <section>
-                  <div {...getRootProps()}>
-                    <input {...getInputProps()} />
-                    <span className={styles.dragMessage}>
-                      파일을 여기로 드래그하세요
-                    </span>
-                  </div>
-                </section>;
-              }}
-            </Dropzone>
-            {files.length === 0 && (
-              <span className={styles.dragMessage}>
-                파일을 여기로 드래그하세요
-              </span>
-            )}
             <input
               type="file"
               multiple
@@ -135,18 +138,27 @@ const BoardEditPage = () => {
               style={{ display: "none" }}
               id="file-upload"
             />
-
-            <div>
-              {files.map((file, index) => (
-                <div key={index} className={styles.fileItem}>
-                  <button onClick={() => handleDeleteFile(file)}>
-                    <FaTrash />
-                  </button>
-                  <span className={styles.fileName}>{file.name}</span>
-                </div>
-              ))}
+          </div>
+          {/* <div
+              {...getRootProps({
+                className: isDragActive ? styles.drapzoneActive:styles.file,
+              })} 
+            >
+              <input {...getInputProps()} />
+              {filelist}
+            </div> */}
+          <section className={styles.file}>
+            <div
+              {...getRootProps({
+                className: isDragActive
+                  ? styles.drapzoneActive
+                  : styles.drapzone,
+              })}
+            >
+              <input {...getInputProps()} />
+              {filelist}
             </div>
-          </div> */}
+          </section>
         </div>
         <div className={styles.buttons}>
           <Link to="/posts">
