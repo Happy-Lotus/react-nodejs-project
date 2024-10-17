@@ -7,6 +7,12 @@ html {
   height: 100%; /* 전체 높이를 100%로 설정 */
   margin: 0; /* 기본 마진 제거 */
   font-family: "Outfit", "Pretendard", AppleGothic, sans-serif;
+
+  -ms-overflow-style: none;
+
+  ::-webkit-scrollbar {
+    display: none;
+  }
 }
 
 @media (max-width: 1500px) {
@@ -19,4 +25,18 @@ html {
   min-height: 32rem;
   max-height: 32rem;
   overflow-y: auto;
+}
+
+.swal2-title {
+  font-size: 1.4rem;
+}
+
+#swal2-html-container {
+  font-size: 1rem;
+}
+
+.swal2-styled {
+  padding: 0;
+  width: 66px;
+  height: 44px;
 }
