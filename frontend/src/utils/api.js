@@ -226,3 +226,21 @@ export const verifyCode = async (email, code) => {
     return response;
   } catch (error) {}
 };
+
+export const registerPost = async (formData) => {
+  try {
+    const config = {
+      url: "http://localhost:4000/",
+      method: "post",
+      headers: {
+        "Content-Type": "multipart/form-data",
+        withCredentials: true,
+      },
+      formData,
+    };
+
+    const response = await axios(config);
+    console.log(response);
+    return response;
+  } catch (error) {}
+};
