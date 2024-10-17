@@ -1,12 +1,12 @@
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import { Link, useParams, useNavigate } from "react-router-dom";
-import { CKEditor } from "@ckeditor/ckeditor5-react";
-import ClassicEditor from "@ckeditor/ckeditor5-build-classic";
-import Dropzone, { useDropzone } from "react-dropzone";
+import { useDropzone } from "react-dropzone";
 
 import styles from "./BoardEditPage.module.scss"; // SCSS 모듈 임포트
 import Editor from "./Editor";
-import { FaUpload, FaTrash, FaTrashAlt } from "react-icons/fa";
+import { FaUpload, FaTrash } from "react-icons/fa";
+import Swal from "sweetalert2"; // SweetAlert2 임포트
+import FileDropzone from "./fileDropzone";
 
 const BoardEditPage = () => {
   const [mountainContent, setMountainContent] = useState({
@@ -18,6 +18,9 @@ const BoardEditPage = () => {
   const navigate = useNavigate();
   const [viewConent, setViewContent] = useState([]);
   const [isDragActive, setIsDragActive] = useState(false);
+  const [thumbnail, setThumbnail] = useState(null);
+  const [showThumbnailModal, setShowThumbnailModal] = useState(false);
+  const [isExiting, setIsExiting] = useState(false); // 모달 종료 상태 추가
 
   const getValue = (e) => {
     const { name, value } = e.target;
@@ -25,6 +28,16 @@ const BoardEditPage = () => {
       ...prevContent,
       [name]: value,
     }));
+  };
+  const handleThumbnailChange = (event) => {
+    const file = event.target.files[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setThumbnail(reader.result);
+      };
+      reader.readAsDataURL(file);
+    }
   };
 
   useEffect(() => {
@@ -50,58 +63,103 @@ const BoardEditPage = () => {
     setFiles((prevFiles) => prevFiles.filter((file) => file !== fileToDelete));
   };
 
-  const onDrop = useCallback((acceptedFiles) => {
-    const existingFileNames = new Set(
-      filesRef.current.map((file) => file.name)
-    );
+  const onDrop = useCallback(
+    (acceptedFiles) => {
+      const existingFileNames = new Set(
+        filesRef.current.map((file) => file.name)
+      );
 
-    const newFiles = acceptedFiles.filter(
-      (file) => !existingFileNames.has(file.name)
-    );
+      if (files.length + acceptedFiles.length > 5) {
+        alert("첨부할 수 있는 파일의 개수는 5개를 초과할 수 없습니다.");
+        setIsDragActive(false); // Reset drag state
+        return;
+      }
+      const oversizedFiles = acceptedFiles.filter(
+        (file) => file.size > 10 * 1024 * 1024
+      ); // 10MB
+      if (oversizedFiles.length > 0) {
+        alert("첨부할 수 있는 파일의 크기는 10MB를 초과할 수 없습니다.");
+        setIsDragActive(false); // Reset drag state
+        return;
+      }
 
-    setFiles((prevFiles) => [
-      ...prevFiles,
-      ...newFiles.map((file) => Object.assign(file, { preview: file.name })),
-    ]);
-    setIsDragActive(false);
-  }, []);
+      const newFiles = acceptedFiles.filter(
+        (file) => !existingFileNames.has(file.name)
+      );
 
-  const { getRootProps, getInputProps } = useDropzone({
-    accept: {
-      "image/*": [".jpeg", ".jpg", ".png"],
-      "application/pdf": [],
-      "application/x-hwp": [], // HWP 파일 형식 추가
+      setFiles((prevFiles) => [
+        ...prevFiles,
+        ...newFiles.map((file) => Object.assign(file, { preview: file.name })),
+      ]);
+      setIsDragActive(false);
     },
-    onDrop,
-    onDragEnter: () => {
-      if (!isDragActive) setIsDragActive(true);
-    },
-    onDragLeave: () => {
-      if (isDragActive) setIsDragActive(false);
-    },
-    noClick: true,
-  });
-  const filelist =
-    files.length > 0 ? (
-      <ul className={styles.file__list}>
-        {files.map((file) => (
-          <li key={file.name} style={{ paddingBottom: "8px" }}>
-            <div className={styles.file__item}>
-              <button onClick={() => handleDeleteFile(file)}>
-                <FaTrash />
-              </button>
-              <span className={styles.filename}>{file.name}</span>
-            </div>
-          </li>
-        ))}
-      </ul>
-    ) : (
-      <p className={styles.filelist__p}>파일을 여기로 드래그하세요.</p>
-    );
+    [files.length]
+  );
+
+  // const { getRootProps, getInputProps } = useDropzone({
+  //   accept: {
+  //     "image/*": [".jpeg", ".jpg", ".png"],
+  //     "application/pdf": [],
+  //     "application/x-hwp": [], // HWP 파일 형식 추가
+  //   },
+  //   onDrop,
+  //   onDragEnter: () => {
+  //     if (!isDragActive) setIsDragActive(true);
+  //   },
+  //   onDragLeave: () => {
+  //     if (isDragActive) setIsDragActive(false);
+  //   },
+  //   noClick: true,
+  //   maxFiles: 5,
+  // });
+  // const filelist =
+  //   files.length > 0 ? (
+  //     <ul className={styles.file__list}>
+  //       {files.map((file) => (
+  //         <li key={file.name} style={{ paddingBottom: "8px" }}>
+  //           <div className={styles.file__item}>
+  //             <button onClick={() => handleDeleteFile(file)}>
+  //               <FaTrash />
+  //             </button>
+  //             <span className={styles.filename}>{file.name}</span>
+  //           </div>
+  //         </li>
+  //       ))}
+  //     </ul>
+  //   ) : (
+  //     <p className={styles.filelist__p}>파일을 여기로 드래그하세요.</p>
+  //   );
 
   const onSubmit = async () => {
-    // await registerPost(mountainContent.title,mountainContent.content);
-    navigate("/posts");
+    setShowThumbnailModal(true); // 썸네일 모달 표시
+  };
+
+  const handleRegister = async () => {
+    // 데이터베이스에 저장하는 로직 추가
+    // await registerPost(mountainContent.title, mountainContent.content, files, thumbnail);
+    navigate("/posts"); // 저장 후 /posts로 이동
+  };
+
+  const handleCancel = () => {
+    setIsExiting(true); // 모달 종료 애니메이션 시작
+    setTimeout(() => {
+      setShowThumbnailModal(false); // 모달 닫기
+      setIsExiting(false); // 종료 상태 초기화
+    }, 200); // 애니메이션 시간과 일치
+  };
+  const onCancle = async () => {
+    const result = await Swal.fire({
+      title: "작성한 내용은 저장되지 않습니다.",
+      text: "그래도 취소하시겠습니까?",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonText: "예",
+      cancelButtonText: "아니오",
+    });
+
+    if (result.isConfirmed) {
+      navigate("/posts"); // 예를 클릭하면 /posts로 이동
+    }
   };
 
   return (
@@ -139,15 +197,14 @@ const BoardEditPage = () => {
               id="file-upload"
             />
           </div>
-          {/* <div
-              {...getRootProps({
-                className: isDragActive ? styles.drapzoneActive:styles.file,
-              })} 
-            >
-              <input {...getInputProps()} />
-              {filelist}
-            </div> */}
-          <section className={styles.file}>
+          <FileDropzone
+            onDrop={onDrop}
+            isDragActive={isDragActive}
+            files={files}
+            setIsDragActive={setIsDragActive}
+            handleDeleteFile={handleDeleteFile}
+          />
+          {/* <section className={styles.file}>
             <div
               {...getRootProps({
                 className: isDragActive
@@ -158,16 +215,66 @@ const BoardEditPage = () => {
               <input {...getInputProps()} />
               {filelist}
             </div>
-          </section>
+          </section> */}
+          <p className={styles.fileNotice}>
+            파일의 최대 크기: 10MB, 최대 첨부 파일 갯수: 5
+          </p>
         </div>
         <div className={styles.buttons}>
-          <Link to="/posts">
-            <button className={styles.backButton}>취소</button>
-          </Link>
+          <button className={styles.backButton} onClick={onCancle}>
+            취소
+          </button>
           <button className={styles.editButton} onClick={onSubmit}>
             등록
           </button>
         </div>
+        {showThumbnailModal && ( // 썸네일 선택 모달
+          <div
+            className={`${styles.thumbnailModal} ${
+              isExiting ? styles.exit : ""
+            }`}
+          >
+            <div className={styles.modalContent}>
+              <h2 className={styles.thumbnail__title}>썸네일 업로드</h2>
+              <div className={styles.thumbnailUploadArea}>
+                <input
+                  type="file"
+                  accept="image/*"
+                  onChange={handleThumbnailChange}
+                  style={{ display: "none" }}
+                  id="thumbnail-upload"
+                />
+                <label
+                  htmlFor="thumbnail-upload"
+                  className={styles.thumbnailLabel}
+                >
+                  <div className={styles.thumbnailPlaceholder}>
+                    {thumbnail ? (
+                      <img
+                        src={thumbnail}
+                        alt="썸네일 미리보기"
+                        className={styles.thumbnailPreview}
+                      />
+                    ) : (
+                      <p>썸네일 이미지를 업로드하세요.</p>
+                    )}
+                  </div>
+                </label>
+              </div>
+              <div className={styles.modalButtons}>
+                <button className={styles.cancleButton} onClick={handleCancel}>
+                  취소
+                </button>
+                <button
+                  className={styles.registerButton}
+                  onClick={handleRegister}
+                >
+                  등록
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );
