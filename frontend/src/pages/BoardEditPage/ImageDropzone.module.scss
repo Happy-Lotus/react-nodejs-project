@@ -18,14 +18,117 @@
   align-items: center;
   background-color: #f9f9f9; /* 배경색 */
   transition: background-color 0.3s; /* 배경색 전환 효과 */
+
+  &.imagePresent {
+    border: none; // 이미지가 있을 때 border 제거
+    &:hover {
+      // hover 효과 제거
+      background-color: transparent;
+    }
+  }
+  &.hoverEffect {
+    background-color: #e9e9e9; // 드래그 중일 때의 배경색
+  }
 }
 
-.thumbnailPlaceholder:hover {
-  background-color: #e9e9e9; /* hover 시 배경색 변경 */
-}
+// .thumbnailPlaceholder:hover {
+//   background-color: #e9e9e9; /* hover 시 배경색 변경 */
+// }
 
 .thumbnailPreview {
-  max-width: 100%;
-  max-height: 100%;
-  border-radius: 8px; /* 모서리 둥글게 */
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block; // 이미지가 블록 요소로 표시되도록
+  margin: 0 auto; // 중앙 정렬
+  border-radius: 8px;
+}
+
+.modalContent {
+  width: 100%;
+  height: 100%;
+  background: #f8f9fa;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  row-gap: 20px;
+}
+
+@keyframes slideIn {
+  from {
+    transform: translateY(100%); /* 아래에서 시작 */
+  }
+  to {
+    transform: translateY(0); /* 원래 위치로 이동 */
+  }
+}
+
+@keyframes slideOut {
+  from {
+    transform: translateY(0); /* 현재 위치에서 시작 */
+  }
+  to {
+    transform: translateY(100%); /* 아래로 이동 */
+  }
+}
+
+.thumbnail__title {
+  font-size: 2rem;
+  font-weight: bolder;
+}
+
+.registerButton {
+  background-color: rgb(98, 72, 255); // 수정 버튼 색상
+  color: white;
+}
+
+.cancleButton {
+  background-color: #ff4d4d; // 삭제 버튼 색상
+  color: white;
+}
+
+.thumbnail__delete {
+  width: 700px;
+  display: flex;
+  column-gap: 16px;
+  justify-content: flex-end;
+}
+
+.thumbnail__deleteButton {
+  font-size: 1rem;
+  text-decoration: underline;
+  cursor: pointer;
+  color: #868e96;
+
+  &:active {
+    color: #495057;
+  }
+}
+
+.modalButtons {
+  display: flex;
+  justify-content: flex-end;
+  flex-direction: row;
+  column-gap: 12px;
+
+  .registerButton,
+  .cancleButton {
+    padding: 10px 15px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 16px;
+  }
+
+  .deleteButton {
+    background-color: #ff4d4d; // 삭제 버튼 색상
+    color: white;
+  }
+
+  .editButton {
+    background-color: rgb(98, 72, 255); // 수정 버튼 색상
+    color: white;
+  }
 }

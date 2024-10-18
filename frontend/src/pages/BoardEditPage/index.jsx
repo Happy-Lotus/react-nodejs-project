@@ -146,6 +146,7 @@ const BoardEditPage = () => {
       setShowThumbnailModal(false); // 모달 닫기
       setIsExiting(false); // 종료 상태 초기화
     }, 200); // 애니메이션 시간과 일치
+    setThumbnail(null);
   };
 
   const onCancle = async () => {
@@ -210,25 +211,14 @@ const BoardEditPage = () => {
               isExiting ? styles.exit : ""
             }`}
           >
-            <div className={styles.modalContent}>
-              <h2 className={styles.thumbnail__title}>썸네일 업로드</h2>
-              <ImageDropzone
-                thumbnail={thumbnail}
-                handleThumbnailChange={handleThumbnailChange}
-                onDrop={onDropThumbnail}
-              />
-              <div className={styles.modalButtons}>
-                <button className={styles.cancleButton} onClick={handleCancel}>
-                  취소
-                </button>
-                <button
-                  className={styles.registerButton}
-                  onClick={handleRegister}
-                >
-                  등록
-                </button>
-              </div>
-            </div>
+            <ImageDropzone
+              thumbnail={thumbnail}
+              handleThumbnailChange={handleThumbnailChange}
+              onDrop={onDropThumbnail}
+              setThumbnail={setThumbnail}
+              handleCancel={handleCancel}
+              handleRegister={handleRegister}
+            />
           </div>
         )}
       </div>

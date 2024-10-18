@@ -15,7 +15,8 @@ const Post = require("./models/Post");
 const File = require("./models/File");
 const adminRouter = require("./routes/User");
 const postRouter = require("./routes/Post");
-const { upload } = require("./config/storage");
+const upload = require("./config/storage").upload;
+const imageUploadMulter = require("./config/storage").imageUpload;
 dotenv.config();
 app.use(cors({ credentials: true, origin: "http://localhost:3000" }));
 app.use(express.json());
@@ -120,8 +121,8 @@ app.post(
 
 app.post(
   "/posts/upload",
-  authMiddleware,
-  upload.single("image"),
+  // authMiddleware,
+  imageUploadMulter.single("image"),
   (req, res) => {
     File.imageUpload(req, res);
   }

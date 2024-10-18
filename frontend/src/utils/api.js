@@ -45,7 +45,6 @@ export const useSignup = () => {
 
 export const useLogin = () => {
   const setSigninState = useSetRecoilState(signinState);
-  const [cookies, setCookie] = useCookies(["AccessToken", "RefreshToken"]);
 
   const signin = async (userData) => {
     console.log("sign in api 요청");
