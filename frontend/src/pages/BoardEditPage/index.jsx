@@ -1,6 +1,6 @@
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
-
+import axios from "axios";
 import styles from "./BoardEditPage.module.scss"; // SCSS 모듈 임포트
 import Editor from "./Editor";
 import Swal from "sweetalert2"; // SweetAlert2 임포트
@@ -58,7 +58,9 @@ const BoardEditPage = () => {
     );
     setFiles((prevFiles) => [
       ...prevFiles,
-      ...newFiles.map((file) => Object.assign(file, { preview: file.name })),
+      ...newFiles.map((file) =>
+        Object.assign(file, { preview: file.name, fieldname: "files" })
+      ),
     ]);
   };
 
@@ -92,7 +94,9 @@ const BoardEditPage = () => {
 
       setFiles((prevFiles) => [
         ...prevFiles,
-        ...newFiles.map((file) => Object.assign(file, { preview: file.name })),
+        ...newFiles.map((file) =>
+          Object.assign(file, { preview: file.name, fieldname: "files" })
+        ),
       ]);
       setIsDragActive(false);
     },
@@ -106,17 +110,37 @@ const BoardEditPage = () => {
   const onDropThumbnail = useCallback((acceptedFiles) => {
     const file = acceptedFiles[0]; // 첫 번째 파일만 사용
     if (file) {
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setThumbnail(reader.result); // 썸네일 상태 업데이트
-      };
-      reader.readAsDataURL(file);
+      Object.assign(file, { fieldname: "image" }); // fieldname 추가
+      const formData = new FormData();
+      formData.append("image", file);
+      axios
+        .post("http://localhost:4000/posts/upload", formData, {
+          headers: {
+            "Content-Type": "multipart/form-data",
+          },
+        })
+        .then((response) => {
+          const imageUrl = response.data.url.split("/").pop();
+          setThumbnail(imageUrl);
+        })
+        .catch((error) => {
+          console.error("Error uploading thumbnail:", error);
+        });
+      // const reader = new FileReader();
+      // reader.onloadend = () => {
+      //   Object.assign(file, { fieldname: "thumbnail", url: reader.result }); // fieldname 추가
+      //   setThumbnail(file); // 썸네일 상태 업데이트
+      //   console.log("thumbnail");
+      //   console.log(thumbnail);
+      // };
+      // reader.readAsDataURL(file);
     }
   }, []);
 
   const handleThumbnailChange = (event) => {
     const file = event.target.files[0];
     if (file) {
+      Object.assign(file, { fieldname: "thumbnail" }); // fieldname 추가
       const reader = new FileReader();
       reader.onloadend = () => {
         setThumbnail(reader.result);
@@ -125,19 +149,27 @@ const BoardEditPage = () => {
     }
   };
 
-  const handleRegister = async () => {
+  const handleRegister = async (e) => {
+    e.preventDefault();
     const formData = new FormData();
-    formData.append("title", mountainContent.title);
-    formData.append("content", mountainContent.content);
-    if (thumbnail) {
-      formData.append("thumbnail", thumbnail);
-    }
+    const postData = {
+      title: mountainContent.title,
+      content: mountainContent.content,
+      thumbnail: `uploads/${thumbnail}`,
+    };
     files.forEach((file) => {
       formData.append("files", file); // 첨부파일 추가
     });
-    const response = await registerPost(formData);
+    formData.append("post", JSON.stringify(postData));
 
-    navigate("/posts"); // 저장 후 /posts로 이동
+    // formData.append("files", files); // 첨부파일 추가
+    console.log("files 정보");
+    // console.log(files);
+    // console.log(thumbnail);
+
+    await registerPost(formData);
+
+    // navigate("/posts"); // 저장 후 /posts로 이동
   };
 
   const handleCancel = () => {

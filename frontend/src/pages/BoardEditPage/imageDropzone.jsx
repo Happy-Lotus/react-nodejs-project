@@ -46,6 +46,7 @@ const ImageDropzone = ({
           onChange={handleThumbnailChange}
           style={{ display: "none" }}
           id="thumbnail-upload"
+          name="thumbnail"
         />
         <div
           className={`${styles.thumbnailPlaceholder} ${

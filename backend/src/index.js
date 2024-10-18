@@ -19,12 +19,11 @@ const upload = require("./config/storage").upload;
 const imageUploadMulter = require("./config/storage").imageUpload;
 dotenv.config();
 app.use(cors({ credentials: true, origin: "http://localhost:3000" }));
-app.use(express.json());
 const cookieParser = require("cookie-parser");
 const authMiddleware = require("./middleware/authMiddleware");
 const session = require("express-session");
 const FileStore = require("session-file-store")(session);
-
+const bodyParser = require("body-parser");
 app.use(cookieParser());
 app.use(
   session({
@@ -39,7 +38,7 @@ app.use(
   })
 );
 app.use(express.urlencoded({ extended: true }));
-
+app.use(express.json());
 //swagger
 app.use(
   "/api-docs",
@@ -109,15 +108,16 @@ app.get("/uploads/:imageUrl", (req, res) => {
  *             schema:
  *              msg: string
  */
-app.post(
-  "/posts/edit",
-  authMiddleware,
-  upload.fields([{ name: "files" }, { name: "thumbnail" }]),
-  (req, res) => {
-    console.log("create");
-    Post.create(req, res);
-  }
-);
+// app.post(
+//   "/posts/edit",
+//   // authMiddleware,
+//   upload.fields([{ name: "files" }, { name: "thumbnail" }]),
+//   (req, res) => {
+//     console.log("create");
+//     console.log(req);
+//     // Post.create(req, res);
+//   }
+// );
 
 app.post(
   "/posts/upload",
@@ -163,9 +163,9 @@ app.post(
  *             schema:
  *              result: string
  */
-app.delete("/posts/:postid", authMiddleware, (req, res) => {
-  Post.delete(req, res);
-});
+// app.delete("/posts/:postid", authMiddleware, (req, res) => {
+//   Post.delete(req, res);
+// });
 
 //게시물 수정
 /**
@@ -217,15 +217,15 @@ app.delete("/posts/:postid", authMiddleware, (req, res) => {
  *             schema:
  *              msg: string
  */
-app.post(
-  "/posts/detail/:postid",
-  authMiddleware,
-  upload.fields([{ name: "files" }, { name: "thumbnail" }]),
-  (req, res) => {
-    console.log("/posts/detail/:postid post update 호출");
-    Post.update(req, res);
-  }
-);
+// app.post(
+//   "/posts/detail/:postid",
+//   authMiddleware,
+//   upload.fields([{ name: "files" }, { name: "thumbnail" }]),
+//   (req, res) => {
+//     console.log("/posts/detail/:postid post update 호출");
+//     Post.update(req, res);
+//   }
+// );
 
 /**
  * @swagger
@@ -259,9 +259,9 @@ app.post(
  *                  url:
  *                    type: string
  */
-app.get("/posts/:postid/:filename", authMiddleware, (req, res) => {
-  File.downloadFiles(req, res);
-});
+// app.get("/posts/:postid/:filename", authMiddleware, (req, res) => {
+//   File.downloadFiles(req, res);
+// });
 
 app.listen(PORT, () => {
   console.log(`${PORT}번에서 실행이 되었습니다.`);

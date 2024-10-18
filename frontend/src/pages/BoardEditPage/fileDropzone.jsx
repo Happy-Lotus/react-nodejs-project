@@ -60,6 +60,7 @@ const FileDropzone = ({
           onChange={handleFileChange}
           style={{ display: "none" }}
           id="file-upload"
+          name="files"
         />
       </div>
       <section className={styles.file}>

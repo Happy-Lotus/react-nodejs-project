@@ -3,21 +3,25 @@ const dotenv = require("dotenv");
 const File = require("../models/File");
 const Post = require("../models/Post");
 dotenv.config();
-
+const moment = require("moment");
 //게시물 생성
 exports.create = async (req, res) => {
   try {
-    const { title, content, writer } = JSON.parse(req.body.board);
-    const { email, userid } = req.user;
-    const files = req.files.files;
-    const thumbnail = req.files.thumbnail
-      ? `${req.files.thumbnail[0].destination}${req.files.thumbnail[0].filename}`
-      : "";
+    const { title, content, thumbnail } = JSON.parse(req.body.post);
+    // const { email, userid } = req.user;
+    const email = "happy";
+    const userid = 22;
+    const files = req.files;
+
+    // const thumbnail = req.file;
+    // // const thumbnail = req.file.thumbnail
+    // //   ? `${req.files.thumbnail[0].destination}${req.files.thumbnail[0].filename}`
+    // //   : "";
 
     const sql =
       "INSERT INTO board (title, content, writer, regdate, userid,thumbnail) VALUES (?, ?, ?, ?, ?, ?)";
     const now = moment(Date.now()).format("YYYY-MM-DD HH:mm:ss");
-    const var_array = [title, content, writer, now, userid, thumbnail];
+    const var_array = [title, content, "애니", now, userid, thumbnail];
     let fileInfos;
 
     if (files) {

@@ -1,7 +1,7 @@
 const express = require("express");
 const router = express.Router();
 
-const { upload } = require("../config/storage");
+const { upload, imageUpload } = require("../config/storage");
 const postController = require("../controllers/post");
 const authMiddleware = require("../middleware/authMiddleware");
 
@@ -15,12 +15,7 @@ router.get("/:option", authMiddleware, postController.verifyEmail);
 router.get("/detail/:postid", authMiddleware, postController.read);
 
 /* 게시물 작성*/
-router.post(
-  "/edit",
-  authMiddleware,
-  upload.fields([{ name: "files" }, { name: "thumbnail" }]),
-  postController.create
-);
+router.post("/edit", upload.array("files"), postController.create);
 
 /* 게시물 수정*/
 router.post(

@@ -10,6 +10,7 @@ const pool = maria.createConnection({
   database: "testdb",
   timezone: "Asia/Seoul",
   dateStrings: true,
+  charset: "utf8mb4",
 });
 
 module.exports = pool;

@@ -229,16 +229,30 @@ export const verifyCode = async (email, code) => {
 export const registerPost = async (formData) => {
   try {
     const config = {
-      url: "http://localhost:4000/",
+      url: "http://localhost:4000/posts/edit",
       method: "post",
       headers: {
         "Content-Type": "multipart/form-data",
         withCredentials: true,
       },
-      formData,
+      body: formData,
     };
-
-    const response = await axios(config);
+    for (const key of formData.keys()) {
+      console.log(key);
+    }
+    for (const value of formData.values()) {
+      console.log(value);
+    }
+    const response = await axios.post(
+      "http://localhost:4000/posts/edit",
+      formData,
+      {
+        headers: {
+          "Content-Type": "multipart/form-data",
+          withCredentials: true,
+        },
+      }
+    );
     console.log(response);
     return response;
   } catch (error) {}
