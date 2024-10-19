@@ -15,7 +15,7 @@ const storage = multer.diskStorage({
       "utf8"
     );
     console.log(file.originalname);
-    cb(null, Date.now() + file.originalname);
+    cb(null, Date.now() + "_" + file.originalname);
   },
 });
 
@@ -33,7 +33,7 @@ const imageStorage = multer.diskStorage({
     // const originalName = Buffer.from(file.originalname, "latin1").toString(
     //   "utf8"
     // );
-    cb(null, Date.now() + file.originalname);
+    cb(null, Date.now() + "_" + file.originalname);
   },
 });
 const upload = multer({

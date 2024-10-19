@@ -96,19 +96,27 @@ exports.read = async function (url, res) {
   return res.json({ url: fileUrl });
 };
 
-exports.downloadFiles = (req, res) => {
-  const filename = req.params.filename;
+// exports.downloadFiles = (req, res) => {
+//   const filename = req.params.filename;
 
-  try {
-    const isFileExist = fs.existsSync(`uploads/${filename}`);
+//   try {
+//     const isFileExist = fs.existsSync(`uploads/${filename}`);
 
-    if (!isFileExist) {
-      return res.status(400).json({ error: "No File" });
-    } else {
-      return res.download(`uploads/${filename}`);
-    }
-  } catch (error) {}
-};
+//     if (!isFileExist) {
+//       return res.status(400).json({ error: "No File" });
+//     } else {
+//       return res
+//         .status(201)
+//         .download(
+//           `uploads/${filename}`,
+//           filename.substring(filename.indexOf("_") + 1)
+//         );
+//     }
+//   } catch (error) {
+//     console.error("Error: ", error);
+//     return res.status(500).json({ message: "Server error:" });
+//   }
+// };
 
 exports.deleteFiles = async (urls) => {
   const deletePromises = urls.map(async (url) => {

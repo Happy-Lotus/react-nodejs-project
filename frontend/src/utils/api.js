@@ -257,3 +257,22 @@ export const registerPost = async (formData) => {
     return response;
   } catch (error) {}
 };
+
+export const downloadFile = async (postid, filename) => {
+  try {
+    const config = {
+      method: "get",
+      url: `http://localhost:4000/posts/${postid}/file/${filename}`,
+      headers: {
+        "Content-Type": "application/json",
+      },
+      responseType: "blob",
+      withCredentials: true,
+    };
+    const response = await axios(config);
+    console.log(response.status)
+    return response;
+  } catch (error) {
+    console.error("Error downloading file:", error); // Added error logging
+  }
+};

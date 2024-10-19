@@ -50,6 +50,7 @@ app.use("/uploads", express.static(path.join(__dirname, "/uploads")));
 
 app.use("/", adminRouter);
 app.use("/posts", postRouter);
+// app.use("/files")
 
 app.get("/uploads/:imageUrl", (req, res) => {
   const imageUrl = req.params.imageUrl;
@@ -260,6 +261,11 @@ app.post(
  *                    type: string
  */
 // app.get("/posts/:postid/:filename", authMiddleware, (req, res) => {
+//   File.downloadFiles(req, res);
+// });
+
+// app.get("/posts/:postid/:filename", (req, res) => {
+//   console.log("filename 호출")
 //   File.downloadFiles(req, res);
 // });
 

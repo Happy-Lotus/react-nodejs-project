@@ -2,8 +2,10 @@ const conn = require("../config/database");
 const dotenv = require("dotenv");
 const File = require("../models/File");
 const Post = require("../models/Post");
+const path = require("path"); // path 모듈 추가
 dotenv.config();
 const moment = require("moment");
+const fs = require("fs");
 //게시물 생성
 exports.create = async (req, res) => {
   try {
@@ -121,5 +123,24 @@ exports.read = async (req, res) => {
 //       .json({ result: error.message || "Server error" });
 //   }
 // };
+exports.downloadFiles = async (req, res) => {
+  console.log("controllers post downloadFiles");
+  const filename = req.params.filename;
+
+  try {
+    const filePath = path.join(__dirname, "../uploads", filename);
+
+    if (!fs.existsSync(filePath)) {
+      return res.status(400).json({ error: "No File" });
+    } else {
+      const originalname = filename.substring(filename.indexOf("_") + 1);
+      console.log(originalname);
+      return res.status(201).download(filePath, originalname);
+    }
+  } catch (error) {
+    console.error("Error: ", error);
+    return res.status(500).json({ message: "Server error:" });
+  }
+};
 
 exports.update = async (req, res) => {};
