@@ -55,7 +55,7 @@ const ImageDropzone = ({
         >
           {thumbnail ? (
             <img
-              src={`/uploads/${thumbnail}`}
+              src={`http://localhost:4000/uploads/${thumbnail}`}
               alt="썸네일 미리보기"
               className={styles.thumbnailPreview}
             />

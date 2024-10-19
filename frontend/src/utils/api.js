@@ -243,6 +243,7 @@ export const registerPost = async (formData) => {
     for (const value of formData.values()) {
       console.log(value);
     }
+    console.log(formData);
     const response = await axios.post(
       "http://localhost:4000/posts/edit",
       formData,
@@ -270,7 +271,7 @@ export const downloadFile = async (postid, filename) => {
       withCredentials: true,
     };
     const response = await axios(config);
-    console.log(response.status)
+    console.log(response.status);
     return response;
   } catch (error) {
     console.error("Error downloading file:", error); // Added error logging

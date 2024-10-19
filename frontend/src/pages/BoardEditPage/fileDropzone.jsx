@@ -38,7 +38,13 @@ const FileDropzone = ({
             style={{ paddingBottom: "8px" }}
           >
             <div className={styles.file__item}>
-              <button onClick={() => handleDeleteFile(file.originalname)}>
+              <button
+                onClick={() =>
+                  file.name
+                    ? handleDeleteFile(file.name)
+                    : handleDeleteFile(file.originalname)
+                }
+              >
                 <FaTrash />
               </button>
               <span className={styles.filename}>

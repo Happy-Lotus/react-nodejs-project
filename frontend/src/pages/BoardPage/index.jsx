@@ -98,11 +98,22 @@ function BoardPage() {
                 <tr key={index} className={styles.tr__content}>
                   <td>{filteredPosts.length - index}</td>
                   <td className={styles.title__cell}>
-                    <img
-                      src={`http://localhost:4000/${thumbnail[index]}`}
-                      alt={`Thumbnail ${post.thumbnail}`}
-                      className={styles.thumbnail}
-                    />
+                    {thumbnail[index] ? (
+                      <img
+                        src={`http://localhost:4000/${thumbnail[index]}`}
+                        alt={`Thumbnail ${post.thumbnail}`}
+                        className={styles.thumbnail}
+                      />
+                    ) : (
+                      <div
+                        className={styles.placeholder}
+                        style={{
+                          backgroundColor: "transparent",
+                          width: "240px",
+                          height: "160px",
+                        }}
+                      ></div>
+                    )}
                   </td>
                   <td className={styles.content__cell}>
                     {" "}

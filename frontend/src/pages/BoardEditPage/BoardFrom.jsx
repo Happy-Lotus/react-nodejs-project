@@ -19,21 +19,20 @@ const BoardForm = ({ isEditMode }) => {
   const [thumbnail, setThumbnail] = useState(null); //썸네일 상태
   const [isThumbnailRemoved, setIsThumbnailRemoved] = useState(false); // 썸네일 제거 상태
   const [showThumbnailModal, setShowThumbnailModal] = useState(false); //썸네일 창 상태
-
   const [files, setFiles] = useState([]); // 첨부파일 상태
-  // const filesRef = useRef(files); // 현재 파일 리스트를 참조하기 위한 ref
+  const filesRef = useRef(files); // 현재 파일 리스트를 참조하기 위한 ref
   const [isDragActive, setIsDragActive] = useState(false);
   const [isExiting, setIsExiting] = useState(false); // 모달 종료 상태 추가
   const [newFiles, setNewFiles] = useState([]); // 새로 추가할 파일
   const [deletedFiles, setDeletedFiles] = useState([]); // 삭제할 파일명
 
-  const getValue = (e) => {
-    const { name, value } = e.target;
-    setMountainContent((prevContent) => ({
-      ...prevContent,
-      [name]: value,
-    }));
-  };
+  // const getValue = (e) => {
+  //   const { name, value } = e.target;
+  //   setMountainContent((prevContent) => ({
+  //     ...prevContent,
+  //     [name]: value,
+  //   }));
+  // };
 
   useEffect(() => {
     if (isEditMode) {
@@ -48,6 +47,9 @@ const BoardForm = ({ isEditMode }) => {
     }
     // filesRef.current = files; // files 상태가 변경될 때마다 ref 업데이트
   }, [isEditMode, location.state]);
+  useEffect(() => {
+    filesRef.current = files; // files 상태가 변경될 때마다 ref 업데이트
+  }, [files]);
 
   //최종 등록
   const handleRegister = async (e) => {
@@ -57,17 +59,18 @@ const BoardForm = ({ isEditMode }) => {
     const postData = {
       title: mountainContent.title,
       content: mountainContent.content,
-      // thumbnail: `uploads/${thumbnail}`,
     };
 
     //썸네일 처리
     if (isThumbnailRemoved) {
+      postData.thumbnail = null;
       //썸네일 제거
-      postData["thumbnail"] = null;
     } else if (thumbnail) {
       //썸네일 추가 또는 변경
-      postData["thumbnail"] = thumbnail;
+      postData.thumbnail = `uploads/${thumbnail}`;
     }
+
+    formData.append("post", JSON.stringify(postData));
 
     //파일 처리
     if (isEditMode) {
@@ -86,6 +89,7 @@ const BoardForm = ({ isEditMode }) => {
       newFiles.forEach((file) => {
         formData.append("files", file);
       });
+      console.log(newFiles);
     }
 
     try {
@@ -97,6 +101,7 @@ const BoardForm = ({ isEditMode }) => {
       //   },
       // });
       // navigate(`/posts`); // 수정 또는 작성 완료 후 게시물 목록으로 이동
+      await registerPost(formData);
     } catch (error) {}
     // await registerPost(formData);
 
@@ -106,10 +111,6 @@ const BoardForm = ({ isEditMode }) => {
   // 파일 drag&drop -> 완료
   const handleFileDrop = useCallback(
     (acceptedFiles) => {
-      // const existingFileNames = new Set(
-      //   filesRef.current.map((file) => file.name)
-      // );
-
       //files : 기존 파일 acceptedFiles: 새로 추가된 파일 newFiles: 저장은 안된 기존파일
       if (files.length + acceptedFiles.length + newFiles.length > 5) {
         alert("첨부할 수 있는 파일의 개수는 5개를 초과할 수 없습니다.");
@@ -126,23 +127,25 @@ const BoardForm = ({ isEditMode }) => {
         return;
       }
 
-      // const newFiles = acceptedFiles.filter(
-      //   (file) => !existingFileNames.has(file.name)
-      // );
+      if (isEditMode) {
+        //수정모드일 경우
+        setNewFiles((prevFiles) => [
+          ...prevFiles,
+          ...acceptedFiles.map((file) =>
+            Object.assign(file, { preview: file.name, fieldname: "files" })
+          ),
+        ]);
+      } else {
+        setFiles((prevFiles) => [
+          ...prevFiles,
+          ...acceptedFiles.map((file) =>
+            Object.assign(file, { preview: file.name, fieldname: "files" })
+          ),
+        ]);
+      }
 
       //새 파일 추가
-      setNewFiles((prevFiles) => [
-        ...prevFiles,
-        ...acceptedFiles.map((file) =>
-          Object.assign(file, { preview: file.name, fieldname: "files" })
-        ),
-      ]);
-      setFiles((prevFiles) => [
-        ...prevFiles,
-        ...acceptedFiles.map((file) =>
-          Object.assign(file, { preview: file.name, fieldname: "files" })
-        ),
-      ]);
+
       setIsDragActive(false);
     },
     [files, newFiles]
@@ -165,19 +168,22 @@ const BoardForm = ({ isEditMode }) => {
       setIsDragActive(false); // Reset drag state
       return;
     }
-
-    setNewFiles((prevFiles) => [
-      ...prevFiles,
-      ...selectedFiles.map((file) =>
-        Object.assign(file, { preview: file.name, fieldname: "files" })
-      ),
-    ]);
-    setFiles((prevFiles) => [
-      ...prevFiles,
-      ...selectedFiles.map((file) =>
-        Object.assign(file, { preview: file.name, fieldname: "files" })
-      ),
-    ]);
+    if (isEditMode) {
+      //수정모드일 경우
+      setNewFiles((prevFiles) => [
+        ...prevFiles,
+        ...selectedFiles.map((file) =>
+          Object.assign(file, { preview: file.name, fieldname: "files" })
+        ),
+      ]);
+    } else {
+      setFiles((prevFiles) => [
+        ...prevFiles,
+        ...selectedFiles.map((file) =>
+          Object.assign(file, { preview: file.name, fieldname: "files" })
+        ),
+      ]);
+    }
   };
 
   //파일 삭제 -> 새로 저장한 파일과 기존에 저장된 파일 삭제 로직 구현
@@ -191,12 +197,15 @@ const BoardForm = ({ isEditMode }) => {
         setFiles((prev) =>
           prev.filter((file) => file.originalname !== filename)
         ); // UI에서 파일 제거
+      } else {
+        setNewFiles((prev) => prev.filter((file) => file.name !== filename)); // 새로 추가된 파일 리스트에서 제거
+        console.log(files);
       }
     } else {
       console.log("handleToDeleteFile");
-      setNewFiles((prev) => prev.filter((file) => file.name !== filename)); // 새로 추가된 파일 리스트에서 제거
+      console.log(filename);
       console.log(files);
-      setFiles((prev) => prev.filter((file) => file.originalname !== filename)); // UI에서 파일 제거
+      setFiles((prev) => prev.filter((file) => file.name !== filename)); // UI에서 파일 제거
       console.log(files);
     }
   };
@@ -403,8 +412,10 @@ const BoardForm = ({ isEditMode }) => {
           <input
             name="title"
             className={styles.title__input}
-            onChange={getValue}
-            defaultValue={mountainContent.title}
+            onChange={(e) =>
+              setMountainContent({ ...mountainContent, title: e.target.value })
+            } // 상태 업데이트}
+            value={mountainContent.title}
           ></input>
         </div>
         <div className={styles.content__contentBox}>

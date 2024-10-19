@@ -359,7 +359,7 @@ const Editor = ({ content, setContent }) => {
     <CKEditor
       editor={ClassicEditor}
       config={editorConfig}
-      data="<h2>Congratulations on setting up CKEditor 5! 🎉</h2>"
+      data={content}
       // onReady={(editor) => {
       //   // You can store the "editor" and use when it is needed.
       //   console.log("Editor is ready to use!", editor);
