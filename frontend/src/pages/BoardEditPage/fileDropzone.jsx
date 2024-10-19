@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { useDropzone } from "react-dropzone";
 import { FaTrash } from "react-icons/fa";
 import styles from "./FileDropzone.module.scss"; // 스타일 파일 경로
+import { FaUpload } from "react-icons/fa";
 
 const FileDropzone = ({
   onDrop,
@@ -9,6 +10,7 @@ const FileDropzone = ({
   isDragActive,
   setIsDragActive,
   handleDeleteFile,
+  handleFileChange,
 }) => {
   const { getRootProps, getInputProps } = useDropzone({
     onDrop,
@@ -31,12 +33,23 @@ const FileDropzone = ({
     files.length > 0 ? (
       <ul className={styles.file__list}>
         {files.map((file) => (
-          <li key={file.name} style={{ paddingBottom: "8px" }}>
+          <li
+            key={file.name || file.originalname}
+            style={{ paddingBottom: "8px" }}
+          >
             <div className={styles.file__item}>
-              <button onClick={() => handleDeleteFile(file)}>
+              <button
+                onClick={() =>
+                  file.name
+                    ? handleDeleteFile(file.name)
+                    : handleDeleteFile(file.originalname)
+                }
+              >
                 <FaTrash />
               </button>
-              <span className={styles.filename}>{file.name}</span>
+              <span className={styles.filename}>
+                {file.name || file.originalname}
+              </span>
             </div>
           </li>
         ))}
@@ -46,16 +59,35 @@ const FileDropzone = ({
     );
 
   return (
-    <section className={styles.file}>
-      <div
-        {...getRootProps({
-          className: isDragActive ? styles.drapzoneActive : styles.drapzone,
-        })}
-      >
-        <input {...getInputProps()} />
-        {filelist}
+    <div className={styles.attachments}>
+      <div className={styles.title__uploadButton}>
+        <h2 className={styles.attachments__title}>첨부파일</h2>
+        <label htmlFor="file-upload" className={styles.fileUploadButton}>
+          <FaUpload /> 업로드
+        </label>
+        <input
+          type="file"
+          multiple
+          onChange={handleFileChange}
+          style={{ display: "none" }}
+          id="file-upload"
+          name="files"
+        />
       </div>
-    </section>
+      <section className={styles.file}>
+        <div
+          {...getRootProps({
+            className: isDragActive ? styles.drapzoneActive : styles.drapzone,
+          })}
+        >
+          <input {...getInputProps()} />
+          {filelist}
+        </div>
+      </section>
+      <p className={styles.fileNotice}>
+        파일의 최대 크기: 10MB, 최대 첨부 파일 갯수: 5
+      </p>
+    </div>
   );
 };
 

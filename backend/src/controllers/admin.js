@@ -141,6 +141,7 @@ exports.login = async (req, res) => {
           email: user.email,
           userid: user.userid,
           pwd: user.pwd,
+          nickname: user.nickname,
         };
 
         const accessToken = jwt.sign(payload, secret, {

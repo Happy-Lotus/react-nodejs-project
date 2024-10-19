@@ -11,7 +11,7 @@ function BoardPage() {
   const [searchOption, setSearchOption] = useState("title"); // 추가된 부분
   const [searchTerm, setSearchTerm] = useState("");
   const [filteredPosts, setFilteredPosts] = useState([]); // 필터링된 게시물 상태
-  const [image, setImage] = useState([]);
+  const [thumbnail, setThumbnail] = useState([]);
 
   useEffect(() => {
     const getPosts = async () => {
@@ -21,7 +21,7 @@ function BoardPage() {
         setPosts(data);
 
         const imageList = data.map((post) => post.thumbnail);
-        setImage(imageList);
+        setThumbnail(imageList);
         setFilteredPosts(data);
       } catch (error) {
         console.error("Error fetching posts:", error);
@@ -96,13 +96,24 @@ function BoardPage() {
             <tbody>
               {filteredPosts.map((post, index) => (
                 <tr key={index} className={styles.tr__content}>
-                  <td>{index}</td>
+                  <td>{filteredPosts.length - index}</td>
                   <td className={styles.title__cell}>
-                    <img
-                      src={`http://localhost:4000/${image[0]}`}
-                      alt={`Thumbnail ${post.thumbnail}`}
-                      className={styles.thumbnail}
-                    />
+                    {thumbnail[index] ? (
+                      <img
+                        src={`http://localhost:4000/${thumbnail[index]}`}
+                        alt={`Thumbnail ${post.thumbnail}`}
+                        className={styles.thumbnail}
+                      />
+                    ) : (
+                      <div
+                        className={styles.placeholder}
+                        style={{
+                          backgroundColor: "transparent",
+                          width: "240px",
+                          height: "160px",
+                        }}
+                      ></div>
+                    )}
                   </td>
                   <td className={styles.content__cell}>
                     {" "}

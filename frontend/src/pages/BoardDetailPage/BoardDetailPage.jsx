@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
 
 import styles from "./BoardDetailPage.module.scss"; // SCSS 모듈 임포트
-import { fetchPostDetail } from "../../utils/api";
+import { downloadFile, fetchPostDetail } from "../../utils/api";
 
 const BoardDetailPage = () => {
   const { postId } = useParams(); // URL 파라미터에서 postId 가져오기
@@ -19,6 +19,27 @@ const BoardDetailPage = () => {
 
   const transform = () => {
     return { __html: post.content };
+  };
+
+  const fileDownload = (originalname, filename) => {
+    console.log(files);
+    console.log(filename);
+    downloadFile(postId, filename)
+      .then((response) => {
+        console.log(response.message);
+        if (response && response.status === 201) {
+          const url = window.URL.createObjectURL(new Blob([response.data]));
+          const link = document.createElement("a");
+          link.href = url;
+          link.setAttribute("download", originalname);
+          document.body.appendChild(link);
+          link.click();
+          link.remove();
+        }
+      })
+      .catch((error) => {
+        console.error("Error downloading file:", error); // Log any errors
+      });
   };
 
   useEffect(() => {
@@ -63,11 +84,18 @@ const BoardDetailPage = () => {
           dangerouslySetInnerHTML={transform()}
         ></div>
         <div className={styles.attachments}>
-          <h2>3. 첨부파일</h2>
+          <h2>첨부파일</h2>
           <div className={styles.file}>
             {files.map((item, index) => {
-              console.log(item.originalname);
-              return <span key={index}>📄 {item.originalname}</span>;
+              console.log(item.filename);
+              return (
+                <span
+                  key={index}
+                  onClick={() => fileDownload(item.originalname, item.filename)}
+                >
+                  📄 {item.originalname}
+                </span>
+              );
             })}
             {/* <span>📄 Lorem Ipsum.pdf</span>
             <span>🖼️ sample.jpg</span> */}

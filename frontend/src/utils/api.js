@@ -45,7 +45,6 @@ export const useSignup = () => {
 
 export const useLogin = () => {
   const setSigninState = useSetRecoilState(signinState);
-  const [cookies, setCookie] = useCookies(["AccessToken", "RefreshToken"]);
 
   const signin = async (userData) => {
     console.log("sign in api 요청");
@@ -225,4 +224,56 @@ export const verifyCode = async (email, code) => {
     console.log(response);
     return response;
   } catch (error) {}
+};
+
+export const registerPost = async (formData) => {
+  try {
+    const config = {
+      url: "http://localhost:4000/posts/edit",
+      method: "post",
+      headers: {
+        "Content-Type": "multipart/form-data",
+        withCredentials: true,
+      },
+      body: formData,
+    };
+    for (const key of formData.keys()) {
+      console.log(key);
+    }
+    for (const value of formData.values()) {
+      console.log(value);
+    }
+    console.log(formData);
+    const response = await axios.post(
+      "http://localhost:4000/posts/edit",
+      formData,
+      {
+        headers: {
+          "Content-Type": "multipart/form-data",
+          withCredentials: true,
+        },
+      }
+    );
+    console.log(response);
+    return response;
+  } catch (error) {}
+};
+
+export const downloadFile = async (postid, filename) => {
+  try {
+    const config = {
+      method: "get",
+      url: `http://localhost:4000/posts/${postid}/file/${filename}`,
+      headers: {
+        "Content-Type": "application/json",
+      },
+      responseType: "blob",
+      withCredentials: true,
+    };
+    const response = await axios(config);
+    console.log(response.status);
+    return response;
+  } catch (error) {
+    console.error("Error downloading file:", error); // Added error logging
+  }
 };

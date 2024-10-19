@@ -75,40 +75,25 @@ exports.imageUpload = async function (req, res) {
   if (!req.file) {
     return res.status(400).json({ error: "No file uploaded." });
   }
-
   // 파일 URL 생성
-  const fileUrl = `http://localhost:4000/uploads/${req.file.filename}`;
-  console.log(req.file);
-  return res.json({ url: fileUrl });
+  const imageUrl = `http://localhost:4000/uploads/${req.file.filename}`;
+  return res.json({ url: imageUrl });
 };
 
 exports.read = async function (url, res) {
   if (!url) {
     return res.status(400).json({ error: "No file uploaded." });
   }
-
   const fileUrl = `http://localhost:4000/uploads/${url}`;
+
   res.setHeader("Access-Control-Allow-Origin", "http://localhost:3000");
   res.setHeader("Access-Control-Allow-Methods", "GET,POST,DELETE,PUT");
   res.setHeader("Access-Control-Allow-Headers", "Content-Type");
+  res.setHeader("Access-Control-Allow-Credentials", "true");
   res.setHeader("X-Content-Type-Options", "nosniff");
-  res.setHeader("Content-Type", "text/css");
+  res.setHeader("Content-Type", "application/json");
 
   return res.json({ url: fileUrl });
-};
-
-exports.downloadFiles = (req, res) => {
-  const filename = req.params.filename;
-
-  try {
-    const isFileExist = fs.existsSync(`uploads/${filename}`);
-
-    if (!isFileExist) {
-      return res.status(400).json({ error: "No File" });
-    } else {
-      return res.download(`uploads/${filename}`);
-    }
-  } catch (error) {}
 };
 
 exports.deleteFiles = async (urls) => {
