@@ -10,6 +10,7 @@ import CommonHeader from "./components/header/header";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/ReactToastify.css";
 import { RecoilRoot } from "recoil"; // Import RecoilRoot
+import BoardForm from "./pages/BoardEditPage/BoardFrom";
 function Layout() {
   return (
     <div style={{ width: "100%", height: "100vh" }}>
@@ -57,10 +58,13 @@ function App() {
         <Route path="/posts" element={<Layout />}>
           <Route index element={<BoardPage />} />
           <Route path="/posts/detail/:postId" element={<BoardDetailPage />} />
-          <Route path="/posts/edit" element={<BoardEditPage />} />
+          <Route
+            path="/posts/edit"
+            element={<BoardEditPage isEditMode={false} />}
+          />
           <Route
             path="/posts/detail/:postId/edit"
-            element={<BoardRewritePage />}
+            element={<BoardRewritePage isEditMode={true} />}
           />
           {/*로그인 여부와 상관없이 갈 수 있는 경로*/}
           {/* <Route index element={<RegisterPage />} /> */}

@@ -21,12 +21,12 @@ const BoardDetailPage = () => {
     return { __html: post.content };
   };
 
-  const fileDownload = (originalname,filename) => {
-    console.log(files)
-    console.log(filename)
+  const fileDownload = (originalname, filename) => {
+    console.log(files);
+    console.log(filename);
     downloadFile(postId, filename)
       .then((response) => {
-        console.log(response.message)
+        console.log(response.message);
         if (response && response.status === 201) {
           const url = window.URL.createObjectURL(new Blob([response.data]));
           const link = document.createElement("a");
@@ -84,12 +84,15 @@ const BoardDetailPage = () => {
           dangerouslySetInnerHTML={transform()}
         ></div>
         <div className={styles.attachments}>
-          <h2>3. 첨부파일</h2>
+          <h2>첨부파일</h2>
           <div className={styles.file}>
             {files.map((item, index) => {
               console.log(item.filename);
               return (
-                <span key={index} onClick={() => fileDownload(item.originalname,item.filename)}> 
+                <span
+                  key={index}
+                  onClick={() => fileDownload(item.originalname, item.filename)}
+                >
                   📄 {item.originalname}
                 </span>
               );

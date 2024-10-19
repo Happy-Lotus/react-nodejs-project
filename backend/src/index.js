@@ -50,9 +50,9 @@ app.use("/uploads", express.static(path.join(__dirname, "/uploads")));
 
 app.use("/", adminRouter);
 app.use("/posts", postRouter);
-// app.use("/files")
 
-app.get("/uploads/:imageUrl", (req, res) => {
+app.get("/posts/:imageUrl", (req, res) => {
+  console.log("/uploads imageUrl");
   const imageUrl = req.params.imageUrl;
   File.read(imageUrl, res);
 });

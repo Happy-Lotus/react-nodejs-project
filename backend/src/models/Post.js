@@ -5,69 +5,61 @@ const moment = require("moment");
 const { update } = require("./Token");
 
 //게시물 생성
-exports.create = async function (req, res) {
-  try {
-    const { title, content, writer } = JSON.parse(req.body.board);
-    const { email, userid } = req.user;
-    const files = req.files.files;
-    const thumbnail = req.files.thumbnail
-      ? `${req.files.thumbnail[0].destination}${req.files.thumbnail[0].filename}`
-      : "";
+exports.create = async function (postData) {
+  const { title, content, writer, userid, thumbnail, files } = postData;
 
-    const sql =
-      "INSERT INTO board (title, content, writer, regdate, userid,thumbnail) VALUES (?, ?, ?, ?, ?, ?)";
-    const now = moment(Date.now()).format("YYYY-MM-DD HH:mm:ss");
-    const var_array = [title, content, writer, now, userid, thumbnail];
-    let fileInfos;
+  const sql =
+    "INSERT INTO board (title, content, writer, regdate, userid,thumbnail) VALUES (?, ?, ?, ?, ?, ?)";
+  const now = moment(Date.now()).format("YYYY-MM-DD HH:mm:ss");
+  const var_array = [title, content, writer, now, userid, thumbnail];
+  let fileInfos;
 
-    if (files) {
-      fileInfos = files.map((file) => ({
-        filename: file.filename,
-        originalname: file.originalname,
-        size: file.size,
-        url: `/uploads/${file.filename}`,
-      }));
-    }
+  if (files) {
+    fileInfos = files.map((file) => ({
+      filename: file.filename,
+      originalname: file.originalname,
+      size: file.size,
+      url: `/uploads/${file.filename}`,
+    }));
+  }
 
-    console.log(fileInfos);
+  console.log(fileInfos);
 
-    conn.query(sql, var_array, (error, results) => {
+  return new Promise(async (resolve, reject) => {
+    conn.query(sql, var_array, async (error, results) => {
       if (error) {
-        console.error("Database error: ", error);
-        return res.status(500).json({ result: "Database error:" + email });
+        return reject({ statusCode: 500, message: error.sqlMessage });
       } else {
         if (results.affectedRows > 0) {
+          const boardId = results.insertId;
           if (fileInfos) {
             try {
-              const boardId = results.insertId;
-              if (files) File.create(boardId, fileInfos);
-              return res
-                .status(201)
-                .json({ result: "File and Post upload OK" });
-            } catch (error) {
-              console.error("File upload error: ", error);
-              return res.status(400).json({ result: "File upload error" });
+              await File.create(boardId, fileInfos);
+              resolve({ statusCode: 201, message: "File and Post upload OK" });
+            } catch (fileError) {
+              return reject({
+                statusCode: fileError.statusCode,
+                message: fileError.message,
+              });
             }
           } else {
-            return res
-              .status(201)
-              .json({ result: "Only Post created successfully" });
+            resolve({
+              statusCode: 201,
+              message: "Only Post created successfully",
+            });
           }
         } else {
-          return res.status(400).json({ result: "Error" });
+          reject({ statusCode: 404, message: "Request Error" });
         }
       }
     });
-  } catch (error) {
-    console.error("Error: ", error);
-    return res.status(500).json({ result: "Server error:" });
-  }
+  });
 };
 
 //게시물 전체 조회(글 목록) => 완료
 exports.readAll = async function () {
   const sql =
-    "SELECT boardid, title, content, writer, regdate, thumbnail FROM board";
+    "SELECT boardid, title, content, writer, regdate, thumbnail FROM board ORDER BY boardid DESC";
   try {
     return new Promise((resolve, reject) => {
       conn.query(sql, async (error, results) => {

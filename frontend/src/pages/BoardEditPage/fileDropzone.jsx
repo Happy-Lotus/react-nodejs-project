@@ -33,12 +33,17 @@ const FileDropzone = ({
     files.length > 0 ? (
       <ul className={styles.file__list}>
         {files.map((file) => (
-          <li key={file.name} style={{ paddingBottom: "8px" }}>
+          <li
+            key={file.name || file.originalname}
+            style={{ paddingBottom: "8px" }}
+          >
             <div className={styles.file__item}>
-              <button onClick={() => handleDeleteFile(file)}>
+              <button onClick={() => handleDeleteFile(file.originalname)}>
                 <FaTrash />
               </button>
-              <span className={styles.filename}>{file.name}</span>
+              <span className={styles.filename}>
+                {file.name || file.originalname}
+              </span>
             </div>
           </li>
         ))}

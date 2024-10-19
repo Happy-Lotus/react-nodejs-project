@@ -2,6 +2,7 @@ const conn = require("../config/database");
 const dotenv = require("dotenv");
 const File = require("../models/File");
 const Post = require("../models/Post");
+const User = require("../models/User");
 const path = require("path"); // path 모듈 추가
 dotenv.config();
 const moment = require("moment");
@@ -10,63 +11,68 @@ const fs = require("fs");
 exports.create = async (req, res) => {
   try {
     const { title, content, thumbnail } = JSON.parse(req.body.post);
-    // const { email, userid } = req.user;
-    const email = "happy";
-    const userid = 22;
+    const { email, userid, nickname } = req.user;
     const files = req.files;
 
-    // const thumbnail = req.file;
-    // // const thumbnail = req.file.thumbnail
-    // //   ? `${req.files.thumbnail[0].destination}${req.files.thumbnail[0].filename}`
-    // //   : "";
+    const data = {
+      title,
+      content,
+      writer: nickname,
+      userid,
+      thumbnail,
+      files,
+    };
 
-    const sql =
-      "INSERT INTO board (title, content, writer, regdate, userid,thumbnail) VALUES (?, ?, ?, ?, ?, ?)";
-    const now = moment(Date.now()).format("YYYY-MM-DD HH:mm:ss");
-    const var_array = [title, content, "애니", now, userid, thumbnail];
-    let fileInfos;
+    const { statusCode, message } = await Post.create(data);
+    return res.status(statusCode).json({ message });
 
-    if (files) {
-      fileInfos = files.map((file) => ({
-        filename: file.filename,
-        originalname: file.originalname,
-        size: file.size,
-        url: `/uploads/${file.filename}`,
-      }));
-    }
+    // const sql =
+    //   "INSERT INTO board (title, content, writer, regdate, userid,thumbnail) VALUES (?, ?, ?, ?, ?, ?)";
+    // const now = moment(Date.now()).format("YYYY-MM-DD HH:mm:ss");
+    // const var_array = [title, content, "애니", now, userid, thumbnail];
+    // let fileInfos;
 
-    console.log(fileInfos);
+    // if (files) {
+    //   fileInfos = files.map((file) => ({
+    //     filename: file.filename,
+    //     originalname: file.originalname,
+    //     size: file.size,
+    //     url: `/uploads/${file.filename}`,
+    //   }));
+    // }
 
-    conn.query(sql, var_array, (error, results) => {
-      if (error) {
-        console.error("Database error: ", error);
-        return res.status(500).json({ result: "Database error:" + email });
-      } else {
-        if (results.affectedRows > 0) {
-          if (fileInfos) {
-            try {
-              const boardId = results.insertId;
-              if (files) File.create(boardId, fileInfos);
-              return res
-                .status(201)
-                .json({ result: "File and Post upload OK" });
-            } catch (error) {
-              console.error("File upload error: ", error);
-              return res.status(400).json({ result: "File upload error" });
-            }
-          } else {
-            return res
-              .status(201)
-              .json({ result: "Only Post created successfully" });
-          }
-        } else {
-          return res.status(400).json({ result: "Error" });
-        }
-      }
-    });
+    // console.log(fileInfos);
+
+    // conn.query(sql, var_array, (error, results) => {
+    //   if (error) {
+    //     console.error("Database error: ", error);
+    //     return res.status(500).json({ result: "Database error:" + email });
+    //   } else {
+    //     if (results.affectedRows > 0) {
+    //       if (fileInfos) {
+    //         try {
+    //           const boardId = results.insertId;
+    //           if (files) File.create(boardId, fileInfos);
+    //           return res
+    //             .status(201)
+    //             .json({ result: "File and Post upload OK" });
+    //         } catch (error) {
+    //           console.error("File upload error: ", error);
+    //           return res.status(400).json({ result: "File upload error" });
+    //         }
+    //       } else {
+    //         return res
+    //           .status(201)
+    //           .json({ result: "Only Post created successfully" });
+    //       }
+    //     } else {
+    //       return res.status(400).json({ result: "Error" });
+    //     }
+    //   }
+    // });
   } catch (error) {
     console.error(error);
-    res.status(500).json({ message: "서버 오류" });
+    res.status(error.statusCode).json({ message: error.message });
   }
 };
 

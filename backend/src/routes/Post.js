@@ -15,7 +15,12 @@ router.get("/:option", authMiddleware, postController.verifyEmail);
 router.get("/detail/:postid", postController.read);
 
 /* 게시물 작성*/
-router.post("/edit", upload.array("files"), postController.create);
+router.post(
+  "/edit",
+  authMiddleware,
+  upload.array("files"),
+  postController.create
+);
 
 /* 게시물 수정*/
 router.post(
