@@ -97,10 +97,11 @@ const BoardForm = ({ isEditMode }) => {
           formData.append("files", file);
         });
         console.log(files);
+        formData.append("post", JSON.stringify(postData));
         await registerPost(formData);
       }
+      navigate("/posts"); // 저장 후 /posts로 이동
     } catch (error) {}
-    // navigate("/posts"); // 저장 후 /posts로 이동
   };
 
   // 파일 drag&drop -> 완료
@@ -196,14 +197,13 @@ const BoardForm = ({ isEditMode }) => {
   //파일 삭제 -> 새로 저장한 파일과 기존에 저장된 파일 삭제 로직 구현
   const handleDeleteFile = (filename) => {
     if (isEditMode) {
-      const fileToDelete = files.find((file) => file.originalname === filename);
+      const fileToDelete = files.find((file) => file.filename === filename);
+      console.log(fileToDelete);
 
       if (fileToDelete) {
         //기존에 저장된 파일인 경우
         setDeletedFiles((prev) => [...prev, filename]); // 삭제할 파일명 추가
-        setFiles((prev) =>
-          prev.filter((file) => file.originalname !== filename)
-        ); // UI에서 파일 제거
+        setFiles((prev) => prev.filter((file) => file.filename !== filename)); // UI에서 파일 제거
       } else {
         setNewFiles((prev) => prev.filter((file) => file.name !== filename)); // 새로 추가된 파일 리스트에서 제거
         console.log(files);

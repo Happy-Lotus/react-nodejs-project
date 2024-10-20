@@ -1,5 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
+import { marked } from "marked";
+import Prism from "prismjs";
 
 import styles from "./BoardDetailPage.module.scss"; // SCSS 모듈 임포트
 import { downloadFile, fetchPostDetail } from "../../utils/api";
@@ -8,6 +10,7 @@ const BoardDetailPage = () => {
   const { postId } = useParams(); // URL 파라미터에서 postId 가져오기
   const [post, setPost] = useState(null); // 게시물 데이터를 저장할 상태
   const [files, setFile] = useState([]);
+  const [htmlContent, setHtmlContent] = useState(""); // 변환된 HTML 내용을 저장할 상태
   const [loading, setLoading] = useState(true); // 로딩 상태
   const navigate = useNavigate();
 
@@ -17,8 +20,34 @@ const BoardDetailPage = () => {
     });
   };
 
+  const markdownToHtml = async (fileContent) => {
+    const renderer = new marked.Renderer();
+    renderer.code = function (code, language, escaped) {
+      code = this.options.highlight(code, language);
+      if (!language) {
+        return `<pre><code>${code}</code></pre>`;
+      }
+
+      const languageClass = "language-" + language;
+      return `<pre class="${languageClass}"><code class="${languageClass}">${code}</code></pre>`;
+    };
+
+    marked.setOptions({
+      renderer,
+      highlight: function (code, language) {
+        try {
+          return Prism.highlight(code, Prism.languages[language], language);
+        } catch {
+          return code;
+        }
+      },
+    });
+
+    return marked(fileContent);
+  };
+
   const transform = () => {
-    return { __html: post.content };
+    return { __html: htmlContent };
   };
 
   const fileDownload = (originalname, filename) => {
@@ -48,6 +77,8 @@ const BoardDetailPage = () => {
         const data = await fetchPostDetail(postId); // API 호출
         setPost(data.post); // 받아온 데이터로 상태 업데이트
         setFile(data.files);
+        const html = await markdownToHtml(data.post.content);
+        setHtmlContent(html);
       } catch (error) {
         console.error("Error fetching post detail:", error);
       } finally {

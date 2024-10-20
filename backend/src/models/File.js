@@ -51,14 +51,17 @@ exports.readOption = async function (boardId) {
 
 //파일 삭제
 exports.delete = async function (boardid, filename) {
-  const sql = "DELETE FROM file WHERE filename = ? AND boardid = ?";
+  const sql = "DELETE FROM file WHERE filename = ?";
   const var_array = [filename, boardid];
+  console.log("File delete");
+  console.log(filename);
 
   return new Promise((resolve, reject) => {
     conn.query(sql, var_array, (error, results) => {
       if (error) {
         return reject({ statusCode: 400, message: error.sqlMessage });
       } else {
+        console.log("파일 삭제 성공" + results.length);
         resolve({ statusCode: 201, message: "파일 삭제 성공" });
       }
     });
@@ -107,6 +110,7 @@ exports.deleteFiles = async (urls) => {
       "D:/Gitrepo/react-nodejs-project/backend/uploads",
       fileName
     ); // 파일 경로 설정
+    console.log(fileName);
     console.log(__dirname);
     try {
       await fs.unlink(filePath); // 파일 삭제
@@ -147,7 +151,7 @@ exports.deleteAttachedFiles = async (filenames) => {
   const deletePromises = filenames.map(async (file) => {
     // const fileName = file.filename;
     const filePath = path.join(
-      "D:/Gitrepo/react-nodejs-project/backend/uploads",
+      "D:/Gitrepo/react-nodejs-project/backend/src/uploads",
       file
     ); // 파일 경로 설정
 

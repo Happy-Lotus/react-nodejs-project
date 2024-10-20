@@ -141,13 +141,17 @@ exports.update = async function (req, res) {
     if (statusCode === 201) {
       await Promise.all([
         File.deleteAttachedFiles(deleteFiles),
-        File.deleteThumbnail(existThumbnail),
+        ...(existThumbnail && existThumbnail !== data.thumbnail
+          ? [File.deleteThumbnail(existThumbnail)]
+          : []),
       ]);
     }
     return res.status(statusCode).json({ message });
   } catch (error) {
     console.error(error);
-    res.status(error.statusCode).json({ message: error.message });
+    res
+      .status(error.statusCode || 500)
+      .json({ message: error.message || "Server error" });
   }
 
   // const existThumbnail = await this.readByBoardId(boardid).then((result) => {

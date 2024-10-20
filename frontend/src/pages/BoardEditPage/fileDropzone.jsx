@@ -42,7 +42,7 @@ const FileDropzone = ({
                 onClick={() =>
                   file.name
                     ? handleDeleteFile(file.name)
-                    : handleDeleteFile(file.originalname)
+                    : handleDeleteFile(file.filename)
                 }
               >
                 <FaTrash />
