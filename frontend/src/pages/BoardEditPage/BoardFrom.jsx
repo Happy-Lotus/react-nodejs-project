@@ -11,10 +11,7 @@ import { registerPost } from "../../utils/api";
 const BoardForm = ({ isEditMode }) => {
   const location = useLocation();
   const navigate = useNavigate();
-  const [mountainContent, setMountainContent] = useState({
-    title: "",
-    content: "",
-  });
+  const [mountainContent, setMountainContent] = useState({});
 
   const [thumbnail, setThumbnail] = useState(null); //썸네일 상태
   const [isThumbnailRemoved, setIsThumbnailRemoved] = useState(false); // 썸네일 제거 상태
@@ -26,14 +23,6 @@ const BoardForm = ({ isEditMode }) => {
   const [newFiles, setNewFiles] = useState([]); // 새로 추가할 파일
   const [deletedFiles, setDeletedFiles] = useState([]); // 삭제할 파일명
 
-  // const getValue = (e) => {
-  //   const { name, value } = e.target;
-  //   setMountainContent((prevContent) => ({
-  //     ...prevContent,
-  //     [name]: value,
-  //   }));
-  // };
-
   useEffect(() => {
     if (isEditMode) {
       //수정 모드
@@ -44,12 +33,26 @@ const BoardForm = ({ isEditMode }) => {
       });
       setThumbnail(post.thumbnail);
       setFiles(files);
+    } else {
+      setMountainContent({
+        title: "",
+        content: "",
+      });
     }
     // filesRef.current = files; // files 상태가 변경될 때마다 ref 업데이트
   }, [isEditMode, location.state]);
+
   useEffect(() => {
     filesRef.current = files; // files 상태가 변경될 때마다 ref 업데이트
   }, [files]);
+
+  const getValue = (e) => {
+    const { name, value } = e.target;
+    setMountainContent((prevContent) => ({
+      ...prevContent,
+      [name]: value,
+    }));
+  };
 
   //최종 등록
   const handleRegister = async (e) => {
@@ -224,8 +227,9 @@ const BoardForm = ({ isEditMode }) => {
           },
         })
         .then((response) => {
-          const imageUrl = response.data.url.split("/").pop();
+          const imageUrl = `uploads/${response.data.url.split("/").pop()}`;
           setThumbnail(imageUrl);
+          console.log(thumbnail);
           setIsThumbnailRemoved(false);
         })
         .catch((error) => {
@@ -412,9 +416,7 @@ const BoardForm = ({ isEditMode }) => {
           <input
             name="title"
             className={styles.title__input}
-            onChange={(e) =>
-              setMountainContent({ ...mountainContent, title: e.target.value })
-            } // 상태 업데이트}
+            onChange={getValue}
             value={mountainContent.title}
           ></input>
         </div>
