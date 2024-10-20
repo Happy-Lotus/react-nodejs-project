@@ -146,7 +146,7 @@
 
 // export default BoardRewritePage;
 import React from "react";
-import BoardForm from "../BoardEditPage/BoardFrom";
+import BoardForm from "../BoardEditPage/BoardForm";
 
 const BoardRewritePage = () => {
   return <BoardForm isEditMode={true} />; // 수정 모드

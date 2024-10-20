@@ -25,8 +25,8 @@ router.post(
 /* 게시물 수정*/
 router.post(
   "/detail/:postid",
-  authMiddleware,
-  upload.fields([{ name: "files" }, { name: "thumbnail" }]),
+  // authMiddleware,
+  upload.array("newFiles"),
   postController.update
 );
 

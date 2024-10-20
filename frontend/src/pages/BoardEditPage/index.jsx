@@ -259,7 +259,7 @@
 // };
 
 // export default BoardEditPage;
-import BoardForm from "./BoardFrom";
+import BoardForm from "./BoardForm";
 
 const BoardEditPage = () => {
   return <BoardForm isEditMode={false} />;

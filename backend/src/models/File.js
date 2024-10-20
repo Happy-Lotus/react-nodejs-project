@@ -49,25 +49,29 @@ exports.readOption = async function (boardId) {
   }
 };
 
-exports.delete = async function (file) {
-  const sql = "DELETE FROM file WHERE filename = ?";
-  console.log(file.filename);
-  const filename = file.filename;
+//파일 삭제
+exports.delete = async function (boardid, filename) {
+  const sql = "DELETE FROM file WHERE filename = ? AND boardid = ?";
+  const var_array = [filename, boardid];
 
-  try {
-    await new Promise((resolve, reject) => {
-      conn.query(sql, filename, (error, results) => {
-        if (error) {
-          console.error("Database error: ", error);
-          return reject(new Error("Database error: " + error.message));
-        }
-        resolve();
-      });
+  return new Promise((resolve, reject) => {
+    conn.query(sql, var_array, (error, results) => {
+      if (error) {
+        return reject({ statusCode: 400, message: error.sqlMessage });
+      } else {
+        resolve({ statusCode: 201, message: "파일 삭제 성공" });
+      }
     });
-  } catch (error) {
-    console.error(filename + " delete Error: ", error);
-    return res.status(500).json({ result: "Server error:" });
-  }
+  });
+  // await new Promise((resolve, reject) => {
+  //   conn.query(sql, filename, (error, results) => {
+  //     if (error) {
+  //       console.error("Database error: ", error);
+  //       return reject(new Error("Database error: " + error.message));
+  //     }
+  //     resolve();
+  //   });
+  // });
 };
 
 exports.imageUpload = async function (req, res) {
@@ -118,6 +122,7 @@ exports.deleteFiles = async (urls) => {
 
 // 썸네일 파일 삭제 함수
 exports.deleteThumbnail = async (thumbnailUrl) => {
+  console.log("deleteThumbnail 함수" + thumbnailUrl);
   if (thumbnailUrl) {
     const thumbnailFileName = path.basename(thumbnailUrl);
     console.log(thumbnailFileName);
@@ -125,6 +130,7 @@ exports.deleteThumbnail = async (thumbnailUrl) => {
       "D:/Gitrepo/react-nodejs-project/backend/uploads",
       thumbnailFileName
     ); // 썸네일 파일 경로 설정
+    console.log(thumbnailFilePath);
 
     try {
       await fs.unlink(thumbnailFilePath); // 썸네일 파일 삭제
@@ -137,12 +143,12 @@ exports.deleteThumbnail = async (thumbnailUrl) => {
 };
 
 // 첨부파일 삭제 함수
-exports.deleteAttachedFiles = async (files) => {
-  const deletePromises = files.map(async (file) => {
-    const fileName = file.filename;
+exports.deleteAttachedFiles = async (filenames) => {
+  const deletePromises = filenames.map(async (file) => {
+    // const fileName = file.filename;
     const filePath = path.join(
       "D:/Gitrepo/react-nodejs-project/backend/uploads",
-      fileName
+      file
     ); // 파일 경로 설정
 
     try {

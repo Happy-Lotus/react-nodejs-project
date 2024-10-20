@@ -10,7 +10,7 @@ import CommonHeader from "./components/header/header";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/ReactToastify.css";
 import { RecoilRoot } from "recoil"; // Import RecoilRoot
-import BoardForm from "./pages/BoardEditPage/BoardFrom";
+import BoardForm from "./pages/BoardEditPage/BoardForm";
 function Layout() {
   return (
     <div style={{ width: "100%", height: "100vh" }}>

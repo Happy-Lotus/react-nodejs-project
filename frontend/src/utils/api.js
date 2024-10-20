@@ -146,27 +146,6 @@ export const checkNickname = async (nickname) => {
   } catch (error) {}
 };
 
-export const updatePost = async (data) => {
-  try {
-    const config = {
-      method: "post",
-      url: "http://localhost:4000/",
-      headers: {
-        "Content-Type": "multipart/form-data",
-        withCredentials: true,
-      },
-      data: {
-        title: data.title,
-        content: data.content,
-        files: data.files,
-      },
-    };
-
-    const response = await axios(config);
-    return response;
-  } catch (error) {}
-};
-
 export const userLogout = async () => {
   try {
     const config = {
@@ -246,6 +225,34 @@ export const registerPost = async (formData) => {
     console.log(formData);
     const response = await axios.post(
       "http://localhost:4000/posts/edit",
+      formData,
+      {
+        headers: {
+          "Content-Type": "multipart/form-data",
+          withCredentials: true,
+        },
+      }
+    );
+    console.log(response);
+    return response;
+  } catch (error) {}
+};
+
+export const updatePost = async (postid, formData) => {
+  try {
+    const config = {
+      url: `http://localhost:4000/posts/detail/${postid}`,
+      method: "post",
+      headers: {
+        "Content-Type": "multipart/form-data",
+        withCredentials: true,
+      },
+      body: formData,
+    };
+
+    console.log(formData);
+    const response = await axios.post(
+      `http://localhost:4000/posts/detail/${postid}`,
       formData,
       {
         headers: {

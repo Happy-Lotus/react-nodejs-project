@@ -1,26 +1,31 @@
 import React, { useCallback, useEffect, useRef, useState } from "react";
-import { useLocation, useNavigate } from "react-router-dom";
+import { useLocation, useNavigate, useParams } from "react-router-dom";
 import axios from "axios";
 import styles from "./BoardEditPage.module.scss"; // SCSS 모듈 임포트
 import Editor from "./Editor";
 import Swal from "sweetalert2"; // SweetAlert2 임포트
 import FileDropzone from "./fileDropzone";
 import ImageDropzone from "./imageDropzone";
-import { registerPost } from "../../utils/api";
+import { registerPost, updatePost } from "../../utils/api";
 
 const BoardForm = ({ isEditMode }) => {
+  const { postId } = useParams(); // URL 파라미터에서 postId 가져오기
   const location = useLocation();
   const navigate = useNavigate();
-  const [mountainContent, setMountainContent] = useState({});
+  const [mountainContent, setMountainContent] = useState({
+    title: "",
+    content: "",
+  });
 
   const [thumbnail, setThumbnail] = useState(null); //썸네일 상태
   const [isThumbnailRemoved, setIsThumbnailRemoved] = useState(false); // 썸네일 제거 상태
   const [showThumbnailModal, setShowThumbnailModal] = useState(false); //썸네일 창 상태
   const [files, setFiles] = useState([]); // 첨부파일 상태
   const filesRef = useRef(files); // 현재 파일 리스트를 참조하기 위한 ref
+  const [newFiles, setNewFiles] = useState([]); // 새로 추가할 파일
+  const newFilesRef = useRef(newFiles);
   const [isDragActive, setIsDragActive] = useState(false);
   const [isExiting, setIsExiting] = useState(false); // 모달 종료 상태 추가
-  const [newFiles, setNewFiles] = useState([]); // 새로 추가할 파일
   const [deletedFiles, setDeletedFiles] = useState([]); // 삭제할 파일명
 
   useEffect(() => {
@@ -33,20 +38,17 @@ const BoardForm = ({ isEditMode }) => {
       });
       setThumbnail(post.thumbnail);
       setFiles(files);
-    } else {
-      setMountainContent({
-        title: "",
-        content: "",
-      });
     }
     // filesRef.current = files; // files 상태가 변경될 때마다 ref 업데이트
   }, [isEditMode, location.state]);
 
   useEffect(() => {
     filesRef.current = files; // files 상태가 변경될 때마다 ref 업데이트
-  }, [files]);
+    newFilesRef.current = newFiles;
+  }, [files, newFiles]);
 
   const getValue = (e) => {
+    e.preventDefault();
     const { name, value } = e.target;
     setMountainContent((prevContent) => ({
       ...prevContent,
@@ -58,56 +60,46 @@ const BoardForm = ({ isEditMode }) => {
   const handleRegister = async (e) => {
     e.preventDefault();
     const formData = new FormData();
-
+    console.log(mountainContent.content);
     const postData = {
       title: mountainContent.title,
       content: mountainContent.content,
+      deleteFiles: [],
+      thumbnail: thumbnail,
     };
 
     //썸네일 처리
     if (isThumbnailRemoved) {
-      postData.thumbnail = null;
       //썸네일 제거
-    } else if (thumbnail) {
-      //썸네일 추가 또는 변경
-      postData.thumbnail = `uploads/${thumbnail}`;
-    }
-
-    formData.append("post", JSON.stringify(postData));
-
-    //파일 처리
-    if (isEditMode) {
-      //수정 모드
-      files.forEach((file) => {
-        formData.append("files", file); //기존 첨부파일 추가
-      });
-      newFiles.forEach((file) => {
-        formData.append("newFiles", file); //새로 추가할 파일 추가
-      });
-      deletedFiles.forEach((filename) => {
-        formData.append("deleteFiles", filename); //삭제할 파일명 추가
-      });
-    } else {
-      //작성 모드. 새로 추가된 파일만 추가
-      newFiles.forEach((file) => {
-        formData.append("files", file);
-      });
-      console.log(newFiles);
+      postData.thumbnail = "";
     }
 
     try {
-      // const url = isEditMode ? `http://localhost:4000/posts/${location.state.post.id}` : `http://localhost:4000/posts`;
-      // const method = isEditMode ? 'put' : 'post';
-      // await axios[method](url, formData, {
-      //   headers: {
-      //     "Content-Type": "multipart/form-data",
-      //   },
-      // });
-      // navigate(`/posts`); // 수정 또는 작성 완료 후 게시물 목록으로 이동
-      await registerPost(formData);
-    } catch (error) {}
-    // await registerPost(formData);
+      //파일 처리
+      if (isEditMode) {
+        //수정 모드
 
+        newFiles.forEach((file) => {
+          formData.append("newFiles", file); //새로 추가할 파일 추가
+        });
+        deletedFiles.forEach((filename) => {
+          postData.deleteFiles.push(filename);
+        });
+        console.log(postData);
+        formData.append("post", JSON.stringify(postData));
+
+        console.log(formData);
+
+        await updatePost(postId, formData);
+      } else {
+        //작성 모드. 새로 추가된 파일만 추가
+        files.forEach((file) => {
+          formData.append("files", file);
+        });
+        console.log(files);
+        await registerPost(formData);
+      }
+    } catch (error) {}
     // navigate("/posts"); // 저장 후 /posts로 이동
   };
 
@@ -133,6 +125,12 @@ const BoardForm = ({ isEditMode }) => {
       if (isEditMode) {
         //수정모드일 경우
         setNewFiles((prevFiles) => [
+          ...prevFiles,
+          ...acceptedFiles.map((file) =>
+            Object.assign(file, { preview: file.name, fieldname: "newFiles" })
+          ),
+        ]);
+        setFiles((prevFiles) => [
           ...prevFiles,
           ...acceptedFiles.map((file) =>
             Object.assign(file, { preview: file.name, fieldname: "files" })
@@ -174,6 +172,12 @@ const BoardForm = ({ isEditMode }) => {
     if (isEditMode) {
       //수정모드일 경우
       setNewFiles((prevFiles) => [
+        ...prevFiles,
+        ...selectedFiles.map((file) =>
+          Object.assign(file, { preview: file.name, fieldname: "newFiles" })
+        ),
+      ]);
+      setFiles((prevFiles) => [
         ...prevFiles,
         ...selectedFiles.map((file) =>
           Object.assign(file, { preview: file.name, fieldname: "files" })
@@ -257,6 +261,7 @@ const BoardForm = ({ isEditMode }) => {
   const handleRemoveThumbnail = () => {
     setThumbnail(null); // 썸네일 제거
     setIsThumbnailRemoved(true); // 썸네일 제거 상태를 true로 설정
+    console.log(isThumbnailRemoved);
   };
 
   //변경 또는 작성 취소 버튼
@@ -426,7 +431,7 @@ const BoardForm = ({ isEditMode }) => {
             <Editor
               content={mountainContent.content}
               setContent={(data) =>
-                setMountainContent({ ...mountainContent, content: data })
+                setMountainContent((prev) => ({ ...prev, content: data }))
               }
             />
           </div>
@@ -470,21 +475,3 @@ const BoardForm = ({ isEditMode }) => {
 };
 
 export default BoardForm;
-
-/**
- * - 파일
- * 1. 파일 업로드 버튼 함수
- * 2. 파일 드래그앤드롭 함수
- * 3. 파일 삭제 또는 추가 함수 -> 이건 수정모드일때만 on 되도록?
- *  ex. 작성 모드 -> 추가되는 파일 모두 setFiles
- *      수정 모드 -> 추가 파일 과 삭제 파일 나누어서 정보 담아 전송.
- * 
- * - 썸네일 
- * 1. 작성 모드일 경우 썸네일을 추가하거나 추가하지 않을수도 있다.
-2. 수정 모드일 경우 
-2-1. 기존 썸네일이 있는데 제거할수도 있음
-2-2. 기존 썸네일이 있는데 다른거로 변경할 수도 있음
-2-3. 기존 썸네일이 있는데 변경하지 않을수도 있음
-2-4. 기존 썸네일이 없는데 그냥 유지할수도 있음
-2-5. 기존 썸네일이 없는데 새로 추가할수도 있음
- */

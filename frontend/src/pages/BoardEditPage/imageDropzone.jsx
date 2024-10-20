@@ -9,6 +9,7 @@ const ImageDropzone = ({
   setThumbnail,
   handleCancel,
   handleRegister,
+  handleRemoveThumbnail,
 }) => {
   const [isDragActive, setIsDragActive] = useState(false);
   const { getRootProps, getInputProps } = useDropzone({
@@ -33,6 +34,7 @@ const ImageDropzone = ({
             onClick={() => {
               setIsDragActive(false);
               setThumbnail(null);
+              handleRemoveThumbnail(true);
             }}
           >
             제거
