@@ -6,17 +6,12 @@
 
     .prev__page,
     .next__page {
-      padding: 10px 15px;
-      margin: 0 5px;
       border: none;
       color: #000000;
       cursor: pointer;
       border-radius: 50%;
       width: 35px;
       height: 35px;
-      display: flex;
-      justify-content: center;
-      align-items: center;
 
       &:hover {
         font-weight: bolder;
@@ -42,4 +37,30 @@
 
 .wrapper {
   display: block;
+}
+.prev__page:disabled,
+.next__page:disabled {
+  color: #ccc; // Color for disabled buttons
+  cursor: not-allowed; // Change cursor for disabled buttons
+}
+.pagination__button {
+  margin: 0 5px;
+  padding: 5px 10px;
+  cursor: pointer;
+}
+
+.active {
+  font-weight: bolder;
+}
+
+.inactive {
+  color: #333;
+}
+
+.prev__page,
+.next__page {
+  background-color: transparent; // Style for the previous and next buttons
+  border: none;
+  cursor: pointer;
+  font-size: 16px; // Adjust size as needed
 }

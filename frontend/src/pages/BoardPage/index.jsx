@@ -12,6 +12,8 @@ function BoardPage() {
   const [searchTerm, setSearchTerm] = useState("");
   const [filteredPosts, setFilteredPosts] = useState([]); // 필터링된 게시물 상태
   const [thumbnail, setThumbnail] = useState([]);
+  const [currentPage, setCurrentPage] = useState(1);
+  const postsPerPage = 5;
 
   useEffect(() => {
     const getPosts = async () => {
@@ -42,8 +44,13 @@ function BoardPage() {
       }
     });
     setFilteredPosts(results); // 필터링된 결과를 상태에 저장
+    setCurrentPage(1); // 검색 후 첫 페이지로 리셋
   };
-
+  // Pagination logic
+  const indexOfLastPost = currentPage * postsPerPage;
+  const indexOfFirstPost = indexOfLastPost - postsPerPage;
+  const currentPosts = filteredPosts.slice(indexOfFirstPost, indexOfLastPost);
+  const totalPages = Math.ceil(filteredPosts.length / postsPerPage);
   if (loading) {
     return <div>Loading...</div>;
   }
@@ -94,9 +101,9 @@ function BoardPage() {
               </tr>
             </thead>
             <tbody>
-              {filteredPosts.map((post, index) => (
+              {currentPosts.map((post, index) => (
                 <tr key={index} className={styles.tr__content}>
-                  <td>{filteredPosts.length - index}</td>
+                  <td>{filteredPosts.length - (indexOfFirstPost + index)}</td>
                   <td className={styles.title__cell}>
                     {thumbnail[index] ? (
                       <img
@@ -116,7 +123,6 @@ function BoardPage() {
                     )}
                   </td>
                   <td className={styles.content__cell}>
-                    {" "}
                     <Link to={`/posts/detail/${post.id}`}>{post.title}</Link>
                   </td>
                   <td>{post.writer}</td>
@@ -127,7 +133,11 @@ function BoardPage() {
           </table>
         </div>
       </div>
-      <CommonNav />
+      <CommonNav
+        currentPage={currentPage}
+        totalPages={totalPages}
+        onPageChange={setCurrentPage}
+      />
     </div>
   );
 }
