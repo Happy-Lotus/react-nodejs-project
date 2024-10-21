@@ -52,6 +52,12 @@ function Layout() {
 function App() {
   return (
     <RecoilRoot>
+      <ToastContainer
+        position="top-center"
+        theme="light"
+        autoClose={2000}
+        closeOnClick
+      />
       <Routes>
         <Route path="/" element={<RegisterPage />} />
         <Route path="/login" element={<LoginPage />} />
