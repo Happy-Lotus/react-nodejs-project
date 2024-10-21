@@ -51,11 +51,15 @@ app.use("/uploads", express.static(path.join(__dirname, "/uploads")));
 app.use("/", adminRouter);
 app.use("/posts", postRouter);
 
-app.get("/posts/:imageUrl", (req, res) => {
-  console.log("/uploads imageUrl");
-  const imageUrl = req.params.imageUrl;
-  File.read(imageUrl, res);
+app.listen(PORT, () => {
+  console.log(`${PORT}번에서 실행이 되었습니다.`);
 });
+
+// app.get("/posts/:imageUrl", (req, res) => {
+//   console.log("/uploads imageUrl");
+//   const imageUrl = req.params.imageUrl;
+//   File.read(imageUrl, res);
+// });
 //게시물 작성
 /**
  * @swagger
@@ -120,14 +124,14 @@ app.get("/posts/:imageUrl", (req, res) => {
 //   }
 // );
 
-app.post(
-  "/posts/upload",
-  // authMiddleware,
-  imageUploadMulter.single("image"),
-  (req, res) => {
-    File.imageUpload(req, res);
-  }
-);
+// app.post(
+//   "/posts/upload",
+//   // authMiddleware,
+//   imageUploadMulter.single("image"),
+//   (req, res) => {
+//     File.imageUpload(req, res);
+//   }
+// );
 //게시물 삭제
 /**
  * @swagger
@@ -268,10 +272,6 @@ app.post(
 //   console.log("filename 호출")
 //   File.downloadFiles(req, res);
 // });
-
-app.listen(PORT, () => {
-  console.log(`${PORT}번에서 실행이 되었습니다.`);
-});
 
 //게시물 상세 조회
 /**

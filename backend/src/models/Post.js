@@ -1,6 +1,7 @@
 const { NULL } = require("mysql/lib/protocol/constants/types");
 const conn = require("../config/database");
 const File = require("./File");
+const fileController = require("../controllers/file");
 const moment = require("moment");
 const { update } = require("./Token");
 
@@ -318,7 +319,6 @@ exports.delete = async function (boardid) {
 
   try {
     const post = await this.readByBoardId(boardid);
-    console.log(post);
     if (!post) {
       return { statusCode: 404, message: "Post not found" };
     }
@@ -329,24 +329,20 @@ exports.delete = async function (boardid) {
     const imageUrls = extractImageUrls(content);
     const deletePromises = []; //한번에 실행할 함수 리스트
 
-    console.log("===========models post 함수 실행==========");
-    console.log(imageUrls);
-    console.log(thumbnail);
-
     //본문에 포함된 사진 서버에서 삭제
     if (imageUrls.length > 0 && imageUrls) {
-      deletePromises.push(File.deleteFiles(imageUrls));
+      deletePromises.push(fileController.deleteFiles(imageUrls));
     }
 
     //서버에 저장된 썸네일 삭제
     if (thumbnail && thumbnail.trim() !== "") {
-      deletePromises.push(File.deleteThumbnail(thumbnail));
+      deletePromises.push(fileController.deleteThumbnail(thumbnail));
     }
 
     //서버에 저장된 첨부파일 삭제
     File.readOption(boardid).then((files) => {
       const fileNames = files.map((file) => file.filename); // 각 파일 객체에서 filename 속성 추출
-      deletePromises.push(File.deleteAttachedFiles(fileNames)); // 파일명 리스트를 deleteAttachedFiles에 전달
+      deletePromises.push(fileController.deleteAttachedFiles(fileNames)); // 파일명 리스트를 deleteAttachedFiles에 전달
     });
 
     // 모든 작업이 완료될 때까지 대기
