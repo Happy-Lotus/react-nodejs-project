@@ -7,6 +7,7 @@ import Swal from "sweetalert2"; // SweetAlert2 임포트
 import FileDropzone from "./fileDropzone";
 import ImageDropzone from "./imageDropzone";
 import { registerPost, updatePost } from "../../utils/api";
+import { toast } from "react-toastify";
 
 const BoardForm = ({ isEditMode }) => {
   const { postId } = useParams(); // URL 파라미터에서 postId 가져오기
@@ -61,18 +62,16 @@ const BoardForm = ({ isEditMode }) => {
     e.preventDefault();
     const formData = new FormData();
     console.log(mountainContent.content);
+    if (isThumbnailRemoved) {
+      setThumbnail(""); // 썸네일 제거
+    }
+
     const postData = {
       title: mountainContent.title,
       content: mountainContent.content,
       deleteFiles: [],
       thumbnail: thumbnail,
     };
-
-    //썸네일 처리
-    if (isThumbnailRemoved) {
-      //썸네일 제거
-      postData.thumbnail = "";
-    }
 
     try {
       //파일 처리
@@ -91,6 +90,7 @@ const BoardForm = ({ isEditMode }) => {
         console.log(formData);
 
         await updatePost(postId, formData);
+        toast.success("게시글 수정 완료 😎");
       } else {
         //작성 모드. 새로 추가된 파일만 추가
         files.forEach((file) => {
@@ -99,9 +99,12 @@ const BoardForm = ({ isEditMode }) => {
         console.log(files);
         formData.append("post", JSON.stringify(postData));
         await registerPost(formData);
+        toast.success("게시글 작성 완료 😎");
       }
       navigate("/posts"); // 저장 후 /posts로 이동
-    } catch (error) {}
+    } catch (error) {
+      toast.error(error);
+    }
   };
 
   // 파일 drag&drop -> 완료
@@ -259,9 +262,7 @@ const BoardForm = ({ isEditMode }) => {
 
   //썸네일 삭제
   const handleRemoveThumbnail = () => {
-    setThumbnail(null); // 썸네일 제거
     setIsThumbnailRemoved(true); // 썸네일 제거 상태를 true로 설정
-    console.log(isThumbnailRemoved);
   };
 
   //변경 또는 작성 취소 버튼
@@ -276,7 +277,10 @@ const BoardForm = ({ isEditMode }) => {
     });
 
     if (result.isConfirmed) {
-      /**저장되지 않은 변경사항 삭제 로직 추가 */
+      console.log("==========수정 또는 삭제 중간에 취소===========");
+
+      console.log(thumbnail);
+      console.log(mountainContent.content);
       navigate("/posts"); // 예를 클릭하면 /posts로 이동
     }
   };
@@ -293,122 +297,9 @@ const BoardForm = ({ isEditMode }) => {
     setTimeout(() => {
       setShowThumbnailModal(false); // 모달 닫기
       setIsExiting(false); // 종료 상태 초기화
+      setIsThumbnailRemoved(false);
     }, 200); // 애니메이션 시간과 일치
-    setThumbnail(null);
   };
-
-  // const handleUpdate = async () => {//수정 모드일 때 api 호출
-  //   const formData = new FormData();
-  //   formData.append("title", mountainContent.title);
-  //   formData.append("content", mountainContent.content);
-  //   if (thumbnail) {
-  //     formData.append("thumbnail", thumbnail); // 썸네일 추가
-  //   }
-  //   attachedFiles.forEach((file) => {
-  //     formData.append("files", file); // 기존 첨부파일 추가
-  //   });
-  //   newFiles.forEach((file) => {
-  //     formData.append("newFiles", file); // 새로 추가할 파일 추가
-  //   });
-  //   deletedFiles.forEach((filename) => {
-  //     formData.append("deletedFiles", filename); // 삭제할 파일명 추가
-  //   });
-
-  //   try {
-  //     const url = isEditMode
-  //       ? `http://localhost:4000/posts/${location.state.post.id}`
-  //       : `http://localhost:4000/posts`;
-  //     const method = isEditMode ? "put" : "post";
-  //     await axios[method](url, formData, {
-  //       headers: {
-  //         "Content-Type": "multipart/form-data",
-  //       },
-  //     });
-  //     navigate(`/posts`); // 수정 또는 작성 완료 후 게시물 목록으로 이동
-  //   } catch (error) {
-  //     console.error("Error saving post:", error);
-  //   }
-  // };
-
-  // const handleDeleteFile = (fileToDelete) => {
-  //   setFiles((prevFiles) => prevFiles.filter((file) => file !== fileToDelete));
-  // };
-
-  // const onDrop = useCallback(// 파일 drag&drop
-  //   (acceptedFiles) => {
-  //     // const existingFileNames = new Set(
-  //     //   filesRef.current.map((file) => file.name)
-  //     // );
-
-  //     if (files.length + acceptedFiles.length + newFiles.length > 5) {
-  //       alert("첨부할 수 있는 파일의 개수는 5개를 초과할 수 없습니다.");
-  //       setIsDragActive(false); // Reset drag state
-  //       return;
-  //     }
-
-  //     const oversizedFiles = acceptedFiles.filter(
-  //       (file) => file.size > 10 * 1024 * 1024
-  //     ); // 10MB
-  //     if (oversizedFiles.length > 0) {
-  //       alert("첨부할 수 있는 파일의 크기는 10MB를 초과할 수 없습니다.");
-  //       setIsDragActive(false); // Reset drag state
-  //       return;
-  //     }
-
-  //     // const newFiles = acceptedFiles.filter(
-  //     //   (file) => !existingFileNames.has(file.name)
-  //     // );
-
-  //     setFiles((prevFiles) => [
-  //       ...prevFiles,
-  //       ...newFiles.map((file) =>
-  //         Object.assign(file, { preview: file.name, fieldname: "files" })
-  //       ),
-  //     ]);
-  //     setIsDragActive(false);
-  //   },
-  //   [files.length]
-  // );
-
-  // const handleThumbnailChange = (event) => {//setThumbnail
-  //   const file = event.target.files[0];
-  //   if (file) {
-  //     Object.assign(file, { fieldname: "thumbnail" }); // fieldname 추가
-  //     const reader = new FileReader();
-  //     reader.onloadend = () => {
-  //       setThumbnail(reader.result);
-  //     };
-  //     reader.readAsDataURL(file);
-  //   }
-  // };
-
-  // const handleRemoveThumbnail = () => {
-  //   setThumbnail(null); // 썸네일 제거
-  //   setIsThumbnailRemoved(true); // 썸네일 제거 상태를 true로 설정
-  // };
-
-  // const handleRegister = async (e) => {
-  //   e.preventDefault();
-  //   const formData = new FormData();
-  //   const postData = {
-  //     title: mountainContent.title,
-  //     content: mountainContent.content,
-  //     thumbnail: `uploads/${thumbnail}`,
-  //   };
-  //   files.forEach((file) => {
-  //     formData.append("files", file); // 첨부파일 추가
-  //   });
-  //   formData.append("post", JSON.stringify(postData));
-
-  //   // formData.append("files", files); // 첨부파일 추가
-  //   console.log("files 정보");
-  //   // console.log(files);
-  //   // console.log(thumbnail);
-
-  //   await registerPost(formData);
-
-  //   // navigate("/posts"); // 저장 후 /posts로 이동
-  // };
 
   return (
     <div className={styles.board__detail__page}>
@@ -462,7 +353,7 @@ const BoardForm = ({ isEditMode }) => {
               thumbnail={thumbnail}
               handleThumbnailChange={handleThumbnailChange}
               onDrop={handleThumbnailDrop}
-              setThumbnail={setThumbnail}
+              isThumbnailRemoved={isThumbnailRemoved}
               handleCancel={handleCancel}
               handleRegister={handleRegister}
               handleRemoveThumbnail={handleRemoveThumbnail}

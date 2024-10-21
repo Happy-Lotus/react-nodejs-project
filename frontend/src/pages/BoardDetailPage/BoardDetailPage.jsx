@@ -93,10 +93,10 @@ const BoardDetailPage = () => {
     const getPostDetail = async () => {
       try {
         const data = await fetchPostDetail(postId); // API 호출
-        setPost(data.post); // 받아온 데이터로 상태 업데이트
         setFile(data.files);
         const html = await markdownToHtml(data.post.content);
         setHtmlContent(html);
+        setPost(data.post);
       } catch (error) {
         console.error("Error fetching post detail:", error);
       } finally {
@@ -124,8 +124,13 @@ const BoardDetailPage = () => {
         <div className={styles.post}>
           <h2 className={styles.post__title}>{post.title}</h2>
           <div className={styles.post__writer__info}>
-            <p>작성자: {post.writer}</p>
-            <p>작성시간: {post.regdate}</p>
+            <p>
+              작성자: <strong>{post.writer}</strong>
+            </p>
+            <p>
+              작성시간:{" "}
+              <strong>{new Date(post.regdate).toLocaleDateString()}</strong>
+            </p>
           </div>
         </div>
         <div
@@ -133,7 +138,9 @@ const BoardDetailPage = () => {
           dangerouslySetInnerHTML={transform()}
         ></div>
         <div className={styles.attachments}>
-          <h2>첨부파일</h2>
+          <div className={styles.attachments__title}>
+            <h2>첨부파일</h2>
+          </div>
           <div className={styles.file}>
             {files.map((item, index) => {
               console.log(item.filename);
@@ -142,7 +149,7 @@ const BoardDetailPage = () => {
                   key={index}
                   onClick={() => fileDownload(item.originalname, item.filename)}
                 >
-                  📄 {item.originalname}
+                  {item.originalname}
                 </span>
               );
             })}

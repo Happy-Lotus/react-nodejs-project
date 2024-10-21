@@ -5,6 +5,9 @@ import CommonNav from "../../components/nav/navigation";
 import { fetchPosts } from "../../utils/api";
 import { Link } from "react-router-dom";
 
+import { BsLink45Deg } from "react-icons/bs";
+import { toast } from "react-toastify";
+
 function BoardPage() {
   const [posts, setPosts] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -45,6 +48,12 @@ function BoardPage() {
     });
     setFilteredPosts(results); // 필터링된 결과를 상태에 저장
     setCurrentPage(1); // 검색 후 첫 페이지로 리셋
+  };
+  const truncateTitle = (title, maxLength) => {
+    if (title.length > maxLength) {
+      return title.slice(0, maxLength) + "..."; // 최대 길이를 초과하면 잘라내고 ... 추가
+    }
+    return title; // 길이가 초과하지 않으면 원본 제목 반환
   };
   // Pagination logic
   const indexOfLastPost = currentPage * postsPerPage;
@@ -123,7 +132,11 @@ function BoardPage() {
                     )}
                   </td>
                   <td className={styles.content__cell}>
-                    <Link to={`/posts/detail/${post.id}`}>{post.title}</Link>
+                    <Link to={`/posts/detail/${post.id}`}>
+                      {truncateTitle(post.title, 30)}
+                      {post.files && post.files.length > 0 ? "🔗" : ""}{" "}
+                      {/* 첨부파일이 있으면 🔗 표시 */}
+                    </Link>
                   </td>
                   <td>{post.writer}</td>
                   <td>{post.regdate}</td>

@@ -15,10 +15,10 @@ function Layout() {
   return (
     <div style={{ width: "100%", height: "100vh" }}>
       <ToastContainer
-        position="bottom-right"
+        position="top-center"
         theme="light"
-        pauseOnHover
-        autoClose={1500}
+        autoClose={2000}
+        closeOnClick
       />
       <header
         style={{

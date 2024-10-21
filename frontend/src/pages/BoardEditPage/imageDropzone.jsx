@@ -6,7 +6,7 @@ const ImageDropzone = ({
   thumbnail,
   handleThumbnailChange,
   onDrop,
-  setThumbnail,
+  isThumbnailRemoved,
   handleCancel,
   handleRegister,
   handleRemoveThumbnail,
@@ -33,7 +33,6 @@ const ImageDropzone = ({
             className={styles.thumbnail__deleteButton}
             onClick={() => {
               setIsDragActive(false);
-              setThumbnail(null);
               handleRemoveThumbnail(true);
             }}
           >
@@ -52,10 +51,10 @@ const ImageDropzone = ({
         />
         <div
           className={`${styles.thumbnailPlaceholder} ${
-            thumbnail ? styles.imagePresent : ""
+            thumbnail && !isThumbnailRemoved ? styles.imagePresent : ""
           } ${isDragActive ? styles.hoverEffect : ""}`}
         >
-          {thumbnail ? (
+          {thumbnail && !isThumbnailRemoved ? (
             <img
               src={`http://localhost:4000/${thumbnail}`}
               alt="썸네일 미리보기"
