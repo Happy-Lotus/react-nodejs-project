@@ -2,9 +2,10 @@ import React, { useEffect, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import { marked } from "marked";
 import Prism from "prismjs";
+import Swal from "sweetalert2"; // SweetAlert2 임포트
 
 import styles from "./BoardDetailPage.module.scss"; // SCSS 모듈 임포트
-import { downloadFile, fetchPostDetail } from "../../utils/api";
+import { downloadFile, fetchPostDetail, postDelete } from "../../utils/api";
 
 const BoardDetailPage = () => {
   const { postId } = useParams(); // URL 파라미터에서 postId 가져오기
@@ -18,6 +19,23 @@ const BoardDetailPage = () => {
     navigate(`/posts/detail/${postId}/edit`, {
       state: { post: post, files: files },
     });
+  };
+
+  const handleDelete = async () => {
+    const result = await Swal.fire({
+      title: "이 게시물을 삭제하시겠습니까?",
+      text: "삭제된 게시물은 복구되지 않습니다.",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonText: "예",
+      cancelButtonText: "아니오",
+    });
+
+    if (result.isConfirmed) {
+      console.log("handleDelete 게시물 삭제 버튼 작동");
+      await postDelete(postId);
+      navigate("/posts"); // 예를 클릭하면 /posts로 이동
+    }
   };
 
   const markdownToHtml = async (fileContent) => {
@@ -133,7 +151,9 @@ const BoardDetailPage = () => {
           </div>
         </div>
         <div className={styles.buttons}>
-          <button className={styles.deleteButton}>삭제</button>
+          <button className={styles.deleteButton} onClick={handleDelete}>
+            삭제
+          </button>
           <Link to="/posts">
             <button className={styles.backButton}>목록</button>
           </Link>

@@ -33,4 +33,7 @@ router.post(
 //게시물 파일 다운로드
 router.get("/:postid/file/:filename", postController.downloadFiles);
 
+//게시물 삭제
+router.delete("/:postid", postController.delete);
+
 module.exports = router;

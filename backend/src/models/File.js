@@ -103,12 +103,14 @@ exports.read = async function (url, res) {
   return res.json({ url: fileUrl });
 };
 
+//본문에 포함된 이미지 파일 삭제 함수
 exports.deleteFiles = async (urls) => {
   const deletePromises = urls.map(async (url) => {
     const fileName = path.basename(url); // URL에서 파일 이름 추출
     const filePath = path.join(
-      "D:/Gitrepo/react-nodejs-project/backend/uploads",
-      fileName
+      __dirname, // 현재 파일의 디렉토리 경로
+      "../uploads", // uploads 디렉토리로 경로 설정
+      fileName // 파일 이름 추가
     ); // 파일 경로 설정
     console.log(fileName);
     console.log(__dirname);
@@ -131,7 +133,8 @@ exports.deleteThumbnail = async (thumbnailUrl) => {
     const thumbnailFileName = path.basename(thumbnailUrl);
     console.log(thumbnailFileName);
     const thumbnailFilePath = path.join(
-      "D:/Gitrepo/react-nodejs-project/backend/uploads",
+      __dirname, // 현재 파일의 디렉토리 경로
+      "../uploads", // uploads 디렉토리로 경로 설정
       thumbnailFileName
     ); // 썸네일 파일 경로 설정
     console.log(thumbnailFilePath);
@@ -149,10 +152,10 @@ exports.deleteThumbnail = async (thumbnailUrl) => {
 // 첨부파일 삭제 함수
 exports.deleteAttachedFiles = async (filenames) => {
   const deletePromises = filenames.map(async (file) => {
-    // const fileName = file.filename;
     const filePath = path.join(
-      "D:/Gitrepo/react-nodejs-project/backend/src/uploads",
-      file
+      __dirname, // 현재 파일의 디렉토리 경로
+      "../uploads", // uploads 디렉토리로 경로 설정
+      file // 파일 이름 추가
     ); // 파일 경로 설정
 
     try {

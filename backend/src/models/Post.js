@@ -312,8 +312,7 @@ exports.update = async function (updateData) {
 };
 
 //게시물 삭제
-exports.delete = async function (req, res) {
-  const boardid = parseInt(req.params.postid);
+exports.delete = async function (boardid) {
   const sql = "DELETE FROM board WHERE boardid = ?";
   const var_array = [boardid];
 
@@ -321,25 +320,36 @@ exports.delete = async function (req, res) {
     const post = await this.readByBoardId(boardid);
     console.log(post);
     if (!post) {
-      return res.status(404).json({ result: "Post not found." });
+      return { statusCode: 404, message: "Post not found" };
     }
 
+    //서버에서 삭제할 썸네일, 본문에 포함된 첨부파일 데이터 읽기
     const content = post.content;
     const thumbnail = post.thumbnail;
     const imageUrls = extractImageUrls(content);
-    const deletePromises = [];
+    const deletePromises = []; //한번에 실행할 함수 리스트
+
+    console.log("===========models post 함수 실행==========");
+    console.log(imageUrls);
+    console.log(thumbnail);
+
+    //본문에 포함된 사진 서버에서 삭제
     if (imageUrls.length > 0 && imageUrls) {
       deletePromises.push(File.deleteFiles(imageUrls));
     }
+
+    //서버에 저장된 썸네일 삭제
     if (thumbnail && thumbnail.trim() !== "") {
       deletePromises.push(File.deleteThumbnail(thumbnail));
     }
-    File.readOption(boardid).then((files) =>
-      deletePromises.push(File.deleteAttachedFiles(files))
-    );
+
+    //서버에 저장된 첨부파일 삭제
+    File.readOption(boardid).then((files) => {
+      const fileNames = files.map((file) => file.filename); // 각 파일 객체에서 filename 속성 추출
+      deletePromises.push(File.deleteAttachedFiles(fileNames)); // 파일명 리스트를 deleteAttachedFiles에 전달
+    });
 
     // 모든 작업이 완료될 때까지 대기
-    await Promise.all(deletePromises);
     await new Promise((resolve, reject) => {
       conn.query(sql, var_array, (error, results) => {
         if (error) {
@@ -349,53 +359,32 @@ exports.delete = async function (req, res) {
         resolve(results);
       });
     });
+    await Promise.all(deletePromises);
 
-    res
-      .status(200)
-      .json({ result: "Post and associated files deleted successfully." });
+    return {
+      statusCode: 200,
+      message: "Post and associated files deleted successfully.",
+    }; // 성공 시 반환
   } catch (error) {
     console.error("Error: ", error);
-    return res.status(500).json({ result: "Server error:" });
+    return {
+      statusCode: error.statusCode || 500,
+      message: error.message || "Server error:",
+    }; // 오류 발생 시 반환
   }
 };
 
 const extractImageUrls = (content) => {
-  const regex = /<img[^>]+src="([^">]+)"/g; // <img> 태그에서 src 속성 추출
+  const regex = /!\[\]\(([^)]+)\)/g; // ![]() 형식에서 URL 추출
   const urls = [];
   let match;
 
   while ((match = regex.exec(content)) !== null) {
-    urls.push(match[1]); // URL 추가
+    const decodedUrl = decodeURIComponent(match[1]); // URL 디코딩
+    const filename = decodedUrl.split("uploads/")[1]; // 'uploads/' 이후의 경로만 추출
+    urls.push(filename);
   }
   return urls;
-};
-
-const changeThumbnailImg = async (
-  existThumbnail,
-  changeThumbnail,
-  thumbnail
-) => {
-  if (existThumbnail && existThumbnail.trim() !== "") {
-    // 기존 썸네일이 존재하는 경우
-    if (thumbnail === existThumbnail) {
-      // 1. 이미 썸네일이 있고 다른 이미지로 변경하지 않는 경우
-      return existThumbnail;
-    } else if (changeThumbnail.trim() !== "") {
-      // 2. 이미 썸네일이 있는데 다른 이미지로 변경하는 경우
-      await File.deleteThumbnail(existThumbnail);
-      console.log("Deleted existing thumbnail:", existThumbnail);
-      return changeThumbnail;
-    } else {
-      // 3. 이미 썸네일이 있는데 삭제하는 경우
-      await File.deleteThumbnail(existThumbnail);
-      console.log("Deleted existing thumbnail:", existThumbnail);
-      return "";
-    }
-  } else if (changeThumbnail.trim() !== "") {
-    // 4. 썸네일 없는데 새로 추가하려는 경우
-    console.log("Adding new thumbnail:", changeThumbnail);
-    return changeThumbnail;
-  }
 };
 
 // //게시물 옵션 조회

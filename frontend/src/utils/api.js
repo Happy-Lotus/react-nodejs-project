@@ -284,3 +284,21 @@ export const downloadFile = async (postid, filename) => {
     console.error("Error downloading file:", error); // Added error logging
   }
 };
+
+export const postDelete = async (postid) => {
+  try {
+    const config = {
+      method: "delete",
+      url: `http://localhost:4000/posts/${postid}`,
+      headers: {
+        "Content-Type": "application/json",
+      },
+      withCredentials: true,
+    };
+    const response = await axios(config);
+    console.log(response);
+    return response;
+  } catch (error) {
+    console.error("Error deleteing file:", error); // Added error logging
+  }
+};
