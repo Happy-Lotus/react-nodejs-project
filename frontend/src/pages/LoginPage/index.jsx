@@ -1,16 +1,15 @@
 import { useForm } from "react-hook-form";
 import styles from "./LoginPage.module.scss";
 import { useLogin } from "../../utils/api"; // API 요청 로직 import
-import { useRecoilValue } from "recoil";
-import { signinState } from "../../state/authState";
+import { useRecoilValue, useSetRecoilState } from "recoil";
+import { signinState, userState } from "../../state/authState";
 import { useNavigate } from "react-router-dom"; // useHistory import
-import { useCookies } from "react-cookie";
 import { toast } from "react-toastify";
-import { useEffect } from "react";
 
 const LoginPage = () => {
   const { signin } = useLogin();
-  const signinStatus = useRecoilValue(signinState);
+  const setSigninState = useSetRecoilState(signinState);
+  const setUserState = useSetRecoilState(userState);
   const navigate = useNavigate();
   const onSubmit = async (data) => {
     console.log("로그인 시도:", data);
@@ -39,7 +38,11 @@ const LoginPage = () => {
 
     try {
       console.log("response 호출시도", data);
-      await signin(data);
+      const response = await signin(data);
+      if (response.status === 201) {
+        setSigninState({ isLoading: false, error: null, success: true });
+        setUserState({ nickname: response.data.nickname });
+      }
       navigate("/posts");
     } catch (error) {
       toast.error(); // Show error for incorrect email/password
@@ -55,17 +58,7 @@ const LoginPage = () => {
     clearErrors,
     getValues,
   } = useForm({ mode: onSubmit });
-  // const dispatch = useDispatch();
 
-  // useEffect(() => {
-  //   console.log("useEffect");
-  //   if (errors.email) {
-  //     toast.error(errors.email.message);
-  //   }
-  //   if (errors.pwd) {
-  //     toast.error(errors.pwd.message);
-  //   }
-  // }, [errors]);
   return (
     <div className={styles.background__color__container}>
       <section className={styles.signup__container}>

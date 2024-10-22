@@ -2,7 +2,6 @@ import { signupState, signinState } from "../state/authState.js";
 import { useSetRecoilState } from "recoil";
 import axiosInstance from "./axios.js";
 import axios from "axios";
-import { useCookies } from "react-cookie";
 axios.defaults.withCredentials = true;
 
 export const useSignup = () => {
@@ -59,11 +58,9 @@ export const useLogin = () => {
         email: userData.email,
         pwd: userData.pwd,
       },
-      // withCredentials: true,
     };
     try {
       const response = await axios(config);
-      setSigninState({ isLoading: false, error: null, success: true });
       console.log(response);
       return response;
     } catch (error) {

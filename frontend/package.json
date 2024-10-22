@@ -29,6 +29,7 @@
     "react-simple-toasts": "^6.0.0",
     "react-toastify": "^10.0.6",
     "recoil": "^0.7.7",
+    "recoil-persist": "^5.1.0",
     "redux": "^5.0.1",
     "sweetalert2": "^11.14.3",
     "web-vitals": "^2.1.4"

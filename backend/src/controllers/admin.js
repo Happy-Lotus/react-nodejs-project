@@ -10,15 +10,13 @@ dotenv.config();
 
 const checkPassword = async function (dbpwd, pwd) {
   try {
-    return new Promise((resolve, reject) => {
-      if (bcrypt.compare(dbpwd, pwd)) {
-        resolve(true);
-      } else {
-        reject(false);
-      }
-    });
+    const isMatch = await bcrypt.compare(pwd, dbpwd);
+    if (!isMatch) {
+      throw new Error("Password mismatch");
+    }
+    return isMatch;
   } catch (error) {
-    console.error("Error:", error);
+    throw error;
   }
 };
 
@@ -143,7 +141,6 @@ exports.login = async (req, res) => {
           pwd: user.pwd,
           nickname: user.nickname,
         };
-
         const accessToken = jwt.sign(payload, secret, {
           algorithm: "HS256",
           expiresIn: "1h",
@@ -160,7 +157,6 @@ exports.login = async (req, res) => {
         } else {
           await Token.update(refreshToken, user.userid);
         }
-        console.log("admin.js login");
         res
           .status(201)
           .setHeader("Access-Control-Allow-Credentials", "true")
@@ -181,16 +177,18 @@ exports.login = async (req, res) => {
           })
           .json({
             email: email,
-            nickname: result.nickname,
+            nickname: user.nickname,
           });
+        console.log(res);
         return res;
-      } else {
-        return res.status(401).json({ result: "Password mismatch" });
       }
     } else {
-      return res.status(statusCode).json({ result: message });
+      return res.status(statusCode).json({ message: message });
     }
   } catch (error) {
+    if (error.message === "Password mismatch") {
+      return res.status(401).json({ result: "Password mismatch" });
+    }
     return res.status(500).json({ result: "Server Error" });
   }
 };

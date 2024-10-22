@@ -1,12 +1,18 @@
 import { Link, Navigate, useNavigate } from "react-router-dom";
 import styles from "./header.module.scss";
 import { userLogout } from "../../utils/api";
+import { signinState } from "../../state/authState";
+import { useSetRecoilState } from "recoil";
 
 function CommonHeader() {
   const navigate = useNavigate();
+  const setSigninState = useSetRecoilState(signinState);
   const logout = async () => {
     try {
-      await userLogout();
+      const response = await userLogout();
+      if (response.status === 204) {
+        setSigninState({ isLoading: false, error: null, success: false });
+      }
       navigate("/login");
     } catch (error) {
       console.error(error);
