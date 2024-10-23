@@ -9,7 +9,7 @@ const authMiddleware = async (req, res, next) => {
 
   /**
    * 클라이언트 요청의 쿠기에 AccessToken이 존재하지 않는 경우
-   * 결과 : 400코드. 다음 미들웨어로 넘어가지 않음.
+   * 결과 : 401코드. 다음 미들웨어로 넘어가지 않음.
    */
   if (!accesstoken) {
     return res.status(401).json({

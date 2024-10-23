@@ -6,6 +6,8 @@ import Swal from "sweetalert2"; // SweetAlert2 임포트
 
 import styles from "./BoardDetailPage.module.scss"; // SCSS 모듈 임포트
 import { downloadFile, fetchPostDetail, postDelete } from "../../utils/api";
+import { useRecoilValue } from "recoil";
+import { userState } from "../../state/authState";
 
 const BoardDetailPage = () => {
   const { postId } = useParams(); // URL 파라미터에서 postId 가져오기
@@ -13,6 +15,7 @@ const BoardDetailPage = () => {
   const [files, setFile] = useState([]);
   const [htmlContent, setHtmlContent] = useState(""); // 변환된 HTML 내용을 저장할 상태
   const [loading, setLoading] = useState(true); // 로딩 상태
+  const currentUser = useRecoilValue(userState);
   const navigate = useNavigate();
 
   const handleEdit = () => {
@@ -158,15 +161,19 @@ const BoardDetailPage = () => {
           </div>
         </div>
         <div className={styles.buttons}>
-          <button className={styles.deleteButton} onClick={handleDelete}>
-            삭제
-          </button>
           <Link to="/posts">
             <button className={styles.backButton}>목록</button>
           </Link>
-          <button className={styles.editButton} onClick={handleEdit}>
-            수정
-          </button>
+          {currentUser.nickname === post.writer && (
+            <>
+              <button className={styles.editButton} onClick={handleEdit}>
+                수정
+              </button>
+              <button className={styles.deleteButton} onClick={handleDelete}>
+                삭제
+              </button>
+            </>
+          )}
         </div>
       </div>
     </div>

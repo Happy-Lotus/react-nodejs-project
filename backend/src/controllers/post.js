@@ -22,6 +22,7 @@ exports.create = async (req, res) => {
       userid,
       thumbnail,
       files,
+      hasFile: files.length > 0 ? 1 : 0,
     };
 
     const { statusCode, message } = await Post.create(data);
@@ -150,99 +151,28 @@ exports.delete = async function (req, res) {
   }
 };
 
-// const existThumbnail = await this.readByBoardId(boardid).then((result) => {
-//   result.thumbnail;
-// });
+exports.readOption = async function (req, res) {
+  try {
+    const option = req.query.option;
+    const content = req.query.content;
+    const page = Number(req.query.page) || 1;
+    const perPage = Number(req.query.perPage) || 5;
 
-// let changeThumbnail =
-//   typeof req.files.thumbnail !== "undefined"
-//     ? `${req.files.thumbnail[0].destination}${req.files.thumbnail[0].filename}`
-//     : "";
+    const { posts, totalPage, currentPage } = await Post.readOption(
+      option,
+      content,
+      page,
+      perPage
+    );
 
-// changeThumbnail = await changeThumbnailImg(
-//   existThumbnail,
-//   changeThumbnail,
-//   thumbnail
-// );
-
-// const add = req.files.files;
-
-// try {
-//   const sql =
-//     "UPDATE board SET title = ?, content = ?, thumbnail = ? WHERE boardid = ?";
-//   const var_array = [title, content, thumbnail, boardid];
-
-//   conn.query(sql, var_array, (error, results) => {
-//     if (error) {
-//       console.error("Database error: ", error);
-//       return res.status(500).json({ result: "Database error:" + userid });
-//     } else {
-//       if (results.affectedRows > 0) {
-
-//         const updateFiles =
-//           typeof req.body.updateFiles !== "undefined"
-//             ? JSON.parse(JSON.parse(req.body.updateFiles).updateFiles)
-//             : [];
-
-//         try {
-//           if (add && add.length > 0) {
-//             let fileInfos;
-
-//             if (add) {
-//               fileInfos = add.map((file) => ({
-//                 filename: file.filename,
-//                 originalname: file.originalname,
-//                 size: file.size,
-//                 url: `/uploads/${file.filename}`,
-//               }));
-//             }
-//             File.create(boardid, fileInfos);
-//           }
-
-//           if (updateFiles.length > 0) {
-//             let fileInfos;
-//             fileInfos = updateFiles.map((filename) => ({
-//               file: { filename: filename },
-//             }));
-
-//             // for (const oldFile of fileInfos) {
-//             //   File.delete(oldFile[0]);
-//             // }
-//             fileInfos.forEach((fileInfo) => {
-//               File.delete(fileInfo.file);
-//             });
-//             File.deleteAttachedFiles(
-//               fileInfos.map((fileInfo) => fileInfo.file)
-//             );
-//           }
-
-//           return res.status(201).json({ result: "File update OK" });
-//         } catch (error) {
-//           console.error("File upload error: ", error);
-//           return res.status(500).json({ result: "File upload error" });
-//         }
-//       } else {
-//         return res.status(400).json({ result: error });
-//       }
-//     }
-//   });
-// } catch (error) {
-//   console.error("Error: ", error);
-//   return res.status(500).json({ result: "Server error:" });
-// }
-// exports.readOption = async (req, res) => {
-//   const option = req.params.option;
-//   const content = req.query.content;
-
-//   try {
-//     const { statusCode, message, post } = await Post.readOption(
-//       option,
-//       content
-//     );
-//     return res.status(statusCode).json({ message, post });
-//   } catch (error) {
-//     return res
-//       .status(error.statusCode || 500)
-//       .json({ result: error.message || "Server error" });
-//   }
-// };
+    return res.status(201).json({
+      message: "게시물 조회 성공",
+      posts,
+      totalPage,
+      currentPage,
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(error.statusCode).json({ message: error.message });
+  }
+};

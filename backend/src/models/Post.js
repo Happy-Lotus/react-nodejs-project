@@ -7,15 +7,16 @@ const { update } = require("./Token");
 
 //게시물 생성 => 완료
 exports.create = async function (postData) {
-  const { title, content, writer, userid, thumbnail, files } = postData;
+  const { title, content, writer, userid, thumbnail, files, hasFile } =
+    postData;
 
   const sql =
-    "INSERT INTO board (title, content, writer, regdate, userid,thumbnail) VALUES (?, ?, ?, ?, ?, ?)";
+    "INSERT INTO board (title, content, writer, regdate, userid,thumbnail,hasFile) VALUES (?, ?, ?, ?, ?, ?,?)";
   const now = moment(Date.now()).format("YYYY-MM-DD HH:mm:ss");
-  const var_array = [title, content, writer, now, userid, thumbnail];
+  const var_array = [title, content, writer, now, userid, thumbnail, hasFile];
   let fileInfos;
 
-  if (files) {
+  if (hasFile) {
     fileInfos = files.map((file) => ({
       filename: file.filename,
       originalname: file.originalname,
@@ -60,7 +61,7 @@ exports.create = async function (postData) {
 //게시물 전체 조회(글 목록) => 완료
 exports.readAll = async function () {
   const sql =
-    "SELECT boardid, title, content, writer, regdate, thumbnail FROM board ORDER BY boardid DESC";
+    "SELECT boardid, title, content, writer, regdate, thumbnail,hasFile FROM board ORDER BY boardid DESC";
   try {
     return new Promise((resolve, reject) => {
       conn.query(sql, async (error, results) => {
@@ -173,11 +174,10 @@ exports.readByBoardId = async function (boardid) {
 
 //게시물 수정(post)
 exports.update = async function (updateData) {
-  const { title, content, thumbnail, boardid, deleteFiles, newFiles } =
+  const { title, content, thumbnail, boardid, deleteFiles, newFiles, hasFile } =
     updateData;
   const sql =
-    "UPDATE board SET title = ?, content = ?, thumbnail = ? WHERE boardid = ?";
-  const var_array = [title, content, thumbnail, boardid];
+    "UPDATE board SET title = ?, content = ?, thumbnail = ? hasFile = ? WHERE boardid = ?";
   let fileInfos;
 
   if (newFiles) {
@@ -188,7 +188,7 @@ exports.update = async function (updateData) {
       url: `/uploads/${file.filename}`,
     }));
   }
-
+  const var_array = [title, content, thumbnail, boardid, hasFile];
   console.log(fileInfos);
 
   return new Promise(async (resolve, reject) => {
@@ -300,119 +300,37 @@ const extractImageUrls = (content) => {
   return urls;
 };
 
-// //게시물 옵션 조회
-// exports.readOption = async function (option, content) {
-//   const sql = `SELECT * FROM board WHERE ${option} LIKE '%${content}%'`;
+//게시물 옵션 조회
+exports.readOption = async function (option, content, page, perPage) {
+  const sqlCount = `SELECT COUNT(*) as total FROM board WHERE ${option} LIKE '%${content}%'`;
+  const sql = `SELECT * FROM board WHERE ${option} LIKE '%${content}%' ORDER BY regdate DESC LIMIT ?, ?`;
+  const var_array = [(page - 1) * perPage, perPage];
+  console.log(option + " " + content + " " + page + " " + perPage);
+  try {
+    const totalResults = await new Promise((resolve, reject) => {
+      conn.query(sqlCount, (error, results) => {
+        if (error) {
+          return reject({ statusCode: 500, message: error.sqlMessage });
+        }
+        resolve(results[0].total);
+      });
+    });
 
-//   try {
-//     return new Promise((resolve, reject) => {
-//       conn.query(sql, (error, results) => {
-//         if (error) {
-//           return reject({ statusCode: 500, message: error.sqlMessage });
-//         } else if (results.length === 0) {
-//           return reject({ statusCode: 404, message: "게시물이 없습니다." });
-//         }
-//         resolve({
-//           statusCode: 201,
-//           message: `게시물 ${option} 조회 성공`,
-//           post: {
-//             boardid: boardid,
-//             title: results[0].title,
-//             content: results[0].content,
-//             writer: results[0].writer,
-//             regdate: results[0].regdate,
-//             thumbnail: results[0].thumbnail,
-//           },
-//         });
-//       });
-//     });
-//   } catch (error) {
-//     throw new Error("서버 오류");
-//   }
-// };
-
-// const boardid = req.params.postid;
-// const { title, content, thumbnail } = JSON.parse(req.body.board);
-// console.log(req.body.updateFiles);
-
-// const existThumbnail = await this.readByBoardId(boardid).then((result) => {
-//   result.thumbnail;
-// });
-
-// let changeThumbnail =
-//   typeof req.files.thumbnail !== "undefined"
-//     ? `${req.files.thumbnail[0].destination}${req.files.thumbnail[0].filename}`
-//     : "";
-
-// changeThumbnail = await changeThumbnailImg(
-//   existThumbnail,
-//   changeThumbnail,
-//   thumbnail
-// );
-
-// const add = req.files.files;
-
-// try {
-//   const sql =
-//     "UPDATE board SET title = ?, content = ?, thumbnail = ? WHERE boardid = ?";
-//   const var_array = [title, content, changeThumbnail, boardid];
-
-//   conn.query(sql, var_array, (error, results) => {
-//     if (error) {
-//       console.error("Database error: ", error);
-//       return res.status(500).json({ result: "Database error:" + userid });
-//     } else {
-//       if (results.affectedRows > 0) {
-//         console.log("updateFiles");
-//         console.log(req.body.updateFiles);
-//         const updateFiles =
-//           typeof req.body.updateFiles !== "undefined"
-//             ? JSON.parse(JSON.parse(req.body.updateFiles).updateFiles)
-//             : [];
-
-//         try {
-//           if (add && add.length > 0) {
-//             let fileInfos;
-
-//             if (add) {
-//               fileInfos = add.map((file) => ({
-//                 filename: file.filename,
-//                 originalname: file.originalname,
-//                 size: file.size,
-//                 url: `/uploads/${file.filename}`,
-//               }));
-//             }
-//             File.create(boardid, fileInfos);
-//           }
-
-//           if (updateFiles.length > 0) {
-//             let fileInfos;
-//             fileInfos = updateFiles.map((filename) => ({
-//               file: { filename: filename },
-//             }));
-
-//             // for (const oldFile of fileInfos) {
-//             //   File.delete(oldFile[0]);
-//             // }
-//             fileInfos.forEach((fileInfo) => {
-//               File.delete(fileInfo.file);
-//             });
-//             File.deleteAttachedFiles(
-//               fileInfos.map((fileInfo) => fileInfo.file)
-//             );
-//           }
-
-//           return res.status(201).json({ result: "File update OK" });
-//         } catch (error) {
-//           console.error("File upload error: ", error);
-//           return res.status(500).json({ result: "File upload error" });
-//         }
-//       } else {
-//         return res.status(400).json({ result: error });
-//       }
-//     }
-//   });
-// } catch (error) {
-//   console.error("Error: ", error);
-//   return res.status(500).json({ result: "Server error:" });
-// }
+    return new Promise((resolve, reject) => {
+      conn.query(sql, var_array, (error, results) => {
+        if (error) {
+          return resolve({ statusCode: 500, message: error.sqlMessage });
+        } else if (results.length === 0) {
+          return resolve({ statusCode: 404, message: "게시물이 없습니다." });
+        }
+        resolve({
+          posts: results,
+          totalPage: Math.ceil(totalResults / perPage), // 총 페이지 수 계산
+          currentPage: page, // 현재 페이지
+        });
+      });
+    });
+  } catch (error) {
+    throw new Error("서버 오류");
+  }
+};

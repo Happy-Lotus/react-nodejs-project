@@ -13,6 +13,7 @@ import { RecoilRoot, useRecoilValue } from "recoil"; // Import RecoilRoot
 import { CookiesProvider } from "react-cookie";
 import React from "react";
 import { signinState } from "./state/authState";
+import CommonFooter from "./components/footer/footer";
 function Layout() {
   return (
     <div style={{ width: "100%", height: "100vh" }}>
@@ -43,10 +44,10 @@ function Layout() {
           <CommonHeader />
         </div>
       </header>
-      {/* <Navbar /> */}
       <main className="max-w-7xl mx-auto my-20">
         <Outlet />
       </main>
+      <CommonFooter />
     </div>
   );
 }

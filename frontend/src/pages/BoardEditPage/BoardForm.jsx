@@ -85,12 +85,19 @@ const BoardForm = ({ isEditMode }) => {
           postData.deleteFiles.push(filename);
         });
         console.log(postData);
-        formData.append("post", JSON.stringify(postData));
+        let hasFile;
 
+        if (newFiles) {
+          hasFile = 1;
+        } else if (files.length - deletedFiles.length === 0) {
+          hasFile = 0;
+        }
+        postData.append("hasFile", hasFile);
+        formData.append("post", JSON.stringify(postData));
         console.log(formData);
 
-        await updatePost(postId, formData);
-        toast.success("게시글 수정 완료 😎");
+        // await updatePost(postId, formData);
+        // toast.success("게시글 수정 완료 😎");
       } else {
         //작성 모드. 새로 추가된 파일만 추가
         files.forEach((file) => {

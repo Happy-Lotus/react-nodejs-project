@@ -299,3 +299,29 @@ export const postDelete = async (postid) => {
     console.error("Error deleteing file:", error); // Added error logging
   }
 };
+
+export const readOption = async (
+  option = "",
+  content,
+  page = 2,
+  perPage = 5
+) => {
+  try {
+    console.log("api readOption");
+    const config = {
+      method: "get",
+      url: `http://localhost:4000/posts?option=${option}&content=${content}&page=${page}&perPage=${perPage}`,
+      headers: {
+        "Content-Type": "application/json",
+      },
+      withCredentials: true,
+    };
+    console.log("api요청");
+
+    const response = await axios(config);
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching posts:", error);
+    throw error; // 에러를 다시 던져서 호출한 곳에서 처리할 수 있도록 함
+  }
+};

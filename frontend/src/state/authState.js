@@ -29,3 +29,12 @@ export const userState = atom({
   },
   effects_UNSTABLE: [persistAtom],
 });
+
+export const postState = atom({
+  key: "postState",
+  default: {
+    title: "",
+    content: "",
+    thumbnail: "",
+  },
+});

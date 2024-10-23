@@ -6,14 +6,14 @@ const postController = require("../controllers/post");
 const fileController = require("../controllers/file");
 const authMiddleware = require("../middleware/authMiddleware");
 
-/*게시물 전체 조회*/
-router.get("/", postController.readAll);
+// /*게시물 전체 조회*/
+// router.get("/", authMiddleware, postController.readAll);
 
-/* 게시물 옵션 조회*/
-router.get("/:option", authMiddleware, postController.verifyEmail);
-
+// /* 게시물 옵션 조회*/
+// router.get("/:option", authMiddleware, postController.verifyEmail);
+router.get("/", postController.readOption);
 /*게시물 상세 조회*/
-router.get("/detail/:postid", postController.read);
+router.get("/detail/:postid", authMiddleware, postController.read);
 
 /* 게시물 작성*/
 router.post(
@@ -26,16 +26,20 @@ router.post(
 /* 게시물 수정*/
 router.post(
   "/detail/:postid",
-  // authMiddleware,
+  authMiddleware,
   upload.array("newFiles"),
   postController.update
 );
 
 //게시물 파일 다운로드
-router.get("/:postid/file/:filename", postController.downloadFiles);
+router.get(
+  "/:postid/file/:filename",
+  authMiddleware,
+  postController.downloadFiles
+);
 
 //게시물 삭제
-router.delete("/:postid", postController.delete);
+router.delete("/:postid", authMiddleware, postController.delete);
 
 //게시물 작성 시 이미지 업로드
 router.post(
@@ -48,8 +52,8 @@ router.post(
 );
 
 //게시물 이미지 가져오기
-router.get("/:imageUrl", (req, res) => {
-  console.log("/uploads imageUrl");
+router.get("/:imageUrl", authMiddleware, (req, res) => {
+  console.log(":imageUrl ");
   const imageUrl = req.params.imageUrl;
   fileController.read(imageUrl, res);
 });

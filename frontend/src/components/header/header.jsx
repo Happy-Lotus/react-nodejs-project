@@ -1,19 +1,19 @@
-import { Link, Navigate, useNavigate } from "react-router-dom";
+import { Link } from "react-router-dom";
 import styles from "./header.module.scss";
 import { userLogout } from "../../utils/api";
-import { signinState } from "../../state/authState";
-import { useSetRecoilState } from "recoil";
+import { signinState, userState } from "../../state/authState";
+import { useRecoilValue, useSetRecoilState } from "recoil";
 
 function CommonHeader() {
-  const navigate = useNavigate();
   const setSigninState = useSetRecoilState(signinState);
+  const user = useRecoilValue(userState);
   const logout = async () => {
     try {
       const response = await userLogout();
+      console.log(response);
       if (response.status === 204) {
         setSigninState({ isLoading: false, error: null, success: false });
       }
-      navigate("/login");
     } catch (error) {
       console.error(error);
     }
@@ -38,6 +38,9 @@ function CommonHeader() {
           >
             LOGOUT
           </button>
+          <p>
+            <strong> [{user.nickname}]</strong>
+          </p>
         </div>
       </div>
     </div>

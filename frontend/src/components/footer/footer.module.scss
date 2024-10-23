@@ -1,47 +1,15 @@
 .footer {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-top: 20px;
+  height: 100px;
+  color: white; // 글자색
+  padding: 20px 0; // 상하 패딩
+  text-align: center; // 텍스트 중앙 정렬
+  position: relative; // 상대 위치 설정
+  bottom: 0; // 하단 고정
+  width: 100%; // 전체 너비
 
-  .pagination {
-    display: flex;
-    justify-content: center;
-    flex-grow: 1;
-
-    .prev__page,
-    .next__page {
-      padding: 10px 15px;
-      margin: 0 5px;
-      border: none;
-      color: #000000;
-      cursor: pointer;
-      border-radius: 50%;
-      width: 35px;
-      height: 35px;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-
-      &:hover {
-        background-color: #0056b3;
-      }
-    }
-  }
-
-  .submit__container {
-    flex-shrink: 0;
-
-    .submit__btn {
-      padding: 10px 20px;
-      border: none;
-      background-color: #28a745;
-      color: #fff;
-      cursor: pointer;
-
-      &:hover {
-        background-color: #218838;
-      }
-    }
+  &__container {
+    max-width: 1440px; // 최대 너비 설정
+    margin: 0 auto; // 중앙 정렬
+    padding: 0 20px; // 좌우 패딩
   }
 }

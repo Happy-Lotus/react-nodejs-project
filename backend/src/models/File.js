@@ -66,13 +66,4 @@ exports.delete = async function (boardid, filename) {
       }
     });
   });
-  // await new Promise((resolve, reject) => {
-  //   conn.query(sql, filename, (error, results) => {
-  //     if (error) {
-  //       console.error("Database error: ", error);
-  //       return reject(new Error("Database error: " + error.message));
-  //     }
-  //     resolve();
-  //   });
-  // });
 };

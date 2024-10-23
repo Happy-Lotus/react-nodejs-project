@@ -29,7 +29,7 @@ function CommonNav({ currentPage, totalPages, onPageChange }) {
   };
 
   return (
-    <footer className={styles.footer}>
+    <nav className={styles.nav}>
       <div className={styles.submit__container}>
         <Link to={`/posts/edit`}>
           <button className={styles.submit__btn}>작성하기</button>
@@ -54,7 +54,7 @@ function CommonNav({ currentPage, totalPages, onPageChange }) {
           </button>
         )}
       </div>
-    </footer>
+    </nav>
   );
 }
 export default CommonNav;
