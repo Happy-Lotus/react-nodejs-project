@@ -7,6 +7,7 @@ const path = require("path"); // path 모듈 추가
 dotenv.config();
 const moment = require("moment");
 const fs = require("fs");
+const fileController = require("../controllers/file");
 
 //게시물 생성
 exports.create = async (req, res) => {
@@ -22,7 +23,7 @@ exports.create = async (req, res) => {
       userid,
       thumbnail,
       files,
-      hasFile: files.length > 0 ? 1 : 0,
+      hasFile: files.length > 0 ? true : false,
     };
 
     const { statusCode, message } = await Post.create(data);
@@ -100,7 +101,7 @@ exports.update = async function (req, res) {
    */
   try {
     const boardid = req.params.postid;
-    const { title, content, thumbnail, deleteFiles } = JSON.parse(
+    const { title, content, thumbnail, deleteFiles, hasFile } = JSON.parse(
       req.body.post
     );
     const newFiles = req.files;
@@ -110,9 +111,11 @@ exports.update = async function (req, res) {
     console.log(thumbnail + "\n" + deleteFiles);
     console.log(newFiles);
 
-    const existThumbnail = await Post.readByBoardId(boardid).then((result) => {
-      result.thumbnail;
-    });
+    const result = await Post.readByBoardId(boardid);
+    const existThumbnail = result.thumbnail;
+    console.log("========existThumbnail=========");
+    console.log(existThumbnail);
+    console.log(thumbnail);
     const data = {
       title,
       content,
@@ -120,16 +123,16 @@ exports.update = async function (req, res) {
       boardid,
       deleteFiles,
       newFiles,
+      hasFile,
     };
 
     const { statusCode, message } = await Post.update(data);
     if (statusCode === 201) {
-      await Promise.all([
-        File.deleteAttachedFiles(deleteFiles),
-        ...(existThumbnail && existThumbnail !== data.thumbnail
-          ? [File.deleteThumbnail(existThumbnail)]
-          : []),
-      ]);
+      console.log("썸네일 삭제 진행");
+      if (existThumbnail && existThumbnail !== data.thumbnail) {
+        console.log("existThumbnail && existThumbnail !== data.thumbnail");
+        await fileController.deleteThumbnail(existThumbnail);
+      }
     }
     return res.status(statusCode).json({ message });
   } catch (error) {

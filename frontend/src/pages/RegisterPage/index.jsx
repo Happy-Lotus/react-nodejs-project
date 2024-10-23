@@ -23,20 +23,17 @@ const RegisterPage = () => {
   const [timer, setTimer] = useState(0);
 
   const onSubmit = async (data) => {
-    // if (!isVerified) {
-    //   setErrorMessage("인증이 되지 않았습니다.");
-    //   return;
-    // }
-    // try {
-    //   await signup(data);
-    //   reset();
-    //   navigate("/login");
-    // } catch (error) {
-    //   console.error(error);
-    // }
-    await signup(data, 1);
-    reset();
-    navigate("/login");
+    if (!isVerified) {
+      setErrorMessage("인증이 되지 않았습니다.");
+      return;
+    }
+    try {
+      await signup(data, isVerified);
+      reset();
+      navigate("/login");
+    } catch (error) {
+      console.error(error);
+    }
   };
 
   const {
@@ -73,11 +70,11 @@ const RegisterPage = () => {
     const response = await generateCode(email);
     console.log("이메일 인증 진행 후");
 
-    // if (response.status === 201) {
-    //   setTimer(180);
-    // } else {
-    //   console.log("handleEmailVerification 오류:", response.status);
-    // }
+    if (response.status === 201) {
+      setTimer(180);
+    } else {
+      console.log("handleEmailVerification 오류:", response.status);
+    }
   };
 
   const handleCodeCheck = async () => {
@@ -89,8 +86,8 @@ const RegisterPage = () => {
       const response = await verifyCode(email, code);
       console.log(response);
       // setErrorMessage("인증 성공");
-      // setIsVerified(true);
-      // setTimer(0);
+      setIsVerified(true);
+      setTimer(0);
     }
   };
 

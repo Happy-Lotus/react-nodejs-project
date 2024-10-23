@@ -18,7 +18,7 @@ const BoardForm = ({ isEditMode }) => {
     content: "",
   });
 
-  const [thumbnail, setThumbnail] = useState(null); //썸네일 상태
+  const [thumbnail, setThumbnail] = useState(""); //썸네일 상태
   const [isThumbnailRemoved, setIsThumbnailRemoved] = useState(false); // 썸네일 제거 상태
   const [showThumbnailModal, setShowThumbnailModal] = useState(false); //썸네일 창 상태
   const [files, setFiles] = useState([]); // 첨부파일 상태
@@ -62,16 +62,20 @@ const BoardForm = ({ isEditMode }) => {
     e.preventDefault();
     const formData = new FormData();
     console.log(mountainContent.content);
-    if (isThumbnailRemoved) {
-      setThumbnail(""); // 썸네일 제거
-    }
 
     const postData = {
       title: mountainContent.title,
       content: mountainContent.content,
       deleteFiles: [],
       thumbnail: thumbnail,
+      hasFile: false,
     };
+    console.log("======postdata======");
+    console.log(postData);
+
+    if (isThumbnailRemoved) {
+      postData.thumbnail = "";
+    }
 
     try {
       //파일 처리
@@ -85,19 +89,22 @@ const BoardForm = ({ isEditMode }) => {
           postData.deleteFiles.push(filename);
         });
         console.log(postData);
-        let hasFile;
-
-        if (newFiles) {
-          hasFile = 1;
-        } else if (files.length - deletedFiles.length === 0) {
-          hasFile = 0;
+        console.log("========파일삭제========");
+        if (newFiles && newFiles.length > 0) {
+          postData.hasFile = 1;
+        } else if (files.length - deletedFiles.length < 0) {
+          console.log("========파일삭제========");
+          console.log(files.length - deletedFiles.length);
+          postData.hasFile = 0;
+        } else {
+          postData.hasFile = 1;
         }
-        postData.append("hasFile", hasFile);
+
         formData.append("post", JSON.stringify(postData));
         console.log(formData);
 
-        // await updatePost(postId, formData);
-        // toast.success("게시글 수정 완료 😎");
+        await updatePost(postId, formData);
+        toast.success("게시글 수정 완료 😎");
       } else {
         //작성 모드. 새로 추가된 파일만 추가
         files.forEach((file) => {
@@ -105,6 +112,8 @@ const BoardForm = ({ isEditMode }) => {
         });
         console.log(files);
         formData.append("post", JSON.stringify(postData));
+        console.log("========formData======");
+        console.log(formData);
         await registerPost(formData);
         toast.success("게시글 작성 완료 😎");
       }
@@ -132,8 +141,10 @@ const BoardForm = ({ isEditMode }) => {
         setIsDragActive(false); // Reset drag state
         return;
       }
-
+      console.log(isEditMode);
       if (isEditMode) {
+        console.log("isEditMode");
+
         //수정모드일 경우
         setNewFiles((prevFiles) => [
           ...prevFiles,
@@ -334,6 +345,17 @@ const BoardForm = ({ isEditMode }) => {
             />
           </div>
         </div>
+        <div className={styles.thumbnail__container}>
+          <ImageDropzone
+            thumbnail={thumbnail}
+            handleThumbnailChange={handleThumbnailChange}
+            onDrop={handleThumbnailDrop}
+            isThumbnailRemoved={isThumbnailRemoved}
+            handleCancel={handleCancel}
+            handleRegister={handleRegister}
+            handleRemoveThumbnail={handleRemoveThumbnail}
+          />
+        </div>
         <FileDropzone
           onDrop={handleFileDrop} //파일드롭
           isDragActive={isDragActive} //드래그 여부
@@ -350,7 +372,7 @@ const BoardForm = ({ isEditMode }) => {
             등록
           </button>
         </div>
-        {showThumbnailModal && ( // 썸네일 선택 모달
+        {/* {showThumbnailModal && ( // 썸네일 선택 모달
           <div
             className={`${styles.thumbnailModal} ${
               isExiting ? styles.exit : ""
@@ -366,7 +388,7 @@ const BoardForm = ({ isEditMode }) => {
               handleRemoveThumbnail={handleRemoveThumbnail}
             />
           </div>
-        )}
+        )} */}
       </div>
     </div>
   );

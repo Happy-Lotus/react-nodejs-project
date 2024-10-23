@@ -67,14 +67,14 @@ const ImageDropzone = ({
 
         <input {...getInputProps()} />
       </div>
-      <div className={styles.modalButtons}>
+      {/* <div className={styles.modalButtons}>
         <button className={styles.cancleButton} onClick={handleCancel}>
           취소
         </button>
         <button className={styles.registerButton} onClick={handleRegister}>
           등록
         </button>
-      </div>
+      </div> */}
     </div>
   );
 };

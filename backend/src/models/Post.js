@@ -163,6 +163,8 @@ exports.readByBoardId = async function (boardid) {
           console.error("Database error: ", error);
           reject(error);
         } else {
+          console.log("results");
+          console.log(results);
           resolve(results[0]);
         }
       });
@@ -174,11 +176,14 @@ exports.readByBoardId = async function (boardid) {
 
 //게시물 수정(post)
 exports.update = async function (updateData) {
+  console.log("update");
+  console.log(updateData);
   const { title, content, thumbnail, boardid, deleteFiles, newFiles, hasFile } =
     updateData;
   const sql =
-    "UPDATE board SET title = ?, content = ?, thumbnail = ? hasFile = ? WHERE boardid = ?";
+    "UPDATE board SET title = ?, content = ?, thumbnail = ?, hasFile = ? WHERE boardid = ?";
   let fileInfos;
+  console.log(updateData);
 
   if (newFiles) {
     fileInfos = newFiles.map((file) => ({
@@ -188,8 +193,7 @@ exports.update = async function (updateData) {
       url: `/uploads/${file.filename}`,
     }));
   }
-  const var_array = [title, content, thumbnail, boardid, hasFile];
-  console.log(fileInfos);
+  const var_array = [title, content, thumbnail, hasFile, boardid];
 
   return new Promise(async (resolve, reject) => {
     conn.query(sql, var_array, async (error, results) => {
@@ -203,9 +207,10 @@ exports.update = async function (updateData) {
               if (deleteFiles.length !== 0) {
                 await Promise.all(
                   deleteFiles.map((file) => File.delete(boardid, file)),
-                  deleteFiles.map((file) =>
-                    fileController.deleteAttachedFiles(file)
-                  )
+                  fileController.deleteAttachedFiles(deleteFiles)
+                  // deleteFiles.map((file) =>
+                  //   fileController.deleteAttachedFiles(file)
+                  // )
                 );
               }
               resolve({ statusCode: 201, message: "File and Post upload OK" });

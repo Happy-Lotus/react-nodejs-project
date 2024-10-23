@@ -60,6 +60,9 @@ function BoardPage() {
     }
     return title; // 길이가 초과하지 않으면 원본 제목 반환
   };
+  const truncateRegDate = (regdate) => {
+    return new Date(regdate).toLocaleDateString();
+  };
   const handleSearchEnter = (e) => {
     if (e.key === "Enter") {
       console.log(searchTerm);
@@ -147,7 +150,7 @@ function BoardPage() {
                     </Link>
                   </td>
                   <td>{post.writer}</td>
-                  <td>{post.regdate}</td>
+                  <td>{truncateRegDate(post.regdate)}</td>
                 </tr>
               ))
             ) : (

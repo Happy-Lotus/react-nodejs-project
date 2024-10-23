@@ -4,10 +4,11 @@ import axiosInstance from "./axios.js";
 import axios from "axios";
 axios.defaults.withCredentials = true;
 
+//회원가입
 export const useSignup = () => {
   const setSignupState = useSetRecoilState(signupState);
 
-  const signup = async (userData) => {
+  const signup = async (userData, isVerified) => {
     console.log("api 요청");
     const config = {
       method: "post",
@@ -20,7 +21,7 @@ export const useSignup = () => {
         nickname: userData.nickname,
         email: userData.email,
         pwd: userData.pwd,
-        isVerified: 1,
+        isVerified: isVerified,
       },
     };
     try {
@@ -300,12 +301,7 @@ export const postDelete = async (postid) => {
   }
 };
 
-export const readOption = async (
-  option = "",
-  content,
-  page = 2,
-  perPage = 5
-) => {
+export const readOption = async (option = "", content, page, perPage = 5) => {
   try {
     console.log("api readOption");
     const config = {
