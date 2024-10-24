@@ -26,7 +26,9 @@ const BoardForm = ({ isEditMode }) => {
   const filesRef = useRef(files); // 현재 파일 리스트를 참조하기 위한 ref
   const [newFiles, setNewFiles] = useState([]); // 새로 추가할 파일
   const newFilesRef = useRef(newFiles);
-  const [isDragActive, setIsDragActive] = useState(false);
+  const [isFileDragActive, setIsFileDragActive] = useState(false);
+  const [isImgDragActive, setIsImgDragActive] = useState(false);
+  // const [isDragActive, setIsDragActive] = useState(false);
   // const [isExiting, setIsExiting] = useState(false); // 모달 종료 상태 추가
   const [deletedFiles, setDeletedFiles] = useState([]); // 삭제할 파일명
 
@@ -125,7 +127,7 @@ const BoardForm = ({ isEditMode }) => {
       //files : 기존 파일 acceptedFiles: 새로 추가된 파일 newFiles: 저장은 안된 기존파일
       if (files.length + acceptedFiles.length + newFiles.length > 5) {
         alert("첨부할 수 있는 파일의 개수는 5개를 초과할 수 없습니다.");
-        setIsDragActive(false); // Reset drag state
+        setIsFileDragActive(false); // Reset drag state
         return;
       }
 
@@ -134,7 +136,7 @@ const BoardForm = ({ isEditMode }) => {
       ); // 10MB
       if (oversizedFiles.length > 0) {
         alert("첨부할 수 있는 파일의 크기는 10MB를 초과할 수 없습니다.");
-        setIsDragActive(false); // Reset drag state
+        setIsFileDragActive(false); // Reset drag state
         return;
       }
       console.log(isEditMode);
@@ -165,7 +167,7 @@ const BoardForm = ({ isEditMode }) => {
 
       //새 파일 추가
 
-      setIsDragActive(false);
+      setIsFileDragActive(false);
     },
     [files, newFiles]
   );
@@ -175,7 +177,7 @@ const BoardForm = ({ isEditMode }) => {
     const selectedFiles = Array.from(event.target.files);
     if (files.length + selectedFiles.length + newFiles.length > 5) {
       alert("첨부할 수 있는 파일의 개수는 5개를 초과할 수 없습니다.");
-      setIsDragActive(false); // Reset drag state
+      setIsFileDragActive(false); // Reset drag state
       return;
     }
 
@@ -184,7 +186,7 @@ const BoardForm = ({ isEditMode }) => {
     ); // 10MB
     if (oversizedFiles.length > 0) {
       alert("첨부할 수 있는 파일의 크기는 10MB를 초과할 수 없습니다.");
-      setIsDragActive(false); // Reset drag state
+      setIsFileDragActive(false); // Reset drag state
       return;
     }
     if (isEditMode) {
@@ -290,6 +292,7 @@ const BoardForm = ({ isEditMode }) => {
     } else {
       alert("썸네일은 이미지 파일만 가능합니다.");
     }
+    setIsImgDragActive(false);
   }, []);
 
   // 썸네일 변경
@@ -307,7 +310,7 @@ const BoardForm = ({ isEditMode }) => {
 
   //썸네일 삭제
   const handleRemoveThumbnail = () => {
-    setIsThumbnailRemoved(true); // 썸네일 제거 상태를 true로 설정
+    setThumbnail(""); // 썸네일 제거 상태를 true로 설정
   };
 
   //변경 또는 작성 취소 버튼
@@ -355,18 +358,18 @@ const BoardForm = ({ isEditMode }) => {
         <div className={styles.thumbnail__container}>
           <ImageDropzone
             thumbnail={thumbnail}
-            handleThumbnailChange={handleThumbnailChange}
+            isDragActive={isImgDragActive}
+            setIsDragActive={setIsImgDragActive}
             onDrop={handleThumbnailDrop}
             isThumbnailRemoved={isThumbnailRemoved}
-            // handleRegister={handleRegister}
             handleRemoveThumbnail={handleRemoveThumbnail}
           />
         </div>
         <FileDropzone
           onDrop={handleFileDrop} //파일드롭
-          isDragActive={isDragActive} //드래그 여부
+          isDragActive={isFileDragActive} //드래그 여부
           files={files} //현재 파일들
-          setIsDragActive={setIsDragActive} //드래그 설정
+          setIsDragActive={setIsFileDragActive} //드래그 설정
           handleDeleteFile={handleDeleteFile} //파일 삭제
           handleFileChange={handleFileButton} //업로드 버튼을 이용한 파일 업로드
         />

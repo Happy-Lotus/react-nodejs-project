@@ -74,15 +74,15 @@ const Editor = ({ content, setContent }) => {
 
       FileResizer.imageFileResizer(
         file,
-        800, // 원하는 너비
-        800, // 원하는 높이
-        format, // 포맷 (JPEG, PNG 등)
-        70, // 품질 (0-100)
-        0, // 회전 (0-360)
+        800,
+        800,
+        format,
+        70,
+        0,
         (uri) => {
-          resolve(uri); // 리사이즈된 파일 반환
+          resolve(uri);
         },
-        "file" // 반환 형식 (file, base64, blob 등)
+        "file"
       );
     });
   };

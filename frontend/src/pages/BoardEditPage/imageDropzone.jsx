@@ -2,38 +2,36 @@ import React, { useState } from "react";
 import { useDropzone } from "react-dropzone";
 import styles from "./ImageDropzone.module.scss"; // SCSS 모듈 임포트
 import Resizer from "react-image-file-resizer";
-
 const ImageDropzone = ({
   thumbnail,
-  handleThumbnailChange,
+  isDragActive,
+  setIsDragActive,
   onDrop,
   isThumbnailRemoved,
   handleRemoveThumbnail,
 }) => {
-  const [isDragActive, setIsDragActive] = useState(false);
   const { getRootProps, getInputProps } = useDropzone({
     onDrop, // 드래그 앤 드롭 핸들러
     accept: { "image/*": [".jpeg", ".jpg", ".png"] }, // 이미지 파일만 허용
     noClick: true,
     onDragEnter: () => {
       if (!isDragActive) setIsDragActive(true);
-      handleRemoveThumbnail(false);
+      // handleRemoveThumbnail(false);
     },
     onDragLeave: () => {
       if (isDragActive) setIsDragActive(false);
     },
   });
 
-  const imagePreview =
-    thumbnail && !isThumbnailRemoved ? (
-      <img
-        src={`http://localhost:4000/${thumbnail}`}
-        alt="썸네일 미리보기"
-        className={styles.thumbnailPreview}
-      />
-    ) : (
-      <p>썸네일 이미지를 업로드하세요.</p>
-    );
+  const imagePreview = thumbnail ? (
+    <img
+      src={`http://localhost:4000/${thumbnail}`}
+      alt="썸네일 미리보기"
+      className={styles.thumbnailPreview}
+    />
+  ) : (
+    <p>썸네일 이미지를 업로드하세요.</p>
+  );
 
   return (
     <div className={styles.modalContent}>
@@ -52,16 +50,22 @@ const ImageDropzone = ({
         )}
       </div>
 
-      <div className={styles.thumbnailUploadArea}>
+      <div
+        className={thumbnail ? styles.imagePresent : styles.thumbnailUploadArea}
+      >
         <div
           {...getRootProps({
-            className: `${styles.thumbnailPlaceholder} ${
+            className: `${
               thumbnail && !isThumbnailRemoved ? styles.imagePresent : ""
-            } ${isDragActive && !isThumbnailRemoved ? styles.hoverEffect : ""}`,
+            } ${
+              isDragActive && !isThumbnailRemoved
+                ? styles.drapzoneActive
+                : styles.drapzone
+            }`,
           })}
         >
-          <input {...getInputProps()} />
           {imagePreview}
+          <input {...getInputProps()} />
         </div>
       </div>
     </div>
