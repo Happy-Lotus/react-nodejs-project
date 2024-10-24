@@ -4,6 +4,7 @@ import { FaSearch } from "react-icons/fa";
 import CommonNav from "../../components/nav/navigation";
 import { Link } from "react-router-dom";
 import { readOption } from "../../utils/api";
+import { debounce } from "lodash";
 
 function BoardPage() {
   const [postData, setPosts] = useState([]);
@@ -29,9 +30,6 @@ function BoardPage() {
 
         setPosts(posts);
         setTotalPages(totalPage); // 총 페이지 수 설정
-        // const imageList = posts ? posts.map((post) => post.thumbnail) : [];
-        // setThumbnail(imageList);
-        setTotalPages(totalPage);
       } catch (error) {
         console.error("Error fetching posts:", error);
       } finally {
@@ -41,8 +39,14 @@ function BoardPage() {
     getPosts();
   }, [searchOption, searchTerm, currentPage]);
 
-  const handleSearch = () => {
-    setCurrentPage(1); // 검색 후 첫 페이지로 리셋
+  const debouncedSearch = debounce((term) => {
+    setSearchTerm(term);
+    setCurrentPage(1);
+  }, 300);
+  const handleSearch = (e) => {
+    const value = e.target.value;
+    debouncedSearch(value);
+    // setCurrentPage(1); // 검색 후 첫 페이지로 리셋
     // 검색 버튼 클릭 시 필터링
     // const results = postData.filter((post) => {
     //   if (searchOption === "title") {
@@ -63,12 +67,12 @@ function BoardPage() {
   const truncateRegDate = (regdate) => {
     return new Date(regdate).toLocaleDateString();
   };
-  const handleSearchEnter = (e) => {
-    if (e.key === "Enter") {
-      console.log(searchTerm);
-      handleSearch();
-    }
-  };
+  // const handleSearchEnter = (e) => {
+  //   if (e.key === "Enter") {
+  //     console.log(searchTerm);
+  //     handleSearch();
+  //   }
+  // };
   // Pagination logic
   // const indexOfLastPost = currentPage * postsPerPage;
   // const indexOfFirstPost = indexOfLastPost - postsPerPage;
@@ -99,9 +103,9 @@ function BoardPage() {
               id="search"
               type="text"
               placeholder="검색"
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              onKeyUp={(e) => handleSearchEnter(e)}
+              // value={searchTerm}
+              onChange={handleSearch}
+              // onKeyUp={(e) => handleSearchEnter(e)}
             />
             <span className={styles.input__box__img} onClick={handleSearch}>
               <FaSearch />
