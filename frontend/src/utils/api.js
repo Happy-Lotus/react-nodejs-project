@@ -321,3 +321,23 @@ export const readOption = async (option = "", content, page, perPage = 5) => {
     throw error; // 에러를 다시 던져서 호출한 곳에서 처리할 수 있도록 함
   }
 };
+
+export const deleteFiles = async (postData) => {
+  try {
+    console.log("파일 삭제 api");
+    const config = {
+      method: "post",
+      url: "http://localhost:4000/posts/cancel",
+      headers: {
+        "Content-Type": "application/json",
+      },
+
+      data: postData,
+    };
+    const response = await axios(config);
+    return response;
+  } catch (error) {
+    console.error("Error deleteFiles", error);
+    throw error;
+  }
+};

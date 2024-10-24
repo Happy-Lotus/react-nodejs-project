@@ -37,6 +37,7 @@ router.get(
   authMiddleware,
   postController.downloadFiles
 );
+router.post("/cancel", authMiddleware, postController.cancel);
 
 //게시물 삭제
 router.delete("/:postid", authMiddleware, postController.delete);

@@ -6,7 +6,7 @@ import Editor from "./Editor";
 import Swal from "sweetalert2"; // SweetAlert2 임포트
 import FileDropzone from "./fileDropzone";
 import ImageDropzone from "./imageDropzone";
-import { registerPost, updatePost } from "../../utils/api";
+import { deleteFiles, registerPost, updatePost } from "../../utils/api";
 import { toast } from "react-toastify";
 import Resizer from "react-image-file-resizer";
 
@@ -31,6 +31,7 @@ const BoardForm = ({ isEditMode }) => {
   // const [isDragActive, setIsDragActive] = useState(false);
   // const [isExiting, setIsExiting] = useState(false); // 모달 종료 상태 추가
   const [deletedFiles, setDeletedFiles] = useState([]); // 삭제할 파일명
+  const [thumbnailDeleteFiles, setThumbnailDeleteFiles] = useState([]);
 
   useEffect(() => {
     if (isEditMode) {
@@ -263,37 +264,40 @@ const BoardForm = ({ isEditMode }) => {
     });
   };
   // 썸네일 drag&drop
-  const handleThumbnailDrop = useCallback(async (acceptedFiles) => {
-    console.log(acceptedFiles);
-    const file = acceptedFiles[0]; // 첫 번째 파일만 사용
-    console.log("=====이미지 리사이징======");
-    console.log(file);
-    if (file && file.type.startsWith("image/")) {
-      const compressedFile = await resizeFile(file);
-      console.log(compressedFile);
-      Object.assign(compressedFile, { fieldname: "image" }); // fieldname 추가
-      const formData = new FormData();
-      formData.append("image", compressedFile);
-      axios
-        .post("http://localhost:4000/posts/upload", formData, {
-          headers: {
-            "Content-Type": "multipart/form-data",
-          },
-        })
-        .then((response) => {
-          const imageUrl = `uploads/${response.data.url.split("/").pop()}`;
-          setThumbnail(imageUrl);
-          console.log(thumbnail);
-          setIsThumbnailRemoved(false);
-        })
-        .catch((error) => {
-          console.error("Error uploading thumbnail:", error);
-        });
-    } else {
-      alert("썸네일은 이미지 파일만 가능합니다.");
-    }
-    setIsImgDragActive(false);
-  }, []);
+  const handleThumbnailDrop = useCallback(
+    async (acceptedFiles) => {
+      console.log(acceptedFiles);
+      const file = acceptedFiles[0]; // 첫 번째 파일만 사용
+      console.log("=====이미지 리사이징======");
+      console.log(file);
+      if (file && file.type.startsWith("image/")) {
+        const compressedFile = await resizeFile(file);
+        console.log(compressedFile);
+        Object.assign(compressedFile, { fieldname: "image" }); // fieldname 추가
+        const formData = new FormData();
+        formData.append("image", compressedFile);
+        axios
+          .post("http://localhost:4000/posts/upload", formData, {
+            headers: {
+              "Content-Type": "multipart/form-data",
+            },
+          })
+          .then((response) => {
+            const imageUrl = `uploads/${response.data.url.split("/").pop()}`;
+            setThumbnail(imageUrl);
+            console.log(thumbnail);
+            setIsThumbnailRemoved(false);
+          })
+          .catch((error) => {
+            console.error("Error uploading thumbnail:", error);
+          });
+      } else {
+        alert("썸네일은 이미지 파일만 가능합니다.");
+      }
+      setIsImgDragActive(false);
+    },
+    [thumbnail]
+  );
 
   // 썸네일 변경
   const handleThumbnailChange = (event) => {
@@ -310,7 +314,8 @@ const BoardForm = ({ isEditMode }) => {
 
   //썸네일 삭제
   const handleRemoveThumbnail = () => {
-    setThumbnail(""); // 썸네일 제거 상태를 true로 설정
+    setIsThumbnailRemoved(true); // 썸네일 제거 상태를 true로 설정
+    setThumbnailDeleteFiles((prevFiles) => [...prevFiles, thumbnail]);
   };
 
   //변경 또는 작성 취소 버튼
@@ -325,6 +330,32 @@ const BoardForm = ({ isEditMode }) => {
     });
 
     if (result.isConfirmed) {
+      const postData = {
+        thumbnails: [],
+        deleteFiles: [],
+      };
+
+      if (isEditMode) {
+        // if (newFiles && newFiles.length > 0) {
+        //   newFiles.forEach((filename) => {
+        //     postData.deleteFiles.push(filename);
+        //   });
+        // }
+      } else {
+        if (thumbnailDeleteFiles !== "") {
+          thumbnailDeleteFiles.forEach((file) => {
+            postData.thumbnails.push(file);
+          });
+        }
+        if (files && files.length > 0) {
+          files.forEach((filename) => {
+            postData.deleteFiles.push(filename);
+          });
+        }
+      }
+      console.log(postData);
+
+      const response = await deleteFiles(postData);
       navigate("/posts"); // 예를 클릭하면 /posts로 이동
     }
   };
