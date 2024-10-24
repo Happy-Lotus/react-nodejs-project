@@ -51,59 +51,56 @@ import {
 import translations from "ckeditor5/translations/ko.js";
 
 import "ckeditor5/ckeditor5.css";
+import FileResizer from "react-image-file-resizer";
 
 const Editor = ({ content, setContent }) => {
   const [viewConent, setViewContent] = useState([]);
 
   const imgLink = "http://localhost:4000/uploads";
 
-  const customUploadAdapter = (loader) => {
-    //서버와의 통신을 처리하는 역할
-    //업로드 어댑터 작동 위해 upload 메소드, abort 메소드 선언
-    /**
-     * upload -> 파일 업로드를 위한 로직. 프로미스 반환
-     * resolve 내 default 값으로 이미지를 접근하기 위한 주소 적어주면 img 태그 내에 소스가 삽입된 형태로 반환
-     * flag : 프로젝트 내에서 첫 이미지를 썸네일로 설정하는 부분
-     * abort -> 업로드가 중간에 중단될 경우
-     *
-     * loader : 정의한 어댑터에서 파일을 읽고 업로드하는 프로세스를 제어
-     */
+  const resizeFile = (file) => {
+    return new Promise((resolve, reject) => {
+      const fileType = file.type;
 
+      let format = "JPEG";
+      if (fileType === "image/png") {
+        format = "PNG";
+      } else if (fileType === "image/jpeg" || fileType === "image/jpg") {
+        format = "JPEG";
+      } else {
+        reject(new Error("지원하지 않는 파일 형식입니다.")); // 지원하지 않는 형식일 경우 에러 처리
+        return;
+      }
+
+      FileResizer.imageFileResizer(
+        file,
+        800, // 원하는 너비
+        800, // 원하는 높이
+        format, // 포맷 (JPEG, PNG 등)
+        70, // 품질 (0-100)
+        0, // 회전 (0-360)
+        (uri) => {
+          resolve(uri); // 리사이즈된 파일 반환
+        },
+        "file" // 반환 형식 (file, base64, blob 등)
+      );
+    });
+  };
+
+  const customUploadAdapter = (loader) => {
     return {
       upload() {
         return new Promise((resolve, reject) => {
           const formData = new FormData();
           loader.file.then(async (file) => {
             try {
+              console.log("=========Editor 사진 업로드=========");
               console.log(file);
-              formData.append("name", file.name);
-              formData.append("image", file);
+              const resizeFiles = await resizeFile(file);
+              console.log(resizeFiles);
+              formData.append("name", resizeFiles.name);
+              formData.append("image", resizeFiles);
               console.log(formData);
-              // const reader = new FileReader();
-              // reader.onloadend = () => {
-              //   setImageUrl(render.result);
-              // };
-              // reader.readAsDataURL(file);
-
-              // const filename = v4();
-              // const type = file.type.split("/")[1];
-
-              // const signedURL = await axios
-              //   .post(process.env.REACT_APP_GET_SIGNEDURL)
-              //   .then((body) => {
-              //     return body.data;
-              //   });
-
-              // await fetch(signedURL, {
-              //   method: "PUT",
-              //   body: file,
-              //   headers: {
-              //     "Content-Type": file.type,
-              //     "Access-Control-Allow-Origin": "*",
-              //     "Access-Control-Allow-Credentials": "true",
-              //   },
-              // });
-
               const response = await axios.post(
                 "http://localhost:4000/posts/upload",
                 formData,
@@ -269,6 +266,28 @@ const Editor = ({ content, setContent }) => {
       ],
     },
     image: {
+      resizeOptions: [
+        {
+          name: "resizeImage:original",
+          value: null,
+          label: "Original",
+        },
+        {
+          name: "resizeImage:custom",
+          label: "Custom",
+          value: "custom",
+        },
+        {
+          name: "resizeImage:40",
+          value: "40",
+          label: "40%",
+        },
+        {
+          name: "resizeImage:60",
+          value: "60",
+          label: "60%",
+        },
+      ],
       toolbar: [
         "toggleImageCaption",
         "imageTextAlternative",
@@ -360,10 +379,6 @@ const Editor = ({ content, setContent }) => {
       editor={ClassicEditor}
       config={editorConfig}
       data={content}
-      // onReady={(editor) => {
-      //   // You can store the "editor" and use when it is needed.
-      //   console.log("Editor is ready to use!", editor);
-      // }}
       onChange={(event, editor) => {
         const data = editor.getData();
         console.log({ event, editor, data });

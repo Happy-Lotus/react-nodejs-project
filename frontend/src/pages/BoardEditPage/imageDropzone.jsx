@@ -1,14 +1,13 @@
 import React, { useState } from "react";
 import { useDropzone } from "react-dropzone";
 import styles from "./ImageDropzone.module.scss"; // SCSS 모듈 임포트
+import Resizer from "react-image-file-resizer";
 
 const ImageDropzone = ({
   thumbnail,
   handleThumbnailChange,
   onDrop,
   isThumbnailRemoved,
-  handleCancel,
-  handleRegister,
   handleRemoveThumbnail,
 }) => {
   const [isDragActive, setIsDragActive] = useState(false);
@@ -18,17 +17,29 @@ const ImageDropzone = ({
     noClick: true,
     onDragEnter: () => {
       if (!isDragActive) setIsDragActive(true);
+      handleRemoveThumbnail(false);
     },
     onDragLeave: () => {
       if (isDragActive) setIsDragActive(false);
     },
   });
 
+  const imagePreview =
+    thumbnail && !isThumbnailRemoved ? (
+      <img
+        src={`http://localhost:4000/${thumbnail}`}
+        alt="썸네일 미리보기"
+        className={styles.thumbnailPreview}
+      />
+    ) : (
+      <p>썸네일 이미지를 업로드하세요.</p>
+    );
+
   return (
     <div className={styles.modalContent}>
-      <h2 className={styles.thumbnail__title}>썸네일 업로드</h2>
-      {thumbnail && (
-        <div className={styles.thumbnail__delete}>
+      <div className={styles.title__deleteButton}>
+        <h2 className={styles.thumbnail__title}>썸네일 업로드</h2>
+        {thumbnail && !isThumbnailRemoved && (
           <button
             className={styles.thumbnail__deleteButton}
             onClick={() => {
@@ -38,43 +49,21 @@ const ImageDropzone = ({
           >
             제거
           </button>
-        </div>
-      )}
-      <div className={styles.thumbnailUploadArea} {...getRootProps()}>
-        <input
-          type="file"
-          accept="image/*"
-          onChange={handleThumbnailChange}
-          style={{ display: "none" }}
-          id="thumbnail-upload"
-          name="thumbnail"
-        />
-        <div
-          className={`${styles.thumbnailPlaceholder} ${
-            thumbnail && !isThumbnailRemoved ? styles.imagePresent : ""
-          } ${isDragActive ? styles.hoverEffect : ""}`}
-        >
-          {thumbnail && !isThumbnailRemoved ? (
-            <img
-              src={`http://localhost:4000/${thumbnail}`}
-              alt="썸네일 미리보기"
-              className={styles.thumbnailPreview}
-            />
-          ) : (
-            <p>썸네일 이미지를 업로드하세요.</p>
-          )}
-        </div>
-
-        <input {...getInputProps()} />
+        )}
       </div>
-      {/* <div className={styles.modalButtons}>
-        <button className={styles.cancleButton} onClick={handleCancel}>
-          취소
-        </button>
-        <button className={styles.registerButton} onClick={handleRegister}>
-          등록
-        </button>
-      </div> */}
+
+      <div className={styles.thumbnailUploadArea}>
+        <div
+          {...getRootProps({
+            className: `${styles.thumbnailPlaceholder} ${
+              thumbnail && !isThumbnailRemoved ? styles.imagePresent : ""
+            } ${isDragActive && !isThumbnailRemoved ? styles.hoverEffect : ""}`,
+          })}
+        >
+          <input {...getInputProps()} />
+          {imagePreview}
+        </div>
+      </div>
     </div>
   );
 };

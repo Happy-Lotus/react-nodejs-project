@@ -8,6 +8,7 @@ import FileDropzone from "./fileDropzone";
 import ImageDropzone from "./imageDropzone";
 import { registerPost, updatePost } from "../../utils/api";
 import { toast } from "react-toastify";
+import Resizer from "react-image-file-resizer";
 
 const BoardForm = ({ isEditMode }) => {
   const { postId } = useParams(); // URL 파라미터에서 postId 가져오기
@@ -20,13 +21,13 @@ const BoardForm = ({ isEditMode }) => {
 
   const [thumbnail, setThumbnail] = useState(""); //썸네일 상태
   const [isThumbnailRemoved, setIsThumbnailRemoved] = useState(false); // 썸네일 제거 상태
-  const [showThumbnailModal, setShowThumbnailModal] = useState(false); //썸네일 창 상태
+  // const [showThumbnailModal, setShowThumbnailModal] = useState(false); //썸네일 창 상태
   const [files, setFiles] = useState([]); // 첨부파일 상태
   const filesRef = useRef(files); // 현재 파일 리스트를 참조하기 위한 ref
   const [newFiles, setNewFiles] = useState([]); // 새로 추가할 파일
   const newFilesRef = useRef(newFiles);
   const [isDragActive, setIsDragActive] = useState(false);
-  const [isExiting, setIsExiting] = useState(false); // 모달 종료 상태 추가
+  // const [isExiting, setIsExiting] = useState(false); // 모달 종료 상태 추가
   const [deletedFiles, setDeletedFiles] = useState([]); // 삭제할 파일명
 
   useEffect(() => {
@@ -58,7 +59,7 @@ const BoardForm = ({ isEditMode }) => {
   };
 
   //최종 등록
-  const handleRegister = async (e) => {
+  const onSubmit = async (e) => {
     e.preventDefault();
     const formData = new FormData();
     console.log(mountainContent.content);
@@ -68,10 +69,8 @@ const BoardForm = ({ isEditMode }) => {
       content: mountainContent.content,
       deleteFiles: [],
       thumbnail: thumbnail,
-      hasFile: false,
+      hasFile: 0,
     };
-    console.log("======postdata======");
-    console.log(postData);
 
     if (isThumbnailRemoved) {
       postData.thumbnail = "";
@@ -88,32 +87,29 @@ const BoardForm = ({ isEditMode }) => {
         deletedFiles.forEach((filename) => {
           postData.deleteFiles.push(filename);
         });
+
         console.log(postData);
-        console.log("========파일삭제========");
         if (newFiles && newFiles.length > 0) {
+          //새 파일이 있을 경우
           postData.hasFile = 1;
-        } else if (files.length - deletedFiles.length < 0) {
-          console.log("========파일삭제========");
-          console.log(files.length - deletedFiles.length);
+        } else if (files.length - deletedFiles.length <= 0) {
+          //기존 파일 - 삭제 파일 했을 때 0이거나 음수일 경우
           postData.hasFile = 0;
-        } else {
+        } else if (files.length > 0) {
+          //기존 파일이 존재하는 경우.
           postData.hasFile = 1;
         }
-
         formData.append("post", JSON.stringify(postData));
-        console.log(formData);
 
         await updatePost(postId, formData);
         toast.success("게시글 수정 완료 😎");
       } else {
         //작성 모드. 새로 추가된 파일만 추가
+        console.log(files);
         files.forEach((file) => {
           formData.append("files", file);
         });
-        console.log(files);
         formData.append("post", JSON.stringify(postData));
-        console.log("========formData======");
-        console.log(formData);
         await registerPost(formData);
         toast.success("게시글 작성 완료 😎");
       }
@@ -237,14 +233,45 @@ const BoardForm = ({ isEditMode }) => {
       console.log(files);
     }
   };
+  const resizeFile = (file) => {
+    return new Promise((resolve, reject) => {
+      const fileType = file.type;
+      let format = "JPEG";
+      if (fileType === "image/png") {
+        format = "PNG";
+      } else if (fileType === "image/jpeg" || fileType === "image/jpg") {
+        format = "JPEG";
+      } else {
+        reject(new Error("지원하지 않는 파일 형식입니다.")); // 지원하지 않는 형식일 경우 에러 처리
+        return;
+      }
 
+      Resizer.imageFileResizer(
+        file,
+        800, // 원하는 너비
+        800, // 원하는 높이
+        format, // 포맷 (JPEG, PNG 등)
+        70, // 품질 (0-100)
+        0, // 회전 (0-360)
+        (uri) => {
+          resolve(uri); // 리사이즈된 파일 반환
+        },
+        "file" // 반환 형식 (file, base64, blob 등)
+      );
+    });
+  };
   // 썸네일 drag&drop
-  const handleThumbnailDrop = useCallback((acceptedFiles) => {
+  const handleThumbnailDrop = useCallback(async (acceptedFiles) => {
+    console.log(acceptedFiles);
     const file = acceptedFiles[0]; // 첫 번째 파일만 사용
+    console.log("=====이미지 리사이징======");
+    console.log(file);
     if (file && file.type.startsWith("image/")) {
-      Object.assign(file, { fieldname: "image" }); // fieldname 추가
+      const compressedFile = await resizeFile(file);
+      console.log(compressedFile);
+      Object.assign(compressedFile, { fieldname: "image" }); // fieldname 추가
       const formData = new FormData();
-      formData.append("image", file);
+      formData.append("image", compressedFile);
       axios
         .post("http://localhost:4000/posts/upload", formData, {
           headers: {
@@ -295,28 +322,8 @@ const BoardForm = ({ isEditMode }) => {
     });
 
     if (result.isConfirmed) {
-      console.log("==========수정 또는 삭제 중간에 취소===========");
-
-      console.log(thumbnail);
-      console.log(mountainContent.content);
       navigate("/posts"); // 예를 클릭하면 /posts로 이동
     }
-  };
-
-  // 썸네일 선택 창 버튼
-  const onSubmit = async () => {
-    //완료 버튼 클릭 시 수행 -> 완료
-    setShowThumbnailModal(true); // 썸네일 모달 표시
-  };
-
-  //썸네일 창 끄기 버튼
-  const handleCancel = () => {
-    setIsExiting(true); // 모달 종료 애니메이션 시작
-    setTimeout(() => {
-      setShowThumbnailModal(false); // 모달 닫기
-      setIsExiting(false); // 종료 상태 초기화
-      setIsThumbnailRemoved(false);
-    }, 200); // 애니메이션 시간과 일치
   };
 
   return (
@@ -351,8 +358,7 @@ const BoardForm = ({ isEditMode }) => {
             handleThumbnailChange={handleThumbnailChange}
             onDrop={handleThumbnailDrop}
             isThumbnailRemoved={isThumbnailRemoved}
-            handleCancel={handleCancel}
-            handleRegister={handleRegister}
+            // handleRegister={handleRegister}
             handleRemoveThumbnail={handleRemoveThumbnail}
           />
         </div>
@@ -372,23 +378,6 @@ const BoardForm = ({ isEditMode }) => {
             등록
           </button>
         </div>
-        {/* {showThumbnailModal && ( // 썸네일 선택 모달
-          <div
-            className={`${styles.thumbnailModal} ${
-              isExiting ? styles.exit : ""
-            }`}
-          >
-            <ImageDropzone
-              thumbnail={thumbnail}
-              handleThumbnailChange={handleThumbnailChange}
-              onDrop={handleThumbnailDrop}
-              isThumbnailRemoved={isThumbnailRemoved}
-              handleCancel={handleCancel}
-              handleRegister={handleRegister}
-              handleRemoveThumbnail={handleRemoveThumbnail}
-            />
-          </div>
-        )} */}
       </div>
     </div>
   );
