@@ -40,3 +40,19 @@ html {
   width: 66px;
   height: 44px;
 }
+
+.ck-editor__main.ck-blurred,
+.ck_focused {
+  padding-right: 36px;
+  padding-left: 36px;
+}
+
+.ck.ck-content.ck-editor__editable.ck-rounded-corners.ck-editor__editable_inline.ck-blurred,
+.ck.ck-content.ck-editor__editable.ck-rounded-corners.ck-editor__editable_inline.ck-focused {
+  padding-right: 36px;
+  padding-left: 36px;
+}
+.custom-image {
+  width: auto !important; /* Ensure the width is respected */
+  height: auto !important; /* Ensure the height is respected */
+}

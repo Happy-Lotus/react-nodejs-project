@@ -35,9 +35,6 @@ import {
   Italic,
   Link,
   LinkImage,
-  List,
-  ListProperties,
-  Markdown,
   Paragraph,
   PasteFromMarkdownExperimental,
   PictureEditing,
@@ -51,6 +48,7 @@ import {
 import translations from "ckeditor5/translations/ko.js";
 
 import "ckeditor5/ckeditor5.css";
+import "ckeditor5-premium-features/ckeditor5-premium-features.css";
 import FileResizer from "react-image-file-resizer";
 
 const Editor = ({ content, setContent }) => {
@@ -113,6 +111,9 @@ const Editor = ({ content, setContent }) => {
 
               resolve({
                 default: response.data.url,
+                attributes: {
+                  style: `width: ${resizeFiles.width}px; height: auto;`, // 예시: 너비를 설정
+                },
               });
             } catch (error) {
               reject(error);
@@ -196,9 +197,7 @@ const Editor = ({ content, setContent }) => {
       Italic,
       Link,
       LinkImage,
-      List,
-      ListProperties,
-      Markdown,
+      // Markdown,
       Paragraph,
       PasteFromMarkdownExperimental,
       PictureEditing,
@@ -206,7 +205,6 @@ const Editor = ({ content, setContent }) => {
       ShowBlocks,
       Style,
       TextTransformation,
-      TodoList,
       Undo,
       uploadPlugin,
     ],

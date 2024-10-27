@@ -25,6 +25,8 @@ exports.create = async (req, res) => {
       files,
       hasFile: files.length > 0 ? true : false,
     };
+    console.log("===========controllers post create===========");
+    console.log(data);
 
     const { statusCode, message } = await Post.create(data);
     return res.status(statusCode).json({ message });

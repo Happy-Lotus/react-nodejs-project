@@ -25,7 +25,7 @@ function Layout() {
       />
       <header
         style={{
-          zIndex: "2",
+          zIndex: "9999",
           height: "100px",
           backgroundColor: "#6248FF",
           color: "white",

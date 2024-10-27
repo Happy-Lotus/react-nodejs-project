@@ -5,6 +5,8 @@ import Prism from "prismjs";
 import Swal from "sweetalert2"; // SweetAlert2 임포트
 
 import styles from "./BoardDetailPage.module.scss"; // SCSS 모듈 임포트
+import "ckeditor5/ckeditor5.css";
+import "ckeditor5-premium-features/ckeditor5-premium-features.css";
 import { downloadFile, fetchPostDetail, postDelete } from "../../utils/api";
 import { useRecoilValue } from "recoil";
 import { userState } from "../../state/authState";
