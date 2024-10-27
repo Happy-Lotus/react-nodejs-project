@@ -1,7 +1,9 @@
-import { signupState, signinState } from "../state/authState.js";
+import { signupState, signinState, userState } from "../state/authState.js";
 import { useSetRecoilState } from "recoil";
 import axiosInstance from "./axios.js";
+import { toast } from "react-toastify";
 import axios from "axios";
+import { useNavigate } from "react-router-dom";
 axios.defaults.withCredentials = true;
 
 //회원가입
@@ -44,8 +46,6 @@ export const useSignup = () => {
 };
 
 export const useLogin = () => {
-  const setSigninState = useSetRecoilState(signinState);
-
   const signin = async (userData) => {
     console.log("sign in api 요청");
     const config = {
@@ -65,11 +65,6 @@ export const useLogin = () => {
       console.log(response);
       return response;
     } catch (error) {
-      setSigninState({
-        isLoading: false,
-        error: error.response?.data?.message || "로그인 실패",
-        success: false,
-      });
       throw error; // 에러 발생 시 에러를 던짐
     }
   };
@@ -100,28 +95,49 @@ export const fetchPosts = async () => {
     console.log("요청 완료");
     return transformedPosts; // 데이터 반환
   } catch (error) {
-    console.error("Error fetching posts:", error);
-    throw error; // 에러 발생 시 에러 던짐
+    // if (error.response.status === 401) {
+    //   console.log("401에러");
+    //   setSigninState({
+    //     isLoading: false,
+    //     error: error.response?.data?.message || "다시 로그인하세요",
+    //     success: false,
+    //   });
+    // }
   }
 };
 
+export const useFetchPostDetail = () => {
+  const setSigninState = useSetRecoilState(signinState);
+  const navigate = useNavigate();
+
+  const fetchPostDetail = async (postId) => {
+    try {
+      console.log("fetchPostDetail");
+      const response = await axios.get(
+        `http://localhost:4000/posts/detail/${postId}`
+      ); // API 호출
+      console.log("fetchPostDetail");
+      console.log(response);
+
+      const transformedPost = response.data.postData;
+      return transformedPost; // 데이터 반환
+    } catch (error) {
+      if (error.response.data.statusCode === 401) {
+        console.log("401에러");
+        setSigninState({
+          isLoading: false,
+          error: error.response?.data?.message || "다시 로그인하세요",
+          success: false,
+        });
+        setTimeout(() => {
+          navigate("/login"); // 로그인 페이지로 리디렉션
+        }, 100); // 잠시 대기 후 리디렉션
+      }
+    }
+  };
+  return { fetchPostDetail };
+};
 // 게시물 상세 데이터 가져오기
-export const fetchPostDetail = async (postId) => {
-  try {
-    console.log("fetchPostDetail");
-    const response = await axios.get(
-      `http://localhost:4000/posts/detail/${postId}`
-    ); // API 호출
-    console.log("fetchPostDetail");
-    console.log(response);
-
-    const transformedPost = response.data.postData;
-    return transformedPost; // 데이터 반환
-  } catch (error) {
-    console.error("Error fetching post detail:", error);
-    throw error;
-  }
-};
 
 export const checkNickname = async (nickname) => {
   try {
@@ -144,21 +160,37 @@ export const checkNickname = async (nickname) => {
   } catch (error) {}
 };
 
-export const userLogout = async () => {
-  try {
-    const config = {
-      url: "http://localhost:4000/logout",
-      method: "post",
-      headers: {
-        "Content-Type": "application/json",
-        withCredentials: true,
-      },
-      data: {},
-    };
+export const useLogout = () => {
+  const setSigninState = useSetRecoilState(signinState);
+  const setUserState = useSetRecoilState(userState);
+  const navigate = useNavigate();
+  const userLogout = async () => {
+    try {
+      const config = {
+        url: "http://localhost:4000/logout",
+        method: "post",
+        headers: {
+          "Content-Type": "application/json",
+          withCredentials: true,
+        },
+        data: {},
+      };
 
-    const response = await axios(config);
-    return response;
-  } catch (error) {}
+      const response = await axios(config);
+      if (response.status === 204) {
+        setSigninState({ isLoading: false, error: null, success: false });
+        setUserState({ nickname: "" });
+        alert("로그아웃되었습니다.");
+      }
+    } catch (error) {
+      setSigninState({ isLoading: false, error: null, success: false });
+      setUserState({ nickname: "" });
+      alert("로그아웃 중 오류가 발생했습니다.");
+    } finally {
+      navigate("/login"); // 로그인 페이지로 리디렉션
+    }
+  };
+  return { userLogout };
 };
 
 export const generateCode = async (email) => {
@@ -301,25 +333,50 @@ export const postDelete = async (postid) => {
   }
 };
 
-export const readOption = async (option = "", content, page, perPage = 5) => {
-  try {
-    console.log("api readOption");
-    const config = {
-      method: "get",
-      url: `http://localhost:4000/posts?option=${option}&content=${content}&page=${page}&perPage=${perPage}`,
-      headers: {
-        "Content-Type": "application/json",
-      },
-      withCredentials: true,
-    };
-    console.log("api요청");
+export const useReadOption = () => {
+  const setSigninState = useSetRecoilState(signinState);
+  const setUserState = useSetRecoilState(userState);
+  const navigate = useNavigate();
 
-    const response = await axios(config);
-    return response.data;
-  } catch (error) {
-    console.error("Error fetching posts:", error);
-    throw error; // 에러를 다시 던져서 호출한 곳에서 처리할 수 있도록 함
-  }
+  const readOption = async (option = "", content, page, perPage = 5) => {
+    try {
+      console.log("api readOption");
+      const config = {
+        method: "get",
+        url: `http://localhost:4000/posts?option=${option}&content=${content}&page=${page}&perPage=${perPage}`,
+        headers: {
+          "Content-Type": "application/json",
+        },
+        withCredentials: true,
+      };
+      console.log("api요청");
+
+      const response = await axios(config);
+      return response.data;
+    } catch (error) {
+      if (error.response.data.statusCode === 401) {
+        console.log("401에러");
+        alert("재로그인하세요."); // 오류 메시지 표시
+        setSigninState({ isLoading: false, error: null, success: false }); // 로그인 상태 업데이트
+        setUserState({ nickname: "" }); // 사용자 상태 초기화
+        navigate("/login"); // 로그인 페이지로 리디렉션
+
+        // setSigninState({
+        //   isLoading: false,
+        //   error: error.response?.data?.message || "다시 로그인하세요",
+        //   success: false,
+        // });
+        // setUserState({
+        //   nickname: "",
+        // });
+        // setTimeout(() => {
+        //   navigate("/login"); // 로그인 페이지로 리디렉션
+        // }, 100); // 잠시 대기 후 리디렉션
+      }
+      throw error;
+    }
+  };
+  return { readOption };
 };
 
 export const deleteFiles = async (postData) => {

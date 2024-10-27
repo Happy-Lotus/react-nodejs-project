@@ -11,7 +11,7 @@ import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/ReactToastify.css";
 import { RecoilRoot, useRecoilValue } from "recoil"; // Import RecoilRoot
 import { CookiesProvider } from "react-cookie";
-import React from "react";
+import { React, useEffect } from "react";
 import { signinState } from "./state/authState";
 import CommonFooter from "./components/footer/footer";
 function Layout() {
@@ -53,6 +53,20 @@ function Layout() {
 }
 function PrivateRoute({ children, name }) {
   const signin = useRecoilValue(signinState);
+  console.log(children);
+  console.log(name);
+
+  // if (signin.error !== null) {
+  //   toast.error(signin.error);
+  //   return <Navigate to="/login" />;
+  // }
+
+  useEffect(() => {
+    if (!signin.success && name !== "login" && name != "Register") {
+      toast.error("로그인 후 사용하실 수 있습니다.");
+    }
+  }, [signin.success, name]);
+
   if (signin.success) {
     console.log("signinsuccess");
     if (name === "Register" || name === "login") {
@@ -60,6 +74,7 @@ function PrivateRoute({ children, name }) {
       console.log("/posts");
       return <Navigate to="/posts" />; // /posts로 리다이렉트
     }
+    console.log(children);
     console.log("/children");
     // 로그인 상태에서 다른 컴포넌트 렌더링
     return children;
@@ -69,8 +84,6 @@ function PrivateRoute({ children, name }) {
     return name === "login" ? <LoginPage /> : <RegisterPage />;
   } else {
     // 로그아웃 상태에서 다른 컴포넌트 접근 시 login 으로 이동
-    console.log("로그인하지 않은 사용자");
-    toast.error("로그인 후 사용하실 수 있습니다."); // Toast 알림 추가
     return <Navigate to="/login" />;
   }
 }

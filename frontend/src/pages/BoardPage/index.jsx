@@ -3,7 +3,7 @@ import styles from "./BoardPage.module.scss";
 import { FaSearch } from "react-icons/fa";
 import CommonNav from "../../components/nav/navigation";
 import { Link } from "react-router-dom";
-import { readOption } from "../../utils/api";
+import { useReadOption } from "../../utils/api";
 import { debounce } from "lodash";
 
 function BoardPage() {
@@ -16,6 +16,7 @@ function BoardPage() {
   const [currentPage, setCurrentPage] = useState(1);
   const postsPerPage = 5;
   const [totalPages, setTotalPages] = useState(0); // 총 페이지 수 상태 추가
+  const { readOption } = useReadOption();
 
   useEffect(() => {
     const getPosts = async () => {
@@ -43,20 +44,10 @@ function BoardPage() {
     setSearchTerm(term);
     setCurrentPage(1);
   }, 300);
+
   const handleSearch = (e) => {
     const value = e.target.value;
     debouncedSearch(value);
-    // setCurrentPage(1); // 검색 후 첫 페이지로 리셋
-    // 검색 버튼 클릭 시 필터링
-    // const results = postData.filter((post) => {
-    //   if (searchOption === "title") {
-    //     return post.title.toLowerCase().includes(searchTerm.toLowerCase());
-    //   } else if (searchOption === "author") {
-    //     return post.writer.toLowerCase().includes(searchTerm.toLowerCase());
-    //   }
-    //   return false;
-    // });
-    // setPosts(results); // 필터링된 결과를 상태에 저장
   };
   const truncateTitle = (title, maxLength) => {
     if (title.length > maxLength) {

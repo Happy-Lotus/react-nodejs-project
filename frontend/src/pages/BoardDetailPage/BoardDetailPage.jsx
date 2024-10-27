@@ -7,7 +7,12 @@ import Swal from "sweetalert2"; // SweetAlert2 임포트
 import styles from "./BoardDetailPage.module.scss"; // SCSS 모듈 임포트
 import "ckeditor5/ckeditor5.css";
 import "ckeditor5-premium-features/ckeditor5-premium-features.css";
-import { downloadFile, fetchPostDetail, postDelete } from "../../utils/api";
+import {
+  downloadFile,
+  fetchPostDetail,
+  postDelete,
+  useFetchPostDetail,
+} from "../../utils/api";
 import { useRecoilValue } from "recoil";
 import { userState } from "../../state/authState";
 
@@ -18,6 +23,8 @@ const BoardDetailPage = () => {
   const [htmlContent, setHtmlContent] = useState(""); // 변환된 HTML 내용을 저장할 상태
   const [loading, setLoading] = useState(true); // 로딩 상태
   const currentUser = useRecoilValue(userState);
+  const { fetchPostDetail } = useFetchPostDetail();
+
   const navigate = useNavigate();
 
   const handleEdit = () => {

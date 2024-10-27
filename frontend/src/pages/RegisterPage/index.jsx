@@ -10,6 +10,7 @@ import {
 import { useRecoilValue } from "recoil";
 import { signupState } from "../../state/authState";
 import { useNavigate } from "react-router-dom"; // useHistory import
+import { set } from "lodash";
 
 const RegisterPage = () => {
   const [duplicateMessage, setDuplicateMessage] = useState("");
@@ -19,16 +20,18 @@ const RegisterPage = () => {
   const navigate = useNavigate();
   const [code, setCode] = useState("");
   const [errorMessage, setErrorMessage] = useState("");
-  const [isVerified, setIsVerified] = useState(false);
+  const [isVerified, setIsVerified] = useState([false, false]);
   const [timer, setTimer] = useState(0);
-
+  const [isVerifying, setIsVerifying] = useState(false); // 인증 진행 중 상태
   const onSubmit = async (data) => {
-    if (!isVerified) {
-      setErrorMessage("인증이 되지 않았습니다.");
+    if (!isVerified[0] || !isVerified[1]) {
+      alert("인증이 되지 않았습니다.");
       return;
     }
     try {
-      await signup(data, isVerified);
+      const verify = isVerified[0] && isVerified[1] ? true : false;
+      console.log(verify);
+      await signup(data, verify);
       reset();
       navigate("/login");
     } catch (error) {
@@ -49,9 +52,10 @@ const RegisterPage = () => {
   const checkDuplicate = async (nickname) => {
     const response = await checkNickname({ nickname });
     if (response) {
-      setDuplicateMessage("중복된 닉네임입니다.");
+      alert("중복된 닉네임입니다.");
     } else {
-      setDuplicateMessage("사용 가능한 닉네임입니다.");
+      alert("사용 가능한 닉네임입니다.");
+      setIsVerified((prev) => [true, ...prev.slice(1)]);
     }
   };
 
@@ -69,9 +73,9 @@ const RegisterPage = () => {
     const email = getValues("email");
     const response = await generateCode(email);
     console.log("이메일 인증 진행 후");
-
     if (response.status === 201) {
-      setTimer(180);
+      alert("인증 코드가 발송되었습니다");
+      setTimer(30);
     } else {
       console.log("handleEmailVerification 오류:", response.status);
     }
@@ -85,9 +89,14 @@ const RegisterPage = () => {
     } else {
       const response = await verifyCode(email, code);
       console.log(response);
-      // setErrorMessage("인증 성공");
-      setIsVerified(true);
-      setTimer(0);
+      if (response.status === 200) {
+        setIsVerified((prev) => [true, true]);
+        setTimer(0);
+        alert("인증이 완료되었습니다.");
+        console.log(isVerified);
+      } else {
+        alert("인증 코드가 맞지 않습니다.");
+      }
     }
   };
 
@@ -97,8 +106,11 @@ const RegisterPage = () => {
       interval = setInterval(() => {
         setTimer((prev) => prev - 1);
       }, 1000);
-    } else if (timer === 0) {
-      clearInterval(interval);
+    } else if (timer === 0 && isVerifying && !isVerified[1]) {
+      // 타이머가 0이 되었을 때만 알림 표시
+      alert("인증코드가 만료되었습니다. 다시 인증해주세요."); // 알림 표시
+      setIsVerified([true, false]); // 인증 상태 초기화
+      setIsVerifying(false);
     }
     return () => clearInterval(interval);
   }, [timer]);
@@ -140,9 +152,9 @@ const RegisterPage = () => {
                 />
               </div>
             </div>
-            {/* {(!isTouched || errors.name) && isSubmitted && (
+            {(!isTouched || errors.name) && isSubmitted && (
               <span className={styles.error_msg}>{errors.name.message}</span>
-            )} */}
+            )}
             <div className={styles.form__group}>
               <label htmlFor="nickname" className={styles.form__group__label}>
                 닉네임
@@ -164,7 +176,6 @@ const RegisterPage = () => {
                     onChange: (e) => {
                       if (e.target.value) {
                         trigger("nickname");
-                        setDuplicateMessage("");
                       }
                     },
                     onBlur: () => {
@@ -202,6 +213,13 @@ const RegisterPage = () => {
                 {errors.nickname ? errors.nickname.message : duplicateMessage}
               </span>
             )} */}
+            {(!isTouched || errors.nickname) &&
+              isSubmitted &&
+              !duplicateMessage && (
+                <span className={styles.error_msg}>
+                  {errors.nickname.message}
+                </span>
+              )}
             <div className={styles.form__group}>
               <label htmlFor="email" className={styles.form__group__label}>
                 이메일
@@ -239,9 +257,9 @@ const RegisterPage = () => {
                 </button>
               </div>
             </div>
-            {/* {errors.email && (
+            {errors.email && (
               <span className={styles.error_msg}>{errors.email.message}</span>
-            )} */}
+            )}
             <div className={styles.form__group}>
               <label htmlFor="code" className={styles.form__group__label}>
                 인증코드
@@ -259,7 +277,7 @@ const RegisterPage = () => {
                       : undefined
                   }
                   {...register("code", {
-                    required: "이메일 인증이 되지 않았습니다.",
+                    required: "이메일 인증이 완료되지 않았습니다.",
                     onChange: (e) => {
                       setCode(e.target.value);
                       if (e.target.value) {
@@ -268,6 +286,7 @@ const RegisterPage = () => {
                       }
                     },
                   })}
+                  disabled={isVerified[1]}
                 />
 
                 <button
@@ -279,7 +298,7 @@ const RegisterPage = () => {
                 </button>
               </div>
             </div>
-            {/* {timer > 0 && <span className={styles.timer}>{timer}초 남음</span>}
+            {timer > 0 && <span className={styles.timer}>{timer}초 남음</span>}
             {isSubmitted && (errors.code || errorMessage) && (
               <span
                 className={
@@ -289,7 +308,7 @@ const RegisterPage = () => {
                 {errors.code ? errors.code.message : errorMessage}
               </span>
             )}
-            {isVerified && <span className={styles.check_icon}>✔️</span>} */}
+            {isVerified[1] && <span className={styles.check_icon}>✔️</span>}
             <div className={styles.form__group}>
               {/**비밀번호 입력 */}
               <label htmlFor="pwd" className={styles.form__group__label}>
@@ -326,11 +345,9 @@ const RegisterPage = () => {
                 />
               </div>
             </div>
-            {/* {errors.password && (
-              <span className={styles.error_msg}>
-                {errors.password.message}
-              </span>
-            )} */}
+            {errors.pwd && (
+              <span className={styles.error_msg}>{errors.pwd.message}</span>
+            )}
             <div className={styles.form__actions}>
               <button type="button" className={styles.btn__submit}>
                 취소
@@ -353,8 +370,8 @@ const RegisterPage = () => {
               </a>
             </p>
 
-            {signupStatus.isLoading && <p>회원가입 중...</p>}
-            {signupStatus.error && <p>{signupStatus.error}</p>}
+            {/* {signupStatus.isLoading && <p>회원가입 중...</p>}
+            {signupStatus.error && <p>{signupStatus.error}</p>} */}
           </form>
         </div>
       </section>

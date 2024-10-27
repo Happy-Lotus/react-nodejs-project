@@ -9,15 +9,11 @@ const User = require("../models/User");
 dotenv.config();
 
 const checkPassword = async function (dbpwd, pwd) {
-  try {
-    const isMatch = await bcrypt.compare(pwd, dbpwd);
-    if (!isMatch) {
-      throw new Error("Password mismatch");
-    }
-    return isMatch;
-  } catch (error) {
-    throw error;
+  const isMatch = await bcrypt.compare(pwd, dbpwd);
+  if (!isMatch) {
+    return false;
   }
+  return true;
 };
 
 exports.checkNickname = async (req, res) => {
@@ -104,9 +100,10 @@ exports.verifyEmail = async (req, res) => {
 
 exports.register = async (req, res) => {
   const isVerified = req.body.isVerified;
+  console.log(isVerified);
 
   try {
-    if (!isVerified || isVerified !== 1) {
+    if (!isVerified) {
       return res
         .status(403)
         .json({ message: "아직 인증이 완료되지 않은 이메일입니다." });
@@ -181,15 +178,18 @@ exports.login = async (req, res) => {
           });
         console.log(res);
         return res;
+      } else {
+        return res.status(404).json({
+          message: "아이디나 비밀번호가 일치하지 않습니다.",
+        });
       }
     } else {
       return res.status(statusCode).json({ message: message });
     }
   } catch (error) {
-    if (error.message === "Password mismatch") {
-      return res.status(401).json({ result: "Password mismatch" });
-    }
-    return res.status(500).json({ result: "Server Error" });
+    return res
+      .status(error.response.statusCode || 500)
+      .json({ message: error.response.message || "Server Error" });
   }
 };
 

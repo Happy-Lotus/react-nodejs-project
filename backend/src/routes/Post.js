@@ -11,7 +11,7 @@ const authMiddleware = require("../middleware/authMiddleware");
 
 // /* 게시물 옵션 조회*/
 // router.get("/:option", authMiddleware, postController.verifyEmail);
-router.get("/", postController.readOption);
+router.get("/", authMiddleware, postController.readOption);
 /*게시물 상세 조회*/
 router.get("/detail/:postid", authMiddleware, postController.read);
 

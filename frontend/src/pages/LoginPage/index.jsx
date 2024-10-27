@@ -5,12 +5,14 @@ import { useRecoilValue, useSetRecoilState } from "recoil";
 import { signinState, userState } from "../../state/authState";
 import { useNavigate } from "react-router-dom"; // useHistory import
 import { toast } from "react-toastify";
-
+import React, { useEffect } from "react";
 const LoginPage = () => {
   const { signin } = useLogin();
   const setSigninState = useSetRecoilState(signinState);
   const setUserState = useSetRecoilState(userState);
   const navigate = useNavigate();
+  const signinStatus = useRecoilValue(signinState);
+
   const onSubmit = async (data) => {
     console.log("로그인 시도:", data);
 
@@ -18,12 +20,13 @@ const LoginPage = () => {
     console.log(data.email);
 
     if (!data.email) {
-      toast.error("이메일을 입력하세요");
+      alert("이메일을 입력하세요");
       return;
     }
 
     if (!/^[\w-\.]+@gmail\.com$/.test(data.email)) {
-      toast.error("이메일 형식이 올바르지 않습니다. 예시(example@gmail.com)"); // Show error for invalid email format
+      console.log("이메일 형식 X");
+      alert("이메일 형식이 올바르지 않습니다. \n예시(example@gmail.com)"); // Show error for invalid email format
       return;
     }
     if (
@@ -32,21 +35,23 @@ const LoginPage = () => {
       data.pwd.length > 12 ||
       !/[!@#$%^&*(),.?":{}|<>]/.test(data.pwd)
     ) {
-      toast.error("비밀번호는 8~12자리여야 하며 특수문자를 포함해야 합니다."); // Show error for invalid password
+      alert("비밀번호는 8~12자리여야 하며 특수문자를 포함해야 합니다."); // Show error for invalid password
       return;
     }
-
     try {
       console.log("response 호출시도", data);
       const response = await signin(data);
+      console.log(response);
       if (response.status === 201) {
         setSigninState({ isLoading: false, error: null, success: true });
         setUserState({ nickname: response.data.nickname });
+        navigate("/posts");
       }
-      navigate("/posts");
     } catch (error) {
-      toast.error(); // Show error for incorrect email/password
-      console.error(error);
+      console.log(error);
+      const errorMessage =
+        error.response?.data?.message || "아이디나 비밀번호가 맞지 않습니다.";
+      alert(errorMessage); // 실패 알림
     }
   };
   const {
@@ -96,9 +101,9 @@ const LoginPage = () => {
                 placeholder="비밀번호 입력"
                 {...register("pwd", {
                   required: "비밀번호는 필수입력입니다.",
-                  onChange: (e) => {
-                    clearErrors("pwd");
-                  },
+                  // onChange: (e) => {
+                  //   clearErrors("pwd");
+                  // },
                   // pattern: {
                   //   value:
                   //     /^(?=.*[a-zA-Z])(?=.*[0-9])(?=.*[!@#$%^&*(),.?":{}|<>]).{8,12}$/,

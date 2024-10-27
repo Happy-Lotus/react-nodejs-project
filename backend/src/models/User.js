@@ -78,9 +78,12 @@ exports.readSpec = async (email) => {
   return new Promise((resolve, reject) => {
     conn.query(sql, email, (error, results) => {
       if (error) {
-        reject({ statusCode: 500, message: "database error" });
+        reject({ statusCode: 500, message: "서버 오류" });
       } else if (results.length === 0) {
-        reject({ statusCode: 404, message: "User not found" });
+        resolve({
+          statusCode: 404,
+          message: "아이디나 비밀번호가 일치하지 않습니다.",
+        });
       } else {
         const user = {
           userid: results[0].userid,

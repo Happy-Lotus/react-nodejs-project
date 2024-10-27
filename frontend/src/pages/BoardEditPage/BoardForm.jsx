@@ -64,6 +64,10 @@ const BoardForm = ({ isEditMode }) => {
   //최종 등록
   const onSubmit = async (e) => {
     e.preventDefault();
+    if (!mountainContent.title) {
+      alert("제목을 입력하세요.");
+      return;
+    }
     const formData = new FormData();
     console.log(mountainContent.content);
 
@@ -105,7 +109,7 @@ const BoardForm = ({ isEditMode }) => {
         formData.append("post", JSON.stringify(postData));
 
         await updatePost(postId, formData);
-        toast.success("게시글 수정 완료 😎");
+        alert("게시글 수정 완료 😎");
       } else {
         //작성 모드. 새로 추가된 파일만 추가
         console.log(files);
@@ -114,11 +118,11 @@ const BoardForm = ({ isEditMode }) => {
         });
         formData.append("post", JSON.stringify(postData));
         await registerPost(formData);
-        toast.success("게시글 작성 완료 😎");
+        alert("게시글 작성 완료 😎");
       }
       navigate("/posts"); // 저장 후 /posts로 이동
     } catch (error) {
-      toast.error(error);
+      alert(error);
     }
   };
 
