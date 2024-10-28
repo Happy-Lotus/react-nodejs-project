@@ -33,6 +33,7 @@ exports.generateCode = async (req, res) => {
     const existingUser = await User.read("email", email);
 
     if (existingUser.length > 0) {
+      console.log(existingUser);
       return res.status(409).json({ message: "이미 존재하는 이메일입니다." });
     }
 
@@ -64,6 +65,7 @@ exports.generateCode = async (req, res) => {
       }
     });
   } catch (error) {
+    console.log(error);
     console.error(error);
     res.status(500).json({ message: "서버 오류" });
   }

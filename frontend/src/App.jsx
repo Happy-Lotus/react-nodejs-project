@@ -61,11 +61,11 @@ function PrivateRoute({ children, name }) {
   //   return <Navigate to="/login" />;
   // }
 
-  useEffect(() => {
-    if (!signin.success && name !== "login" && name != "Register") {
-      toast.error("로그인 후 사용하실 수 있습니다.");
-    }
-  }, [signin.success, name]);
+  // useEffect(() => {
+  //   if (!signin.success && name !== "login" && name !== "Register") {
+  //     alert("로그인 후 사용하실 수 있습니다.");
+  //   }
+  // }, [signin.success, name]);
 
   if (signin.success) {
     console.log("signinsuccess");
@@ -84,6 +84,7 @@ function PrivateRoute({ children, name }) {
     return name === "login" ? <LoginPage /> : <RegisterPage />;
   } else {
     // 로그아웃 상태에서 다른 컴포넌트 접근 시 login 으로 이동
+    alert("로그인 후 사용하실 수 있습니다.");
     return <Navigate to="/login" />;
   }
 }

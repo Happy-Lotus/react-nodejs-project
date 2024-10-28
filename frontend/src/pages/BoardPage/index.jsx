@@ -43,7 +43,7 @@ function BoardPage() {
   const debouncedSearch = debounce((term) => {
     setSearchTerm(term);
     setCurrentPage(1);
-  }, 300);
+  }, 1000);
 
   const handleSearch = (e) => {
     const value = e.target.value;

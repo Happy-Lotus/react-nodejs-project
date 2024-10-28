@@ -10,7 +10,6 @@ import {
 import { useRecoilValue } from "recoil";
 import { signupState } from "../../state/authState";
 import { useNavigate } from "react-router-dom"; // useHistory import
-import { set } from "lodash";
 
 const RegisterPage = () => {
   const [duplicateMessage, setDuplicateMessage] = useState("");
@@ -73,11 +72,9 @@ const RegisterPage = () => {
     const email = getValues("email");
     const response = await generateCode(email);
     console.log("이메일 인증 진행 후");
-    if (response.status === 201) {
+    if (response && response.status === 201) {
       alert("인증 코드가 발송되었습니다");
       setTimer(30);
-    } else {
-      console.log("handleEmailVerification 오류:", response.status);
     }
   };
 
@@ -349,7 +346,13 @@ const RegisterPage = () => {
               <span className={styles.error_msg}>{errors.pwd.message}</span>
             )}
             <div className={styles.form__actions}>
-              <button type="button" className={styles.btn__submit}>
+              <button
+                type="button"
+                className={styles.btn__submit}
+                onClick={() => {
+                  navigate("/login");
+                }}
+              >
                 취소
               </button>
               <button

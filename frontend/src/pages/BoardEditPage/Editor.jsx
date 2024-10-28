@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useCallback } from "react";
 import axios from "axios";
 import { CKEditor } from "@ckeditor/ckeditor5-react";
 import {
@@ -42,10 +42,10 @@ import {
   ShowBlocks,
   Style,
   TextTransformation,
-  TodoList,
   Undo,
 } from "ckeditor5";
 import translations from "ckeditor5/translations/ko.js";
+import { debounce } from "lodash";
 
 import "ckeditor5/ckeditor5.css";
 import "ckeditor5-premium-features/ckeditor5-premium-features.css";
@@ -53,8 +53,13 @@ import FileResizer from "react-image-file-resizer";
 
 const Editor = ({ content, setContent }) => {
   const [viewConent, setViewContent] = useState([]);
-
   const imgLink = "http://localhost:4000/uploads";
+  const debouncedSetContent = useCallback(
+    debounce((data) => {
+      setContent(data);
+    }, 1000), // 300ms 지연
+    []
+  );
 
   const resizeFile = (file) => {
     return new Promise((resolve, reject) => {
@@ -379,8 +384,7 @@ const Editor = ({ content, setContent }) => {
       data={content}
       onChange={(event, editor) => {
         const data = editor.getData();
-        console.log({ event, editor, data });
-        setContent(data); // 부모 컴포넌트의 상태 업데이트
+        debouncedSetContent(data); // 부모 컴포넌트의 상태 업데이트
       }}
     />
   );

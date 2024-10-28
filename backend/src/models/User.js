@@ -113,7 +113,6 @@ exports.read = async function (key, value) {
       });
     });
   } catch (error) {
-    console.error("Error: ", error);
-    throw new Error("서버 오류");
+    throw error;
   }
 };

@@ -4,6 +4,7 @@ import axiosInstance from "./axios.js";
 import { toast } from "react-toastify";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
+
 axios.defaults.withCredentials = true;
 
 //회원가입
@@ -209,9 +210,13 @@ export const generateCode = async (email) => {
     };
 
     const response = await axios(config);
-    console.log(response);
+    // console.log(response);
     return response;
-  } catch (error) {}
+  } catch (error) {
+    if (error.response.status === 409) {
+      alert(error.response.data.message);
+    }
+  }
 };
 
 export const verifyCode = async (email, code) => {
