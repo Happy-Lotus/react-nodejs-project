@@ -4,7 +4,6 @@ import { useLogin } from "../../utils/api"; // API 요청 로직 import
 import { useRecoilValue, useSetRecoilState } from "recoil";
 import { signinState, userState } from "../../state/authState";
 import { useNavigate } from "react-router-dom"; // useHistory import
-import { toast } from "react-toastify";
 import React, { useEffect } from "react";
 const LoginPage = () => {
   const { signin } = useLogin();

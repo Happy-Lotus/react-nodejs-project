@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { useDropzone } from "react-dropzone";
-import styles from "./ImageDropzone.module.scss"; // SCSS 모듈 임포트
+import styles from "./styles/ImageDropzone.module.scss"; // SCSS 모듈 임포트
 import Resizer from "react-image-file-resizer";
 const ImageDropzone = ({
   thumbnail,
@@ -66,7 +66,9 @@ const ImageDropzone = ({
         <div
           {...getRootProps({
             className: ` ${
-              isDragActive ? styles.drapzoneActive : styles.drapzone
+              isDragActive && !(thumbnail && !isThumbnailRemoved)
+                ? styles.drapzoneActive
+                : styles.drapzone
             }`,
           })}
         >

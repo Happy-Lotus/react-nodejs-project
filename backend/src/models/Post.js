@@ -208,9 +208,6 @@ exports.update = async function (updateData) {
                 await Promise.all(
                   deleteFiles.map((file) => File.delete(boardid, file)),
                   fileController.deleteAttachedFiles(deleteFiles)
-                  // deleteFiles.map((file) =>
-                  //   fileController.deleteAttachedFiles(file)
-                  // )
                 );
               }
               resolve({ statusCode: 201, message: "File and Post upload OK" });

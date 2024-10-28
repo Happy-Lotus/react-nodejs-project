@@ -1,9 +1,8 @@
-import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 
 import { MdArrowForwardIos } from "react-icons/md";
 import { MdArrowBackIos } from "react-icons/md";
-import styles from "./navigation.module.scss";
+import styles from "./styles/navigation.module.scss";
 
 function CommonNav({ currentPage, totalPages, onPageChange }) {
   const handlePageChange = (page) => {

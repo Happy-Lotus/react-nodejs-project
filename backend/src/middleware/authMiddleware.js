@@ -1,7 +1,7 @@
 const jwt = require("jsonwebtoken");
 const dotenv = require("dotenv");
 dotenv.config();
-const secret = "Kkb5I86s3B";
+const SECRET_KEY = process.env.SECRET_KEY;
 const Token = require("../models/Token");
 
 const authMiddleware = async (req, res, next) => {
@@ -21,7 +21,7 @@ const authMiddleware = async (req, res, next) => {
    * 클라이언트 요청의 쿠키에 AccessToken이 존재하는 경우
    * 결과 : 토큰의 유효성 검사
    */
-  jwt.verify(accesstoken, secret, async (err, decoded) => {
+  jwt.verify(accesstoken, SECRET_KEY, async (err, decoded) => {
     if (err) {
       if (err.name === "TokenExpiredError") {
         /**
@@ -81,7 +81,7 @@ const authMiddleware = async (req, res, next) => {
         }
 
         // 새로운 access token 발급
-        const newAccessToken = jwt.sign(refreshPayload, secret, {
+        const newAccessToken = jwt.sign(refreshPayload, SECRET_KEY, {
           algorithm: "HS256",
         });
         res.clearCookie("AccessToken", { path: "/" });

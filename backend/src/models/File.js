@@ -1,9 +1,5 @@
-const maria = require("mysql");
 const conn = require("../config/database");
 const moment = require("moment");
-const { upload } = require("../config/storage");
-const fs = require("fs").promises;
-const path = require("path");
 
 // 파일 생성
 exports.create = async function (boardId, fileInfos) {

@@ -32,6 +32,7 @@ const RegisterPage = () => {
       console.log(verify);
       await signup(data, verify);
       reset();
+      alert("회원가입이 완료되었습니다");
       navigate("/login");
     } catch (error) {
       console.error(error);
@@ -39,8 +40,8 @@ const RegisterPage = () => {
   };
 
   const {
-    register, //input 값을 입력할 때 해당 값을 저장할 변수 이름 정해주는 함수
-    handleSubmit, // submit 버튼을 눌렀을 때 form의 전체적인 데이터 처리를 해주는 함수
+    register,
+    handleSubmit,
     formState: { isSubmitted, errors },
     getValues,
     clearErrors,

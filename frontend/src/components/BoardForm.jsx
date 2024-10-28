@@ -1,12 +1,12 @@
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import { useLocation, useNavigate, useParams } from "react-router-dom";
 import axios from "axios";
-import styles from "./BoardEditPage.module.scss"; // SCSS 모듈 임포트
+import styles from "../pages/BoardEditPage/BoardEditPage.module.scss"; // SCSS 모듈 임포트
 import Editor from "./Editor";
 import Swal from "sweetalert2"; // SweetAlert2 임포트
 import FileDropzone from "./fileDropzone";
 import ImageDropzone from "./imageDropzone";
-import { deleteFiles, registerPost, updatePost } from "../../utils/api";
+import { deleteFiles, registerPost, updatePost } from "../utils/api";
 import { toast } from "react-toastify";
 import Resizer from "react-image-file-resizer";
 
@@ -130,7 +130,10 @@ const BoardForm = ({ isEditMode }) => {
   const handleFileDrop = useCallback(
     (acceptedFiles) => {
       //files : 기존 파일 acceptedFiles: 새로 추가된 파일 newFiles: 저장은 안된 기존파일
-      if (files.length + acceptedFiles.length + newFiles.length > 5) {
+      if (files.length + acceptedFiles.length > 5) {
+        console.log(files);
+        console.log(acceptedFiles);
+        console.log(newFiles);
         alert("첨부할 수 있는 파일의 개수는 5개를 초과할 수 없습니다.");
         setIsFileDragActive(false); // Reset drag state
         return;
@@ -180,7 +183,10 @@ const BoardForm = ({ isEditMode }) => {
   //파일 업로드 버튼 이용해 추가 -> 완료
   const handleFileButton = (event) => {
     const selectedFiles = Array.from(event.target.files);
-    if (files.length + selectedFiles.length + newFiles.length > 5) {
+    if (files.length + selectedFiles.length > 5) {
+      console.log(files);
+      console.log(selectedFiles);
+      console.log(newFiles);
       alert("첨부할 수 있는 파일의 개수는 5개를 초과할 수 없습니다.");
       setIsFileDragActive(false); // Reset drag state
       return;

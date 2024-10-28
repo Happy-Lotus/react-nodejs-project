@@ -1,4 +1,4 @@
-import BoardForm from "./BoardForm";
+import BoardForm from "../../components/BoardForm";
 
 const BoardEditPage = () => {
   return <BoardForm isEditMode={false} />;

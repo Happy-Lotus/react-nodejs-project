@@ -30,30 +30,12 @@ const imageStorage = multer.diskStorage({
     file.originalname = Buffer.from(file.originalname, "latin1").toString(
       "utf8"
     );
-    // const originalName = Buffer.from(file.originalname, "latin1").toString(
-    //   "utf8"
-    // );
+
     cb(null, Date.now() + "_" + file.originalname);
   },
 });
 const upload = multer({
   storage,
-  // fileFilter: (req, file, cb) => {
-  //   if (
-  //     [
-  //       "image/jpeg",
-  //       "image/jpg",
-  //       "image/png",
-  //       "application/pdf",
-  //       "application/x-hwp",
-  //     ].includes(file.mimetype)
-  //   )
-  //     cb(null, true);
-  //   else cb(new Error("해당 파일의 형식을 지원하지 않습니다."), false);
-  // },
-  // limits: {
-  //   fileSize: 1024 * 1024 * 5,
-  // },
 });
 const imageUpload = multer({
   storage: imageStorage,

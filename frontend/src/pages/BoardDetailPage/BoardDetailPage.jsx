@@ -46,6 +46,7 @@ const BoardDetailPage = () => {
     if (result.isConfirmed) {
       console.log("handleDelete 게시물 삭제 버튼 작동");
       await postDelete(postId);
+      alert("삭제가 완료되었습니다.");
       navigate("/posts"); // 예를 클릭하면 /posts로 이동
     }
   };

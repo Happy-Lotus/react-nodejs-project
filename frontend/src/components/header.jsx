@@ -1,9 +1,8 @@
 import { Link, useNavigate } from "react-router-dom";
-import styles from "./header.module.scss";
-import { useLogout } from "../../utils/api";
-import { signinState, userState } from "../../state/authState";
+import styles from "./styles/header.module.scss";
+import { useLogout } from "../utils/api";
+import { signinState, userState } from "../state/authState";
 import { useRecoilValue, useSetRecoilState } from "recoil";
-import { toast } from "react-toastify";
 
 function CommonHeader() {
   const setSigninState = useSetRecoilState(signinState);

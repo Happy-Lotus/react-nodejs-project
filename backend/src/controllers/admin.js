@@ -4,9 +4,10 @@ const bcrypt = require("bcryptjs");
 const dotenv = require("dotenv");
 const transporter = require("../config/email");
 const jwt = require("jsonwebtoken");
-const secret = "Kkb5I86s3B";
 const User = require("../models/User");
 dotenv.config();
+const SECRET_KEY = process.env.SECRET_KEY;
+const CLIENT_URL = process.env.CLIENT_URL;
 
 const checkPassword = async function (dbpwd, pwd) {
   const isMatch = await bcrypt.compare(pwd, dbpwd);
@@ -140,11 +141,11 @@ exports.login = async (req, res) => {
           pwd: user.pwd,
           nickname: user.nickname,
         };
-        const accessToken = jwt.sign(payload, secret, {
+        const accessToken = jwt.sign(payload, SECRET_KEY, {
           algorithm: "HS256",
           expiresIn: "1h",
         });
-        const refreshToken = jwt.sign(payload, secret, {
+        const refreshToken = jwt.sign(payload, SECRET_KEY, {
           algorithm: "HS256",
           expiresIn: "14d",
         });
@@ -156,12 +157,13 @@ exports.login = async (req, res) => {
         } else {
           await Token.update(refreshToken, user.userid);
         }
+
         res
           .status(201)
           .setHeader("Access-Control-Allow-Credentials", "true")
           .setHeader("Access-Control-Allow-Headers", "Content-Type")
           .setHeader("Access-Control-Allow-Methods", "POST,OPTIONS")
-          .setHeader("Access-Control-Allow-Origin", "http://localhost:3000")
+          .setHeader("Access-Control-Allow-Origin", CLIENT_URL)
           .cookie("AccessToken", accessToken, {
             maxAge: 3600000,
             httpOnly: true,

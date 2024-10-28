@@ -1,13 +1,10 @@
-const conn = require("../config/database");
 const dotenv = require("dotenv");
-const File = require("../models/File");
 const Post = require("../models/Post");
-const User = require("../models/User");
 const path = require("path"); // path 모듈 추가
 dotenv.config();
-const moment = require("moment");
 const fs = require("fs");
 const fileController = require("../controllers/file");
+const CLIENT_URL = process.env.CLIENT_URL;
 
 //게시물 생성
 exports.create = async (req, res) => {
@@ -42,7 +39,7 @@ exports.readAll = async (req, res) => {
     const { statusCode, message, postData } = await Post.readAll();
     return res
       .setHeader("Access-Control-Allow-Credentials", "true")
-      .setHeader("Access-Control-Allow-Origin", "http://localhost:3000")
+      .setHeader("Access-Control-Allow-Origin", CLIENT_URL)
       .status(statusCode)
       .json({ message: message, postData });
   } catch (error) {
@@ -162,6 +159,7 @@ exports.readOption = async function (req, res) {
     const content = req.query.content;
     const page = Number(req.query.page) || 1;
     const perPage = Number(req.query.perPage) || 5;
+    console.log(CLIENT_URL);
 
     const { posts, totalPage, currentPage } = await Post.readOption(
       option,

@@ -2,6 +2,8 @@ const dotenv = require("dotenv");
 dotenv.config();
 const fs = require("fs").promises;
 const path = require("path");
+const CLIENT_URL = process.env.CLIENT_URL;
+const URL = process.env.URL;
 
 exports.imageUpload = async function (req, res) {
   console.log(req.file);
@@ -9,7 +11,7 @@ exports.imageUpload = async function (req, res) {
     return res.status(400).json({ error: "No file uploaded." });
   }
   // 파일 URL 생성
-  const imageUrl = `http://localhost:4000/uploads/${req.file.filename}`;
+  const imageUrl = `${URL}/uploads/${req.file.filename}`;
   return res.json({ url: imageUrl });
 };
 
@@ -17,9 +19,9 @@ exports.read = async function (url, res) {
   if (!url) {
     return res.status(400).json({ error: "No file uploaded." });
   }
-  const fileUrl = `http://localhost:4000/uploads/${url}`;
+  const fileUrl = `${URL}/uploads/${url}`;
 
-  res.setHeader("Access-Control-Allow-Origin", "http://localhost:3000");
+  res.setHeader("Access-Control-Allow-Origin", CLIENT_URL);
   res.setHeader("Access-Control-Allow-Methods", "GET,POST,DELETE,PUT");
   res.setHeader("Access-Control-Allow-Headers", "Content-Type");
   res.setHeader("Access-Control-Allow-Credentials", "true");

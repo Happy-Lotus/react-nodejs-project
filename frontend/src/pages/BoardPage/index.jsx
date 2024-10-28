@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import styles from "./BoardPage.module.scss";
 import { FaSearch } from "react-icons/fa";
-import CommonNav from "../../components/nav/navigation";
+import CommonNav from "../../components/navigation";
 import { Link } from "react-router-dom";
 import { useReadOption } from "../../utils/api";
 import { debounce } from "lodash";
@@ -11,8 +11,6 @@ function BoardPage() {
   const [loading, setLoading] = useState(true);
   const [searchOption, setSearchOption] = useState("title"); // 추가된 부분
   const [searchTerm, setSearchTerm] = useState("");
-  // const [filteredPosts, setFilteredPosts] = useState([]); // 필터링된 게시물 상태
-  // const [thumbnail, setThumbnail] = useState([]);
   const [currentPage, setCurrentPage] = useState(1);
   const postsPerPage = 5;
   const [totalPages, setTotalPages] = useState(0); // 총 페이지 수 상태 추가
@@ -58,17 +56,7 @@ function BoardPage() {
   const truncateRegDate = (regdate) => {
     return new Date(regdate).toLocaleDateString();
   };
-  // const handleSearchEnter = (e) => {
-  //   if (e.key === "Enter") {
-  //     console.log(searchTerm);
-  //     handleSearch();
-  //   }
-  // };
-  // Pagination logic
-  // const indexOfLastPost = currentPage * postsPerPage;
-  // const indexOfFirstPost = indexOfLastPost - postsPerPage;
-  // const currentPosts = filteredPosts.slice(indexOfFirstPost, indexOfLastPost);
-  // const totalPages = Math.ceil(filteredPosts.length / postsPerPage);
+
   if (loading) {
     return <div>Loading...</div>;
   }

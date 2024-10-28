@@ -5,6 +5,7 @@ import { toast } from "react-toastify";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
 
+const api_url = process.env.REACT_APP_SERVER_URL;
 axios.defaults.withCredentials = true;
 
 //회원가입
@@ -15,7 +16,7 @@ export const useSignup = () => {
     console.log("api 요청");
     const config = {
       method: "post",
-      url: "http://localhost:4000/register",
+      url: `${api_url}/register`,
       headers: {
         "Content-Type": "application/json",
       },
@@ -51,7 +52,7 @@ export const useLogin = () => {
     console.log("sign in api 요청");
     const config = {
       method: "post",
-      url: "http://localhost:4000/login",
+      url: `${api_url}/login`,
       headers: {
         "Content-Type": "application/json",
         withCredentials: true,
@@ -76,7 +77,7 @@ export const fetchPosts = async () => {
   try {
     const config = {
       method: "get",
-      url: "http://localhost:4000/posts",
+      url: `${api_url}/posts`,
       headers: {
         "Content-Type": "application/json",
       },
@@ -95,16 +96,7 @@ export const fetchPosts = async () => {
     }));
     console.log("요청 완료");
     return transformedPosts; // 데이터 반환
-  } catch (error) {
-    // if (error.response.status === 401) {
-    //   console.log("401에러");
-    //   setSigninState({
-    //     isLoading: false,
-    //     error: error.response?.data?.message || "다시 로그인하세요",
-    //     success: false,
-    //   });
-    // }
-  }
+  } catch (error) {}
 };
 
 export const useFetchPostDetail = () => {
@@ -114,9 +106,7 @@ export const useFetchPostDetail = () => {
   const fetchPostDetail = async (postId) => {
     try {
       console.log("fetchPostDetail");
-      const response = await axios.get(
-        `http://localhost:4000/posts/detail/${postId}`
-      ); // API 호출
+      const response = await axios.get(`${api_url}/posts/detail/${postId}`); // API 호출
       console.log("fetchPostDetail");
       console.log(response);
 
@@ -142,9 +132,10 @@ export const useFetchPostDetail = () => {
 
 export const checkNickname = async (nickname) => {
   try {
+    console.log(api_url);
     const config = {
       method: "post",
-      url: "http://localhost:4000/checkNickname",
+      url: `${api_url}/checkNickname`,
       headers: {
         "Content-Type": "application/json",
         withCredentials: true,
@@ -168,7 +159,7 @@ export const useLogout = () => {
   const userLogout = async () => {
     try {
       const config = {
-        url: "http://localhost:4000/logout",
+        url: `${api_url}/logout`,
         method: "post",
         headers: {
           "Content-Type": "application/json",
@@ -198,7 +189,7 @@ export const generateCode = async (email) => {
   console.log("email", email);
   try {
     const config = {
-      url: "http://localhost:4000/generateCode",
+      url: `${api_url}/generateCode`,
       method: "post",
       headers: {
         "Content-Type": "application/json",
@@ -222,7 +213,7 @@ export const generateCode = async (email) => {
 export const verifyCode = async (email, code) => {
   try {
     const config = {
-      url: "http://localhost:4000/verify-email",
+      url: `${api_url}/verify-email`,
       method: "post",
       headers: {
         "Content-Type": "application/json",
@@ -243,7 +234,7 @@ export const verifyCode = async (email, code) => {
 export const registerPost = async (formData) => {
   try {
     const config = {
-      url: "http://localhost:4000/posts/edit",
+      url: `${api_url}/posts/edit`,
       method: "post",
       headers: {
         "Content-Type": "multipart/form-data",
@@ -258,16 +249,12 @@ export const registerPost = async (formData) => {
       console.log(value);
     }
     console.log(formData);
-    const response = await axios.post(
-      "http://localhost:4000/posts/edit",
-      formData,
-      {
-        headers: {
-          "Content-Type": "multipart/form-data",
-          withCredentials: true,
-        },
-      }
-    );
+    const response = await axios.post(`${api_url}/posts/edit`, formData, {
+      headers: {
+        "Content-Type": "multipart/form-data",
+        withCredentials: true,
+      },
+    });
     console.log(response);
     return response;
   } catch (error) {}
@@ -276,7 +263,7 @@ export const registerPost = async (formData) => {
 export const updatePost = async (postid, formData) => {
   try {
     const config = {
-      url: `http://localhost:4000/posts/detail/${postid}`,
+      url: `${api_url}/posts/detail/${postid}`,
       method: "post",
       headers: {
         "Content-Type": "multipart/form-data",
@@ -287,7 +274,7 @@ export const updatePost = async (postid, formData) => {
 
     console.log(formData);
     const response = await axios.post(
-      `http://localhost:4000/posts/detail/${postid}`,
+      `${api_url}/posts/detail/${postid}`,
       formData,
       {
         headers: {
@@ -305,7 +292,7 @@ export const downloadFile = async (postid, filename) => {
   try {
     const config = {
       method: "get",
-      url: `http://localhost:4000/posts/${postid}/file/${filename}`,
+      url: `${api_url}/posts/${postid}/file/${filename}`,
       headers: {
         "Content-Type": "application/json",
       },
@@ -324,7 +311,7 @@ export const postDelete = async (postid) => {
   try {
     const config = {
       method: "delete",
-      url: `http://localhost:4000/posts/${postid}`,
+      url: `${api_url}/posts/${postid}`,
       headers: {
         "Content-Type": "application/json",
       },
@@ -348,7 +335,7 @@ export const useReadOption = () => {
       console.log("api readOption");
       const config = {
         method: "get",
-        url: `http://localhost:4000/posts?option=${option}&content=${content}&page=${page}&perPage=${perPage}`,
+        url: `${api_url}/posts?option=${option}&content=${content}&page=${page}&perPage=${perPage}`,
         headers: {
           "Content-Type": "application/json",
         },
@@ -365,18 +352,6 @@ export const useReadOption = () => {
         setSigninState({ isLoading: false, error: null, success: false }); // 로그인 상태 업데이트
         setUserState({ nickname: "" }); // 사용자 상태 초기화
         navigate("/login"); // 로그인 페이지로 리디렉션
-
-        // setSigninState({
-        //   isLoading: false,
-        //   error: error.response?.data?.message || "다시 로그인하세요",
-        //   success: false,
-        // });
-        // setUserState({
-        //   nickname: "",
-        // });
-        // setTimeout(() => {
-        //   navigate("/login"); // 로그인 페이지로 리디렉션
-        // }, 100); // 잠시 대기 후 리디렉션
       }
       throw error;
     }

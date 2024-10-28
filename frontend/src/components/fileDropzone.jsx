@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { useDropzone } from "react-dropzone";
 import { FaTrash } from "react-icons/fa";
-import styles from "./FileDropzone.module.scss"; // 스타일 파일 경로
+import styles from "./styles/FileDropzone.module.scss"; // 스타일 파일 경로
 import { FaUpload } from "react-icons/fa";
 
 const FileDropzone = ({

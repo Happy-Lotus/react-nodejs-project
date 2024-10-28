@@ -6,14 +6,14 @@ import BoardPage from "./pages/BoardPage";
 import BoardDetailPage from "./pages/BoardDetailPage/BoardDetailPage";
 import BoardRewritePage from "./pages/BoardRewritePage";
 import BoardEditPage from "./pages/BoardEditPage";
-import CommonHeader from "./components/header/header";
+import CommonHeader from "./components/header";
 import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/ReactToastify.css";
 import { RecoilRoot, useRecoilValue } from "recoil"; // Import RecoilRoot
 import { CookiesProvider } from "react-cookie";
 import { React, useEffect } from "react";
 import { signinState } from "./state/authState";
-import CommonFooter from "./components/footer/footer";
+import CommonFooter from "./components/footer";
 function Layout() {
   return (
     <div style={{ width: "100%", height: "100vh" }}>
