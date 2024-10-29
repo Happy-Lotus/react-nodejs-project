@@ -76,6 +76,14 @@ figure.image.image_resized {
   text-align: center;
 }
 
-/*figure.image.image_resized.image-style-block-align-right,
-figure.image.image_resized.image-style-align-right figure.image.image_resized.image-style-block-align-left,
-figure.image.image_resized.image-style-align-left figure.image.image_resized */
+figure.image.image_resized.image-style-align-right {
+  float: right;
+  margin-left: 4px;
+}
+
+figure.image.image_resized.image-style-align-left {
+  float: left;
+  margin-right: 4px;
+}
+
+/*figure.image.image_resized.image-style-block-align-right, */
