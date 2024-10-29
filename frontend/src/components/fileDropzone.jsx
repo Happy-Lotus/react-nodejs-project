@@ -19,6 +19,8 @@ const FileDropzone = ({
       "image/*": [".jpeg", ".jpg", ".png"],
       "application/pdf": [],
       "application/x-hwp": [],
+      "application/vnd.hancom.hwp": [],
+      "application/haansofthwp": [],
     },
     maxFiles: 5,
     onDragEnter: () => {

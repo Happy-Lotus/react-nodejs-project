@@ -43,6 +43,7 @@ import {
   Style,
   TextTransformation,
   Undo,
+  FontSize,
 } from "ckeditor5";
 import translations from "ckeditor5/translations/ko.js";
 import { debounce } from "lodash";
@@ -54,12 +55,12 @@ import FileResizer from "react-image-file-resizer";
 const Editor = ({ content, setContent }) => {
   const [viewConent, setViewContent] = useState([]);
   const imgLink = "http://localhost:4000/uploads";
-  const debouncedSetContent = useCallback(
-    debounce((data) => {
-      setContent(data);
-    }, 1000), // 300ms 지연
-    []
-  );
+  // const debouncedSetContent = useCallback(
+  //   debounce((data) => {
+  //     setContent(data);
+  //   }, 1000), // 300ms 지연
+  //   []
+  // );
 
   const resizeFile = (file) => {
     return new Promise((resolve, reject) => {
@@ -145,6 +146,7 @@ const Editor = ({ content, setContent }) => {
         "showBlocks",
         "|",
         "heading",
+        "fontSize",
         "style",
         "|",
         "bold",
@@ -211,8 +213,13 @@ const Editor = ({ content, setContent }) => {
       Style,
       TextTransformation,
       Undo,
+      FontSize,
       uploadPlugin,
     ],
+    fontSize: {
+      options: [10, 12, 14, "default", 18, 20, 22],
+      supportAllValues: true,
+    },
     heading: {
       options: [
         {
@@ -384,7 +391,7 @@ const Editor = ({ content, setContent }) => {
       data={content}
       onChange={(event, editor) => {
         const data = editor.getData();
-        debouncedSetContent(data); // 부모 컴포넌트의 상태 업데이트
+        setContent(data); // 부모 컴포넌트의 상태 업데이트
       }}
     />
   );

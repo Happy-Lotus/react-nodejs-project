@@ -75,7 +75,7 @@ const RegisterPage = () => {
     console.log("이메일 인증 진행 후");
     if (response && response.status === 201) {
       alert("인증 코드가 발송되었습니다");
-      setTimer(30);
+      setTimer(180);
     }
   };
 

@@ -21,15 +21,12 @@ const BoardForm = ({ isEditMode }) => {
 
   const [thumbnail, setThumbnail] = useState(""); //썸네일 상태
   const [isThumbnailRemoved, setIsThumbnailRemoved] = useState(false); // 썸네일 제거 상태
-  // const [showThumbnailModal, setShowThumbnailModal] = useState(false); //썸네일 창 상태
   const [files, setFiles] = useState([]); // 첨부파일 상태
   const filesRef = useRef(files); // 현재 파일 리스트를 참조하기 위한 ref
   const [newFiles, setNewFiles] = useState([]); // 새로 추가할 파일
   const newFilesRef = useRef(newFiles);
   const [isFileDragActive, setIsFileDragActive] = useState(false);
   const [isImgDragActive, setIsImgDragActive] = useState(false);
-  // const [isDragActive, setIsDragActive] = useState(false);
-  // const [isExiting, setIsExiting] = useState(false); // 모달 종료 상태 추가
   const [deletedFiles, setDeletedFiles] = useState([]); // 삭제할 파일명
   const [thumbnailDeleteFiles, setThumbnailDeleteFiles] = useState([]);
 
@@ -129,6 +126,7 @@ const BoardForm = ({ isEditMode }) => {
   // 파일 drag&drop -> 완료
   const handleFileDrop = useCallback(
     (acceptedFiles) => {
+      console.log(acceptedFiles);
       //files : 기존 파일 acceptedFiles: 새로 추가된 파일 newFiles: 저장은 안된 기존파일
       if (files.length + acceptedFiles.length > 5) {
         console.log(files);
