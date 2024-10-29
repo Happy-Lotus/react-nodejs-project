@@ -161,6 +161,7 @@ const BoardDetailPage = () => {
                 <span
                   key={index}
                   onClick={() => fileDownload(item.originalname, item.filename)}
+                  style={{ cursor: "poinster" }}
                 >
                   {item.originalname}
                 </span>

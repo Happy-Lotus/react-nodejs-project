@@ -47,7 +47,7 @@ function Layout() {
       <main className="max-w-7xl mx-auto my-20">
         <Outlet />
       </main>
-      <CommonFooter />
+      {/* <CommonFooter /> */}
     </div>
   );
 }

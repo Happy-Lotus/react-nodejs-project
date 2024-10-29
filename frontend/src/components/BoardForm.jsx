@@ -364,8 +364,9 @@ const BoardForm = ({ isEditMode }) => {
         }
       }
       console.log(postData);
-
-      const response = await deleteFiles(postData);
+      if (postData.thumbnails.length > 0 || postData.deleteFiles.length > 0) {
+        const response = await deleteFiles(postData);
+      }
       navigate("/posts"); // 예를 클릭하면 /posts로 이동
     }
   };

@@ -56,3 +56,12 @@ html {
   width: auto !important; /* Ensure the width is respected */
   height: auto !important; /* Ensure the height is respected */
 }
+
+figure.image.image-style-align-left {
+  float: left;
+  margin-right: 4px;
+}
+figure.image.image-style-align-right {
+  float: right;
+  margin-left: 4px;
+}
