@@ -197,9 +197,6 @@ exports.cancel = async function (req, res) {
 
     // 두 Promise를 동시에 실행
     await Promise.all([deleteThumbnailPromise, deleteFilesPromise]);
-    // if (thumbnail !== "") await fileController.deleteThumbnail(thumbnail);
-    // if (deleteFiles && deleteFiles.length > 0)
-    //   await fileController.deleteAttachedFiles(deleteFiles);
   } catch (error) {
     console.error(error);
     res.status(error.statusCode).json({ message: error.message });

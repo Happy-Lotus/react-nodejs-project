@@ -19,12 +19,13 @@ const FileStore = require("session-file-store")(session);
 
 const SECRET_KEY = process.env.SECRET_KEY;
 const PORT = process.env.PORT;
+
 app.use(cookieParser());
 app.use(
   session({
     store: new FileStore({
       path: "./sessions", // 세션 파일을 저장할 경로
-      reapInterval: 60, // 세션 만료 시간 (초)
+      reapInterval: 180, // 세션 만료 시간 (초)
     }),
     secret: SECRET_KEY,
     resave: false,

@@ -55,12 +55,6 @@ import FileResizer from "react-image-file-resizer";
 const Editor = ({ content, setContent }) => {
   const [viewConent, setViewContent] = useState([]);
   const imgLink = "http://localhost:4000/uploads";
-  // const debouncedSetContent = useCallback(
-  //   debounce((data) => {
-  //     setContent(data);
-  //   }, 1000), // 300ms 지연
-  //   []
-  // );
 
   const resizeFile = (file) => {
     return new Promise((resolve, reject) => {

@@ -1,7 +1,6 @@
 import { signupState, signinState, userState } from "../state/authState.js";
 import { useSetRecoilState } from "recoil";
 import axiosInstance from "./axios.js";
-import { toast } from "react-toastify";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
 
@@ -114,7 +113,6 @@ export const useFetchPostDetail = () => {
       return transformedPost; // 데이터 반환
     } catch (error) {
       if (error.response.data.statusCode === 401) {
-        console.log("401에러");
         setSigninState({
           isLoading: false,
           error: error.response?.data?.message || "다시 로그인하세요",
@@ -128,7 +126,6 @@ export const useFetchPostDetail = () => {
   };
   return { fetchPostDetail };
 };
-// 게시물 상세 데이터 가져오기
 
 export const checkNickname = async (nickname) => {
   try {
@@ -332,7 +329,6 @@ export const useReadOption = () => {
 
   const readOption = async (option = "", content, page, perPage = 5) => {
     try {
-      console.log("api readOption");
       const config = {
         method: "get",
         url: `${api_url}/posts?option=${option}&content=${content}&page=${page}&perPage=${perPage}`,
@@ -347,7 +343,6 @@ export const useReadOption = () => {
       return response.data;
     } catch (error) {
       if (error.response.data.statusCode === 401) {
-        console.log("401에러");
         alert("재로그인하세요."); // 오류 메시지 표시
         setSigninState({ isLoading: false, error: null, success: false }); // 로그인 상태 업데이트
         setUserState({ nickname: "" }); // 사용자 상태 초기화

@@ -12,25 +12,6 @@ function CommonHeader() {
   const { userLogout } = useLogout();
   const logout = async () => {
     await userLogout();
-    // try {
-    //   const response = await userLogout();
-    //   console.log(response);
-    //   if (response.status === 204) {
-    //     setSigninState({ isLoading: false, error: null, success: false });
-    //     setUserState({ nickname: "" });
-    //   }
-    //   toast.success("로그아웃했습니다.");
-    //   setTimeout(() => {
-    //     navigate("/login"); // 로그인 페이지로 리디렉션
-    //   }, 100); // 잠시 대기 후 리디렉션
-    // } catch (error) {
-    //   setSigninState({ isLoading: false, error: null, success: false });
-    //   setUserState({ nickname: "" });
-    //   toast.error("로그아웃했습니다.");
-    //   setTimeout(() => {
-    //     navigate("/login"); // 로그인 페이지로 리디렉션
-    //   }, 100); // 잠시 대기 후 리디렉션
-    // }
   };
 
   return (

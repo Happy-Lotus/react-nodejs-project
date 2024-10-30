@@ -290,7 +290,7 @@ exports.delete = async function (boardid) {
 };
 
 const extractImageUrls = (content) => {
-  const regex = /!\[\]\(([^)]+)\)/g; // ![]() 형식에서 URL 추출
+  const regex = /<img\s+[^>]*src="([^"]+)"[^>]*>/g; // <img> 태그에서 src 속성의 URL 추출
   const urls = [];
   let match;
 

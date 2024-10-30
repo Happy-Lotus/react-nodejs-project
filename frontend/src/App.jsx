@@ -47,7 +47,6 @@ function Layout() {
       <main className="max-w-7xl mx-auto my-20">
         <Outlet />
       </main>
-      {/* <CommonFooter /> */}
     </div>
   );
 }
@@ -55,17 +54,6 @@ function PrivateRoute({ children, name }) {
   const signin = useRecoilValue(signinState);
   console.log(children);
   console.log(name);
-
-  // if (signin.error !== null) {
-  //   toast.error(signin.error);
-  //   return <Navigate to="/login" />;
-  // }
-
-  // useEffect(() => {
-  //   if (!signin.success && name !== "login" && name !== "Register") {
-  //     alert("로그인 후 사용하실 수 있습니다.");
-  //   }
-  // }, [signin.success, name]);
 
   if (signin.success) {
     console.log("signinsuccess");

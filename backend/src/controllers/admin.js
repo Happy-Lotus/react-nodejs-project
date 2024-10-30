@@ -58,8 +58,6 @@ exports.generateCode = async (req, res) => {
           email: email,
           code: number,
         };
-        console.log("number:" + number);
-        console.log("admin.js");
         res.status(201).json({
           message: "이메일을 확인하여 인증을 완료해주세요.",
         });

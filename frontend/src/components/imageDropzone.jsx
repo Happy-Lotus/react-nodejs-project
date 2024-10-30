@@ -50,12 +50,6 @@ const ImageDropzone = ({
         )}
       </div>
 
-      {/**
-       * 1. thumbnail == "" isThumbnailRemoved false -> 사진 자체가 없는 상황
-       * 2. thumbnail == "" isThumbnailRemoved true -> 이런 경우는 존재 X
-       * 3. thumbnail == "ddd" isThumbnailRemoved false -> 제거 안함
-       * 4. thumbnail == "dddd" isThumbnailRemoved true -> 삭제되어야 함
-       */}
       <div
         className={
           !isThumbnailRemoved && thumbnail !== ""
