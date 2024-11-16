@@ -7,10 +7,10 @@ const authMiddleware = require("../middleware/authMiddleware");
 /*회원가입*/
 router.post("/register", adminController.register);
 
-/* 사용자 이메일 인증*/
+/* 사용자 인증코드 확인*/
 router.post("/verify-email", adminController.verifyEmail);
 
-/*사용자 인증코드 확인*/
+/*사용자 이메일 인증코드 생성*/
 router.post("/generateCode", adminController.generateCode);
 
 /* 사용자 로그인*/

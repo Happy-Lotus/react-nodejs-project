@@ -1,0 +1,67 @@
+.nav {
+  margin-bottom: 80px;
+  .pagination {
+    display: flex;
+    justify-content: center; // 중앙 정렬
+    flex-grow: 1; // 남은 공간을 차지
+
+    .prev__page,
+    .next__page {
+      border: none;
+      color: #000000;
+      cursor: pointer;
+      border-radius: 50%;
+      width: 35px;
+      height: 35px;
+
+      &:hover {
+        font-weight: bolder;
+      }
+    }
+  }
+
+  .submit__container {
+    text-align: right;
+
+    .submit__btn {
+      padding: 10px 20px;
+      border: none;
+      color: black;
+      cursor: pointer;
+
+      &:hover {
+        font-weight: bolder;
+      }
+    }
+  }
+}
+
+.wrapper {
+  display: block;
+}
+.prev__page:disabled,
+.next__page:disabled {
+  color: #ccc; // Color for disabled buttons
+  cursor: not-allowed; // Change cursor for disabled buttons
+}
+.pagination__button {
+  margin: 0 5px;
+  padding: 5px 10px;
+  cursor: pointer;
+}
+
+.active {
+  font-weight: bolder;
+}
+
+.inactive {
+  color: #333;
+}
+
+.prev__page,
+.next__page {
+  background-color: transparent; // Style for the previous and next buttons
+  border: none;
+  cursor: pointer;
+  font-size: 16px; // Adjust size as needed
+}

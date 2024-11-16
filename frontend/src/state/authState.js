@@ -1,4 +1,7 @@
 import { atom } from "recoil";
+import { recoilPersist } from "recoil-persist";
+
+const { persistAtom } = recoilPersist();
 
 export const signupState = atom({
   key: "signupState", // 고유한 ID
@@ -15,5 +18,23 @@ export const signinState = atom({
     isLoading: false,
     error: null,
     success: false,
+  },
+  effects_UNSTABLE: [persistAtom],
+});
+
+export const userState = atom({
+  key: "userState",
+  default: {
+    nickname: "",
+  },
+  effects_UNSTABLE: [persistAtom],
+});
+
+export const postState = atom({
+  key: "postState",
+  default: {
+    title: "",
+    content: "",
+    thumbnail: "",
   },
 });

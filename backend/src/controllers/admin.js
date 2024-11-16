@@ -4,22 +4,17 @@ const bcrypt = require("bcryptjs");
 const dotenv = require("dotenv");
 const transporter = require("../config/email");
 const jwt = require("jsonwebtoken");
-const secret = "Kkb5I86s3B";
 const User = require("../models/User");
 dotenv.config();
+const SECRET_KEY = process.env.SECRET_KEY;
+const CLIENT_URL = process.env.CLIENT_URL;
 
 const checkPassword = async function (dbpwd, pwd) {
-  try {
-    return new Promise((resolve, reject) => {
-      if (bcrypt.compare(dbpwd, pwd)) {
-        resolve(true);
-      } else {
-        reject(false);
-      }
-    });
-  } catch (error) {
-    console.error("Error:", error);
+  const isMatch = await bcrypt.compare(pwd, dbpwd);
+  if (!isMatch) {
+    return false;
   }
+  return true;
 };
 
 exports.checkNickname = async (req, res) => {
@@ -39,6 +34,7 @@ exports.generateCode = async (req, res) => {
     const existingUser = await User.read("email", email);
 
     if (existingUser.length > 0) {
+      console.log(existingUser);
       return res.status(409).json({ message: "이미 존재하는 이메일입니다." });
     }
 
@@ -62,14 +58,13 @@ exports.generateCode = async (req, res) => {
           email: email,
           code: number,
         };
-        console.log("number:" + number);
-        console.log("admin.js");
         res.status(201).json({
           message: "이메일을 확인하여 인증을 완료해주세요.",
         });
       }
     });
   } catch (error) {
+    console.log(error);
     console.error(error);
     res.status(500).json({ message: "서버 오류" });
   }
@@ -106,9 +101,10 @@ exports.verifyEmail = async (req, res) => {
 
 exports.register = async (req, res) => {
   const isVerified = req.body.isVerified;
+  console.log(isVerified);
 
   try {
-    if (!isVerified || isVerified !== 1) {
+    if (!isVerified) {
       return res
         .status(403)
         .json({ message: "아직 인증이 완료되지 않은 이메일입니다." });
@@ -143,12 +139,11 @@ exports.login = async (req, res) => {
           pwd: user.pwd,
           nickname: user.nickname,
         };
-
-        const accessToken = jwt.sign(payload, secret, {
+        const accessToken = jwt.sign(payload, SECRET_KEY, {
           algorithm: "HS256",
           expiresIn: "1h",
         });
-        const refreshToken = jwt.sign(payload, secret, {
+        const refreshToken = jwt.sign(payload, SECRET_KEY, {
           algorithm: "HS256",
           expiresIn: "14d",
         });
@@ -160,13 +155,13 @@ exports.login = async (req, res) => {
         } else {
           await Token.update(refreshToken, user.userid);
         }
-        console.log("admin.js login");
+
         res
           .status(201)
           .setHeader("Access-Control-Allow-Credentials", "true")
           .setHeader("Access-Control-Allow-Headers", "Content-Type")
           .setHeader("Access-Control-Allow-Methods", "POST,OPTIONS")
-          .setHeader("Access-Control-Allow-Origin", "http://localhost:3000")
+          .setHeader("Access-Control-Allow-Origin", CLIENT_URL)
           .cookie("AccessToken", accessToken, {
             maxAge: 3600000,
             httpOnly: true,
@@ -181,17 +176,22 @@ exports.login = async (req, res) => {
           })
           .json({
             email: email,
-            nickname: result.nickname,
+            nickname: user.nickname,
           });
+        console.log(res);
         return res;
       } else {
-        return res.status(401).json({ result: "Password mismatch" });
+        return res.status(404).json({
+          message: "아이디나 비밀번호가 일치하지 않습니다.",
+        });
       }
     } else {
-      return res.status(statusCode).json({ result: message });
+      return res.status(statusCode).json({ message: message });
     }
   } catch (error) {
-    return res.status(500).json({ result: "Server Error" });
+    return res
+      .status(error.response.statusCode || 500)
+      .json({ message: error.response.message || "Server Error" });
   }
 };
 

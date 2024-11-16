@@ -69,7 +69,10 @@ $HEADER-HEIGHT: 100px;
     height: 100%;
   }
   .content__cell {
-    width: 400px;
+    max-width: 200px;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
   }
   .title__cell {
     display: flex;
@@ -139,4 +142,14 @@ $HEADER-HEIGHT: 100px;
   width: 50px;
   height: 50px;
   margin-right: 10px;
+}
+
+.link__container span {
+  margin-left: 4px; /* 아이콘과 제목 사이의 간격 */
+}
+.link__container {
+  max-width: 200px;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
 }

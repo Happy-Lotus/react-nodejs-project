@@ -1,17 +1,58 @@
 import { useForm } from "react-hook-form";
 import styles from "./LoginPage.module.scss";
 import { useLogin } from "../../utils/api"; // API 요청 로직 import
-import { useRecoilValue } from "recoil";
-import { signinState } from "../../state/authState";
+import { useRecoilValue, useSetRecoilState } from "recoil";
+import { signinState, userState } from "../../state/authState";
 import { useNavigate } from "react-router-dom"; // useHistory import
-import { useCookies } from "react-cookie";
-
+import React, { useEffect } from "react";
 const LoginPage = () => {
-  const [cookies, setCookie] = useCookies(["AccessToken", "RefreshToken"]);
   const { signin } = useLogin();
-  const signinStatus = useRecoilValue(signinState);
+  const setSigninState = useSetRecoilState(signinState);
+  const setUserState = useSetRecoilState(userState);
   const navigate = useNavigate();
+  const signinStatus = useRecoilValue(signinState);
 
+  const onSubmit = async (data) => {
+    console.log("로그인 시도:", data);
+
+    // 유효성 검사 결과 확인
+    console.log(data.email);
+
+    if (!data.email) {
+      alert("이메일을 입력하세요");
+      return;
+    }
+
+    if (!/^[\w-\.]+@gmail\.com$/.test(data.email)) {
+      console.log("이메일 형식 X");
+      alert("이메일 형식이 올바르지 않습니다. \n예시(example@gmail.com)"); // Show error for invalid email format
+      return;
+    }
+    if (
+      !data.pwd ||
+      data.pwd.length < 8 ||
+      data.pwd.length > 12 ||
+      !/[!@#$%^&*(),.?":{}|<>]/.test(data.pwd)
+    ) {
+      alert("비밀번호는 8~12자리여야 하며 특수문자를 포함해야 합니다."); // Show error for invalid password
+      return;
+    }
+    try {
+      console.log("response 호출시도", data);
+      const response = await signin(data);
+      console.log(response);
+      if (response.status === 201) {
+        setSigninState({ isLoading: false, error: null, success: true });
+        setUserState({ nickname: response.data.nickname });
+        navigate("/posts");
+      }
+    } catch (error) {
+      console.log(error);
+      const errorMessage =
+        error.response?.data?.message || "아이디나 비밀번호가 맞지 않습니다.";
+      alert(errorMessage); // 실패 알림
+    }
+  };
   const {
     register,
     handleSubmit,
@@ -19,17 +60,8 @@ const LoginPage = () => {
     reset,
     trigger,
     clearErrors,
-  } = useForm();
-  // const dispatch = useDispatch();
-
-  const onSubmit = async (data) => {
-    try {
-      const response = await signin(data);
-      navigate("/posts");
-    } catch (error) {
-      console.error(error);
-    }
-  };
+    getValues,
+  } = useForm({ mode: onSubmit });
 
   return (
     <div className={styles.background__color__container}>
@@ -50,16 +82,15 @@ const LoginPage = () => {
                   isSubmitted ? (errors.email ? "true" : "false") : undefined
                 }
                 {...register("email", {
-                  required: true,
-                  pattern: {
-                    value: /\S+@\S+\.\S+/,
-                    message: "이메일 형식에 맞지 않습니다.",
-                  },
+                  required: "이메일은 필수입력입니다.",
                   onChange: (e) => {
-                    if (e.target.value) {
-                      trigger("email");
-                    }
+                    clearErrors("email");
                   },
+                  // pattern: {
+                  //   value: /^[\w-\.]+@gmail\.com$/,
+                  //   message:
+                  //     "이메일 형식이 올바르지 않습니다. (예: example@gmail.com)",
+                  // },
                 })}
               />
               <input
@@ -68,23 +99,34 @@ const LoginPage = () => {
                 className={styles.form__group__input}
                 placeholder="비밀번호 입력"
                 {...register("pwd", {
-                  required: true,
-                  pattern: {
-                    value:
-                      /^(?=.*[a-zA-Z])(?=.*[0-9])(?=.*[!@#$%^&*(),.?":{}|<>]).{8,12}$/,
-                    message:
-                      "영문 대/소문자, 숫자, 특수문자 포함 8-12자리여야 합니다.",
-                  },
-                  onChange: (e) => {
-                    if (e.target.value) {
-                      clearErrors("pwd"); // 에러 메시지 제거
-                    }
-                  },
+                  required: "비밀번호는 필수입력입니다.",
+                  // onChange: (e) => {
+                  //   clearErrors("pwd");
+                  // },
+                  // pattern: {
+                  //   value:
+                  //     /^(?=.*[a-zA-Z])(?=.*[0-9])(?=.*[!@#$%^&*(),.?":{}|<>]).{8,12}$/,
+                  //   message:
+                  //     "영문 대/소문자, 숫자, 특수문자 포함 8-12자리여야 합니다.",
+                  // },
                 })}
               />
             </div>
-            {(errors.email || errors.password) && (
-              <span className={styles.error_msg}>{errors.email.message}</span>
+            {errors.email && errors.pwd ? (
+              <span className={styles.error_msg}>
+                이메일과 비밀번호는 필수입력입니다.
+              </span>
+            ) : (
+              <>
+                {errors.email && (
+                  <span className={styles.error_msg}>
+                    {errors.email.message}
+                  </span>
+                )}
+                {errors.pwd && (
+                  <span className={styles.error_msg}>{errors.pwd.message}</span>
+                )}
+              </>
             )}
             <div className={styles.form__actions}>
               <button type="submit" className={styles.btn__submit}>
@@ -96,8 +138,8 @@ const LoginPage = () => {
                 회원가입
               </a>
             </p>
-            {signinStatus.isLoading && <p>로그인 중...</p>}
-            {signinStatus.error && <p>{signinStatus.error}</p>}
+            {/* {signinStatus.isLoading && <p>로그인 중...</p>}
+            {signinStatus.error && <p>{signinStatus.error}</p>} */}
           </form>
         </div>
       </section>

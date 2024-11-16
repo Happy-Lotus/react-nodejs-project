@@ -1,0 +1,15 @@
+.footer {
+  height: 100px;
+  color: white; // 글자색
+  padding: 20px 0; // 상하 패딩
+  text-align: center; // 텍스트 중앙 정렬
+  position: relative; // 상대 위치 설정
+  bottom: 0; // 하단 고정
+  width: 100%; // 전체 너비
+
+  &__container {
+    max-width: 1440px; // 최대 너비 설정
+    margin: 0 auto; // 중앙 정렬
+    padding: 0 20px; // 좌우 패딩
+  }
+}

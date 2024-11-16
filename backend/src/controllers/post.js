@@ -1,12 +1,11 @@
-const conn = require("../config/database");
 const dotenv = require("dotenv");
-const File = require("../models/File");
 const Post = require("../models/Post");
-const User = require("../models/User");
 const path = require("path"); // path 모듈 추가
 dotenv.config();
-const moment = require("moment");
 const fs = require("fs");
+const fileController = require("../controllers/file");
+const CLIENT_URL = process.env.CLIENT_URL;
+
 //게시물 생성
 exports.create = async (req, res) => {
   try {
@@ -21,55 +20,13 @@ exports.create = async (req, res) => {
       userid,
       thumbnail,
       files,
+      hasFile: files.length > 0 ? true : false,
     };
+    console.log("===========controllers post create===========");
+    console.log(data);
 
     const { statusCode, message } = await Post.create(data);
     return res.status(statusCode).json({ message });
-
-    // const sql =
-    //   "INSERT INTO board (title, content, writer, regdate, userid,thumbnail) VALUES (?, ?, ?, ?, ?, ?)";
-    // const now = moment(Date.now()).format("YYYY-MM-DD HH:mm:ss");
-    // const var_array = [title, content, "애니", now, userid, thumbnail];
-    // let fileInfos;
-
-    // if (files) {
-    //   fileInfos = files.map((file) => ({
-    //     filename: file.filename,
-    //     originalname: file.originalname,
-    //     size: file.size,
-    //     url: `/uploads/${file.filename}`,
-    //   }));
-    // }
-
-    // console.log(fileInfos);
-
-    // conn.query(sql, var_array, (error, results) => {
-    //   if (error) {
-    //     console.error("Database error: ", error);
-    //     return res.status(500).json({ result: "Database error:" + email });
-    //   } else {
-    //     if (results.affectedRows > 0) {
-    //       if (fileInfos) {
-    //         try {
-    //           const boardId = results.insertId;
-    //           if (files) File.create(boardId, fileInfos);
-    //           return res
-    //             .status(201)
-    //             .json({ result: "File and Post upload OK" });
-    //         } catch (error) {
-    //           console.error("File upload error: ", error);
-    //           return res.status(400).json({ result: "File upload error" });
-    //         }
-    //       } else {
-    //         return res
-    //           .status(201)
-    //           .json({ result: "Only Post created successfully" });
-    //       }
-    //     } else {
-    //       return res.status(400).json({ result: "Error" });
-    //     }
-    //   }
-    // });
   } catch (error) {
     console.error(error);
     res.status(error.statusCode).json({ message: error.message });
@@ -82,7 +39,7 @@ exports.readAll = async (req, res) => {
     const { statusCode, message, postData } = await Post.readAll();
     return res
       .setHeader("Access-Control-Allow-Credentials", "true")
-      .setHeader("Access-Control-Allow-Origin", "http://localhost:3000")
+      .setHeader("Access-Control-Allow-Origin", CLIENT_URL)
       .status(statusCode)
       .json({ message: message, postData });
   } catch (error) {
@@ -113,22 +70,6 @@ exports.read = async (req, res) => {
   }
 };
 
-// exports.readOption = async (req, res) => {
-//   const option = req.params.option;
-//   const content = req.query.content;
-
-//   try {
-//     const { statusCode, message, post } = await Post.readOption(
-//       option,
-//       content
-//     );
-//     return res.status(statusCode).json({ message, post });
-//   } catch (error) {
-//     return res
-//       .status(error.statusCode || 500)
-//       .json({ result: error.message || "Server error" });
-//   }
-// };
 exports.downloadFiles = async (req, res) => {
   console.log("controllers post downloadFiles");
   const filename = req.params.filename;
@@ -149,4 +90,115 @@ exports.downloadFiles = async (req, res) => {
   }
 };
 
-exports.update = async (req, res) => {};
+//게시물 수정
+exports.update = async function (req, res) {
+  /**
+   * req 정보
+   * deleteFiles => 삭제할 파일명 리스트
+   * thumbnail => 변경일 경우 새로운 thumbnail 주소. uploads/~ 삭제면 ""
+   * files => 새로 추가한 파일들
+   */
+  try {
+    const boardid = req.params.postid;
+    const { title, content, thumbnail, deleteFiles, hasFile } = JSON.parse(
+      req.body.post
+    );
+    const newFiles = req.files;
+
+    console.log("controllers update 함수");
+    console.log(title + "\n" + content);
+    console.log(thumbnail + "\n" + deleteFiles);
+    console.log(newFiles);
+
+    const result = await Post.readByBoardId(boardid);
+    const existThumbnail = result.thumbnail;
+    console.log("========existThumbnail=========");
+    console.log(existThumbnail);
+    console.log(thumbnail);
+    const data = {
+      title,
+      content,
+      thumbnail,
+      boardid,
+      deleteFiles,
+      newFiles,
+      hasFile,
+    };
+
+    const { statusCode, message } = await Post.update(data);
+    if (statusCode === 201) {
+      console.log("썸네일 삭제 진행");
+      if (existThumbnail && existThumbnail !== data.thumbnail) {
+        console.log("existThumbnail && existThumbnail !== data.thumbnail");
+        await fileController.deleteThumbnail(existThumbnail);
+      }
+    }
+    return res.status(statusCode).json({ message });
+  } catch (error) {
+    console.error(error);
+    res
+      .status(error.statusCode || 500)
+      .json({ message: error.message || "Server error" });
+  }
+};
+
+exports.delete = async function (req, res) {
+  try {
+    const boardid = req.params.postid;
+    const { statusCode, message } = await Post.delete(boardid);
+    return res.status(statusCode).json({ message: message });
+  } catch (error) {
+    console.error(error);
+    res.status(error.statusCode).json({ message: error.message });
+  }
+};
+
+exports.readOption = async function (req, res) {
+  try {
+    const option = req.query.option;
+    const content = req.query.content;
+    const page = Number(req.query.page) || 1;
+    const perPage = Number(req.query.perPage) || 5;
+    console.log(CLIENT_URL);
+
+    const { posts, totalPage, currentPage } = await Post.readOption(
+      option,
+      content,
+      page,
+      perPage
+    );
+
+    return res.status(201).json({
+      message: "게시물 조회 성공",
+      posts,
+      totalPage,
+      currentPage,
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(error.statusCode).json({ message: error.message });
+  }
+};
+
+exports.cancel = async function (req, res) {
+  try {
+    console.log("cancel 함수");
+    console.log(req);
+    const { thumbnails, deleteFiles } = req.body;
+    const deleteThumbnailPromise = thumbnails.map((thumbnail) =>
+      fileController.deleteThumbnail(thumbnail)
+    );
+
+    // deleteFiles가 존재하면 deleteAttachedFiles 호출
+    const deleteFilesPromise =
+      deleteFiles && deleteFiles.length > 0
+        ? fileController.deleteAttachedFiles(deleteFiles)
+        : Promise.resolve(); // deleteFiles가 없으면 빈 Promise 반환
+
+    // 두 Promise를 동시에 실행
+    await Promise.all([deleteThumbnailPromise, deleteFilesPromise]);
+  } catch (error) {
+    console.error(error);
+    res.status(error.statusCode).json({ message: error.message });
+  }
+};

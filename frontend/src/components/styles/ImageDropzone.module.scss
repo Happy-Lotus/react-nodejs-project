@@ -1,0 +1,172 @@
+.thumbnailUploadArea {
+  width: 500px;
+  height: 300px;
+  position: relative;
+  border-radius: 4px;
+  border: 2px dashed #ccc;
+}
+
+.thumbnailLabel {
+  display: block; /* 블록 요소로 설정 */
+}
+
+.drapzone {
+  width: 100%;
+  height: 100%;
+  background-color: transparent;
+  transition: background-color 0.5s;
+  -moz-transition: background-color 0.5s;
+  -webkit-transition: background-color 0.5s;
+  -ms-transition: background-color 0.5s;
+  -o-transition: background-color 0.5s;
+  top: 50%;
+  border-radius: 4px;
+}
+.drapzone > p,
+.drapzoneActive > p {
+  margin: 0;
+  position: absolute; /* 가운데 정렬을 위해 절대 위치 설정 */
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%); /* 가운데 정렬 */
+  font-size: 1em;
+}
+
+.drapzoneActive {
+  width: 100%;
+  min-height: 100%;
+  border: none;
+  background-color: #e6e6e6; // 드래그 중일 때 배경색
+  transition: background-color 0.5s;
+  -moz-transition: background-color 0.5s;
+  -webkit-transition: background-color 0.5s;
+  -ms-transition: background-color 0.5s;
+  -o-transition: background-color 0.5s;
+  border-radius: 4px;
+  top: 50%;
+}
+
+.imagePresent {
+  width: 500px;
+  height: 300px;
+  border: none; /* 이미지가 있을 때 border 제거 */
+  background-color: transparent; /* 배경색 제거 */
+}
+
+.thumbnailPreview {
+  width: 100%;
+  height: 100%; /* 비율 유지 */
+  object-fit: cover; /* 이미지 비율 유지 */
+  border-radius: 8px; /* 모서리 둥글게 */
+  display: block; // 이미지가 블록 요소로 표시되도록
+}
+
+.thumbnailPlaceholder {
+  width: 400px; /* 원하는 너비 */
+  height: 200px; /* 원하는 높이 */
+  border: 2px dashed #ccc; /* 점선 테두리 */
+  border-radius: 8px; /* 모서리 둥글게 */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  // background-color: #f9f9f9; /* 배경색 */
+  transition: background-color 0.3s; /* 배경색 전환 효과 */
+
+  &.imagePresent {
+    border: none; // 이미지가 있을 때 border 제거
+    &:hover {
+      // hover 효과 제거
+      background-color: transparent;
+    }
+  }
+  &.hoverEffect {
+    background-color: #f9f9f9; // 드래그 중일 때의 배경색
+  }
+}
+.title__deleteButton {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  width: 500px;
+}
+
+.modalContent {
+  padding-top: 16px;
+}
+
+@keyframes slideIn {
+  from {
+    transform: translateY(100%); /* 아래에서 시작 */
+  }
+  to {
+    transform: translateY(0); /* 원래 위치로 이동 */
+  }
+}
+
+@keyframes slideOut {
+  from {
+    transform: translateY(0); /* 현재 위치에서 시작 */
+  }
+  to {
+    transform: translateY(100%); /* 아래로 이동 */
+  }
+}
+
+.thumbnail__title {
+  font-size: 1.3rem;
+  font-weight: bolder;
+}
+
+.registerButton {
+  background-color: rgb(98, 72, 255); // 수정 버튼 색상
+  color: white;
+}
+
+.cancleButton {
+  background-color: #ff4d4d; // 삭제 버튼 색상
+  color: white;
+}
+
+.thumbnail__delete {
+  width: 700px;
+  display: flex;
+  column-gap: 16px;
+  justify-content: flex-end;
+}
+
+.thumbnail__deleteButton {
+  font-size: 1rem;
+  text-decoration: underline;
+  cursor: pointer;
+  color: #868e96;
+
+  &:active {
+    color: #495057;
+  }
+}
+
+.modalButtons {
+  display: flex;
+  justify-content: flex-end;
+  flex-direction: row;
+  column-gap: 12px;
+
+  .registerButton,
+  .cancleButton {
+    padding: 10px 15px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 16px;
+  }
+
+  .deleteButton {
+    background-color: #ff4d4d; // 삭제 버튼 색상
+    color: white;
+  }
+
+  .editButton {
+    background-color: rgb(98, 72, 255); // 수정 버튼 색상
+    color: white;
+  }
+}

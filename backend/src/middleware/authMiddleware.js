@@ -1,20 +1,19 @@
 const jwt = require("jsonwebtoken");
 const dotenv = require("dotenv");
 dotenv.config();
-const secret = "Kkb5I86s3B";
+const SECRET_KEY = process.env.SECRET_KEY;
 const Token = require("../models/Token");
 
 const authMiddleware = async (req, res, next) => {
   const accesstoken = req.cookies.AccessToken;
-
   /**
    * 클라이언트 요청의 쿠기에 AccessToken이 존재하지 않는 경우
-   * 결과 : 400코드. 다음 미들웨어로 넘어가지 않음.
+   * 결과 : 401코드. 다음 미들웨어로 넘어가지 않음.
    */
   if (!accesstoken) {
     return res.status(401).json({
-      code: 401,
-      msg: "No token provided. Access denied.",
+      statusCode: 401,
+      message: "No token provided. Access denied.",
     });
   }
 
@@ -22,7 +21,7 @@ const authMiddleware = async (req, res, next) => {
    * 클라이언트 요청의 쿠키에 AccessToken이 존재하는 경우
    * 결과 : 토큰의 유효성 검사
    */
-  jwt.verify(accesstoken, secret, async (err, decoded) => {
+  jwt.verify(accesstoken, SECRET_KEY, async (err, decoded) => {
     if (err) {
       if (err.name === "TokenExpiredError") {
         /**
@@ -82,7 +81,7 @@ const authMiddleware = async (req, res, next) => {
         }
 
         // 새로운 access token 발급
-        const newAccessToken = jwt.sign(refreshPayload, secret, {
+        const newAccessToken = jwt.sign(refreshPayload, SECRET_KEY, {
           algorithm: "HS256",
         });
         res.clearCookie("AccessToken", { path: "/" });

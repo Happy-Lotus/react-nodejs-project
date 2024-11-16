@@ -59,7 +59,8 @@
       border-bottom: 1px solid rgba(15, 15, 15, 0.15);
       padding-bottom: 20px;
       min-height: 500px;
-      overflow-y: auto;
+      overflow-y: inherit;
+      overflow-x: auto;
 
       h2 {
         font-size: 20px;
@@ -76,7 +77,7 @@
       margin-bottom: 20px;
       display: flex;
       column-gap: 8px;
-
+      align-items: baseline;
       h2 {
         font-size: 20px;
         color: #333; // 제목 색상
